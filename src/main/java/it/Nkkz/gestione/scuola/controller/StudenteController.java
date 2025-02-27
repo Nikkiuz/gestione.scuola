@@ -2,7 +2,8 @@ package it.Nkkz.gestione.scuola.controller;
 
 import it.Nkkz.gestione.scuola.entity.Studente;
 import it.Nkkz.gestione.scuola.service.StudenteService;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,39 +18,53 @@ public class StudenteController {
 		this.studenteService = studenteService;
 	}
 
+	// ✅ Crea uno studente
 	@PostMapping
-	public ResponseEntity<Studente> createStudente(@RequestBody Studente studente) {
-		return ResponseEntity.ok(studenteService.saveStudente(studente));
+	@ResponseStatus(HttpStatus.CREATED)
+	public Studente createStudente(@RequestBody Studente studente) {
+		return studenteService.createStudente(studente);
 	}
 
+	// ✅ Recupera tutti gli studenti
 	@GetMapping
-	public ResponseEntity<List<Studente>> getAllStudenti() {
-		return ResponseEntity.ok(studenteService.getAllStudenti());
+	@ResponseStatus(HttpStatus.OK)
+	public List<Studente> getAllStudenti() {
+		return studenteService.getAllStudenti();
 	}
 
+	// ✅ Recupera uno studente per ID
 	@GetMapping("/{id}")
-	public ResponseEntity<Studente> getStudenteById(@PathVariable Long id) {
-		return ResponseEntity.ok(studenteService.getStudenteById(id));
+	@ResponseStatus(HttpStatus.OK)
+	public Studente getStudenteById(@PathVariable Long id) {
+		return studenteService.getStudenteById(id);
 	}
 
+	// ✅ Recupera tutti gli studenti che imparano una determinata lingua
 	@GetMapping("/lingua/{lingua}")
-	public ResponseEntity<List<Studente>> getStudentiByLingua(@PathVariable String lingua) {
-		return ResponseEntity.ok(studenteService.getStudentiByLingua(lingua));
+	@ResponseStatus(HttpStatus.OK)
+	public List<Studente> getStudentiByLingua(@PathVariable String lingua) {
+		return studenteService.getStudentiByLingua(lingua);
 	}
 
+	// ✅ Recupera tutti gli studenti assegnati a un determinato insegnante
 	@GetMapping("/insegnante/{id}")
-	public ResponseEntity<List<Studente>> getStudentiByInsegnante(@PathVariable Long id) {
-		return ResponseEntity.ok(studenteService.getStudentiByInsegnante(id));
+	@ResponseStatus(HttpStatus.OK)
+	public List<Studente> getStudentiByInsegnante(@PathVariable Long id) {
+		return studenteService.getStudentiByInsegnante(id);
 	}
 
+	// ✅ Aggiorna uno studente
 	@PutMapping("/{id}")
-	public ResponseEntity<Studente> updateStudente(@PathVariable Long id, @RequestBody Studente studenteDetails) {
-		return ResponseEntity.ok(studenteService.updateStudente(id, studenteDetails));
+	@ResponseStatus(HttpStatus.OK)
+	public Studente updateStudente(@PathVariable Long id, @RequestBody Studente studenteDetails) {
+		return studenteService.updateStudente(id, studenteDetails);
 	}
 
+	// ✅ SOLO L'ADMIN può eliminare uno studente
 	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteStudente(@PathVariable Long id) {
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public void deleteStudente(@PathVariable Long id) {
 		studenteService.deleteStudente(id);
-		return ResponseEntity.ok("Studente eliminato con successo");
 	}
 }

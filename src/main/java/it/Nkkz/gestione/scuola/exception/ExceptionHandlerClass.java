@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.HashMap;
@@ -21,11 +22,13 @@ public class ExceptionHandlerClass extends ResponseEntityExceptionHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExceptionHandlerClass.class);
 
-	@ExceptionHandler(value = EntityNotFoundException.class)
-	protected ResponseEntity<String> handleEntityNotFound(EntityNotFoundException ex) {
+	@ExceptionHandler(EntityNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public String handleEntityNotFound(EntityNotFoundException ex) {
 		logger.error("Errore: Entità non trovata - {}", ex.getMessage());
-		return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+		return ex.getMessage();
 	}
+
 
 	@ExceptionHandler(value = SecurityException.class)
 	protected ResponseEntity<String> handleSecurityException(SecurityException ex) {
