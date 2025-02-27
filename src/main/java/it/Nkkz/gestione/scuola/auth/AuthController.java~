@@ -1,0 +1,28 @@
+package it.Nkkz.gestione.scuola.auth;
+
+import it.Nkkz.gestione.scuola.app_users.AppUserService;
+import it.Nkkz.gestione.scuola.app_users.Role;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final AppUserService appUserService;
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
+        appUserService.registerUser(
+            registerRequest.getUsername(),
+            registerRequest.getEmail(),  // NUOVO CAMPO
+            registerRequest.getPassword(),
+            Set.of(Role.ROLE_INSEGNANTE) // Assegna il ruolo di default
+        );
+        return ResponseEntity.ok("Registrazione avvenuta con successo");
+    }
+}
