@@ -29,6 +29,9 @@ public class Corso {
 	@Column(nullable = false)
 	private String orario;
 
+	@Column(nullable = false)
+	private String livello;
+
 	@ManyToOne
 	@JoinColumn(name = "insegnante_id")
 	private Insegnante insegnante;
