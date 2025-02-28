@@ -3,10 +3,9 @@ package it.Nkkz.gestione.scuola.controller;
 import it.Nkkz.gestione.scuola.dto.CorsoRequestDTO;
 import it.Nkkz.gestione.scuola.dto.CorsoResponseDTO;
 import it.Nkkz.gestione.scuola.service.CorsoService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,55 +20,78 @@ public class CorsoController {
 		this.corsoService = corsoService;
 	}
 
-	// ✅ SOLO ADMIN - Recupera tutti i corsi
+	// ✅ Recupera tutti i corsi (solo Admin)
 	@GetMapping
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public ResponseEntity<List<CorsoResponseDTO>> getAllCorsi() {
-		return ResponseEntity.ok(corsoService.getAllCorsi());
+	public List<CorsoResponseDTO> getTuttiICorsi() {
+		return corsoService.getTuttiICorsi();
 	}
 
-	// ✅ ADMIN & INSEGNANTE - Recupera un corso per ID
-	@GetMapping("/{id}")
-	@PreAuthorize("hasRole('ROLE_ADMIN') or @corsoService.isInsegnanteOfCorso(authentication.principal.id, #id)")
-	public ResponseEntity<CorsoResponseDTO> getCorsoById(@PathVariable Long id, Authentication authentication) {
-		return ResponseEntity.ok(corsoService.getCorsoById(id));
+	// ✅ Recupera i corsi di un insegnante specifico (solo per l'insegnante stesso o Admin)
+	@GetMapping("/insegnante/{insegnanteId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or authentication.principal.id == #insegnanteId")
+	public List<CorsoResponseDTO> getCorsiByInsegnante(@PathVariable Long insegnanteId) {
+		return corsoService.getCorsiByInsegnante(insegnanteId);
 	}
 
-	// ✅ SOLO ADMIN - Crea un corso manualmente
+	// ✅ Recupera i corsi per giorno e orario
+	@GetMapping("/orario")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public List<CorsoResponseDTO> getCorsiByGiornoEOrario(@RequestParam String giorno, @RequestParam String orario) {
+		return corsoService.getCorsiByGiornoEOrario(giorno, orario);
+	}
+
+	// ✅ Recupera i corsi per lingua e livello (Admin)
+	@GetMapping("/lingua")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public List<CorsoResponseDTO> getCorsiByLinguaELivello(@RequestParam String lingua, @RequestParam String livello) {
+		return corsoService.getCorsiByLinguaELivello(lingua, livello);
+	}
+
+	// ✅ Recupera corsi privati o di gruppo
+	@GetMapping("/tipologia")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public List<CorsoResponseDTO> getCorsiByTipologia(@RequestParam String tipoCorso) {
+		return corsoService.getCorsiByTipologia(tipoCorso);
+	}
+
+	// ✅ Crea un nuovo corso (solo Admin)
 	@PostMapping
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
-	public CorsoResponseDTO createCorso(@RequestBody CorsoRequestDTO corsoRequestDTO) {
-		return corsoService.createCorso(corsoRequestDTO);
+	public CorsoResponseDTO creaCorso(@Valid @RequestBody CorsoRequestDTO request) {
+		return corsoService.creaCorso(request);
 	}
 
-	// ✅ SOLO ADMIN - Modifica un corso
+	// ✅ Modifica un corso esistente (solo Admin)
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public ResponseEntity<CorsoResponseDTO> updateCorso(@PathVariable Long id, @RequestBody CorsoRequestDTO corsoRequestDTO) {
-		return ResponseEntity.ok(corsoService.updateCorso(id, corsoRequestDTO));
+	@ResponseStatus(HttpStatus.OK)
+	public CorsoResponseDTO modificaCorso(@PathVariable Long id, @Valid @RequestBody CorsoRequestDTO request) {
+		return corsoService.modificaCorso(id, request);
 	}
 
-	// ✅ SOLO ADMIN - Elimina un corso
+	// ✅ Elimina un corso (solo Admin)
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteCorso(@PathVariable Long id) {
-		corsoService.deleteCorso(id);
+	public void eliminaCorso(@PathVariable Long id) {
+		corsoService.eliminaCorso(id);
 	}
 
-	// ✅ SOLO ADMIN - Genera corsi automaticamente
-	@PostMapping("/genera-automaticamente")
+	// ✅ Gestione dei corsi pieni: Admin decide come procedere
+	@PostMapping("/{id}/gestisci-corso-pieno")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@ResponseStatus(HttpStatus.OK)
+	public void gestisciCorsoPieno(@PathVariable Long id, @RequestParam int scelta) {
+		corsoService.gestisciCorsoPieno(id, scelta);
+	}
+
+	// ✅ **Generazione automatica dei corsi** basata su preferenze, livello e età
+	@PostMapping("/genera-corsi")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public void generaCorsiAutomaticamente() {
 		corsoService.generaCorsiAutomaticamente();
-	}
-
-	// ✅ SOLO ADMIN - Gestisce corsi pieni (dividere o aggiungere posti)
-	@PostMapping("/{id}/gestisci-pieno/{opzione}")
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public void gestisciCorsoPieno(@PathVariable Long id, @PathVariable int opzione) {
-		corsoService.gestisciCorsoPieno(id, opzione);
 	}
 }

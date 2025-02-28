@@ -9,9 +9,5 @@ import java.util.List;
 public interface CorsoRepository extends JpaRepository<Corso, Long> {
 	List<Corso> findByInsegnanteId(Long insegnanteId);
 
-	List<Corso> findByGiornoAndOrario(String giorno, String orario);
-
-	List<Corso> findByLinguaAndLivello(String lingua, String livello);
-
-	List<Corso> findByTipoCorso(String tipoCorso);
+	List <Corso> findByGiornoAndOrario(String giorno, String orario);
 }
