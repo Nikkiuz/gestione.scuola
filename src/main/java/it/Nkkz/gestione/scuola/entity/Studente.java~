@@ -1,5 +1,6 @@
 package it.Nkkz.gestione.scuola.entity;
 
+import it.Nkkz.gestione.scuola.entity.app_users.AppUser;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -46,7 +47,7 @@ public class Studente {
 
 	@ManyToOne
 	@JoinColumn(name = "insegnante_id")
-	private Insegnante insegnante;  // 🔥 ORA È GIUSTO! `Insegnante` è un'entità separata
+	private AppUser insegnante;  // Preferenza sugli insegnanti
 
 	@Column(nullable = false)
 	private String tipologiaPagamento;  // Ex "Tipo di iscrizione"

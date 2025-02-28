@@ -1,12 +1,11 @@
 package it.Nkkz.gestione.scuola.service;
 
+import it.Nkkz.gestione.scuola.dto.StudenteRequestDTO;
+import it.Nkkz.gestione.scuola.dto.StudenteResponseDTO;
 import it.Nkkz.gestione.scuola.entity.Studente;
 import it.Nkkz.gestione.scuola.repository.StudenteRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,51 +19,66 @@ public class StudenteService {
 	private StudenteRepository studenteRepository;
 
 	// ✅ Recupera tutti gli studenti
-	public List<Studente> getAllStudenti() {
-		return studenteRepository.findAll();
+	public List<StudenteResponseDTO> getAllStudenti() {
+		return studenteRepository.findAll().stream()
+			.map(this::convertToResponseDTO)
+			.collect(Collectors.toList());
 	}
 
 	// ✅ Recupera uno studente per ID
-	public Studente getStudenteById(Long id) {
-		return studenteRepository.findById(id)
+	public StudenteResponseDTO getStudenteById(Long id) {
+		Studente studente = studenteRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato con ID: " + id));
+		return convertToResponseDTO(studente);
 	}
 
-	// ✅ Crea un nuovo studente
-	public Studente createStudente(Studente studente) {
-		return studenteRepository.save(studente);
-	}
-
-	// ✅ Recupera studenti per lingua
-	public List<Studente> getStudentiByLingua(String lingua) {
-		return studenteRepository.findAll().stream()
-			.filter(studente -> lingua.equalsIgnoreCase(studente.getLinguaDaImparare()))
+	// ✅ Recupera studenti per lingua e livello iniziale
+	public List<StudenteResponseDTO> getStudentiByLinguaELivello(String lingua, String livello) {
+		return studenteRepository.findByLinguaDaImparareAndLivello(lingua, livello).stream()
+			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera studenti assegnati a un determinato insegnante
-	public List<Studente> getStudentiByInsegnante(Long insegnanteId) {
-		return studenteRepository.findAll().stream()
-			.filter(studente -> studente.getInsegnante() != null && studente.getInsegnante().getId().equals(insegnanteId))
+	// ✅ Recupera gli studenti di un insegnante specifico
+	public List<StudenteResponseDTO> getStudentiByInsegnante(Long insegnanteId) {
+		return studenteRepository.findByInsegnanteId(insegnanteId).stream()
+			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Aggiorna uno studente esistente (usiamo `BeanUtils`)
-	public Studente updateStudente(Long id, Studente studenteDetails) {
-		Studente studente = getStudenteById(id);
-		BeanUtils.copyProperties(studenteDetails, studente, "id");
-		return studenteRepository.save(studente);
+	// ✅ Recupera studenti per tipo di corso (privato o di gruppo)
+	public List<StudenteResponseDTO> getStudentiByTipoCorso(boolean corsoPrivato) {
+		return studenteRepository.findByCorsoPrivato(corsoPrivato).stream()
+			.map(this::convertToResponseDTO)
+			.collect(Collectors.toList());
 	}
 
-	// ✅ Elimina uno studente (solo l'Admin può farlo)
+	// ✅ Crea uno studente
+	public StudenteResponseDTO createStudente(StudenteRequestDTO studenteRequestDTO) {
+		Studente studente = new Studente();
+		BeanUtils.copyProperties(studenteRequestDTO, studente);
+		studenteRepository.save(studente);
+		return convertToResponseDTO(studente);
+	}
+
+	// ✅ Modifica uno studente
+	public StudenteResponseDTO updateStudente(Long id, StudenteRequestDTO studenteRequestDTO) {
+		Studente studente = studenteRepository.findById(id)
+			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato con ID: " + id));
+		BeanUtils.copyProperties(studenteRequestDTO, studente);
+		studenteRepository.save(studente);
+		return convertToResponseDTO(studente);
+	}
+
+	// ✅ Elimina uno studente
 	public void deleteStudente(Long id) {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		studenteRepository.deleteById(id);
+	}
 
-		if (!auth.getAuthorities().toString().contains("ROLE_ADMIN")) {
-			throw new AccessDeniedException("Solo l'Admin può eliminare uno studente.");
-		}
-
-		Studente studente = getStudenteById(id);
-		studenteRepository.delete(studente);
+	// ✅ Converte un'entità Studente in DTO
+	private StudenteResponseDTO convertToResponseDTO(Studente studente) {
+		StudenteResponseDTO dto = new StudenteResponseDTO();
+		BeanUtils.copyProperties(studente, dto);
+		return dto;
 	}
 }

@@ -1,0 +1,102 @@
+package it.Nkkz.gestione.scuola.service;
+
+import it.Nkkz.gestione.scuola.dto.CorsoRequestDTO;
+import it.Nkkz.gestione.scuola.dto.CorsoResponseDTO;
+import it.Nkkz.gestione.scuola.entity.Corso;
+import it.Nkkz.gestione.scuola.repository.AulaRepository;
+import it.Nkkz.gestione.scuola.repository.CorsoRepository;
+import it.Nkkz.gestione.scuola.repository.InsegnanteRepository;
+import it.Nkkz.gestione.scuola.repository.StudenteRepository;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class CorsoService {
+
+	@Autowired
+	private CorsoRepository corsoRepository;
+
+	@Autowired
+	private InsegnanteRepository insegnanteRepository;
+
+	@Autowired
+	private StudenteRepository studenteRepository;
+
+	@Autowired
+	private AulaRepository aulaRepository;
+
+	// ✅ Recupera tutti i corsi
+	public List<CorsoResponseDTO> getTuttiICorsi() {
+		return corsoRepository.findAll().stream()
+			.map(this::convertToResponseDTO)
+			.collect(Collectors.toList());
+	}
+
+	// ✅ Recupera un corso per ID
+	public CorsoResponseDTO getCorsoById(Long id) {
+		Corso corso = corsoRepository.findById(id)
+			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
+		return convertToResponseDTO(corso);
+	}
+
+	// ✅ Crea un nuovo corso
+	public CorsoResponseDTO createCorso(CorsoRequestDTO corsoRequestDTO) {
+		Corso corso = new Corso();
+		BeanUtils.copyProperties(corsoRequestDTO, corso);
+		corsoRepository.save(corso);
+		return convertToResponseDTO(corso);
+	}
+
+	// ✅ Modifica un corso
+	public CorsoResponseDTO updateCorso(Long id, CorsoRequestDTO corsoRequestDTO) {
+		Corso corso = corsoRepository.findById(id)
+			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
+		BeanUtils.copyProperties(corsoRequestDTO, corso);
+		corsoRepository.save(corso);
+		return convertToResponseDTO(corso);
+	}
+
+	// ✅ Elimina un corso
+	public void deleteCorso(Long id) {
+		corsoRepository.deleteById(id);
+	}
+
+	// ✅ Recupera i corsi di un insegnante
+	public List<CorsoResponseDTO> getCorsiByInsegnante(Long insegnanteId) {
+		return corsoRepository.findByInsegnanteId(insegnanteId).stream()
+			.map(this::convertToResponseDTO)
+			.collect(Collectors.toList());
+	}
+
+	// ✅ Recupera i corsi di una determinata lingua
+	public List<CorsoResponseDTO> getCorsiByLingua(String lingua) {
+		return corsoRepository.findByLingua(lingua).stream()
+			.map(this::convertToResponseDTO)
+			.collect(Collectors.toList());
+	}
+
+	// ✅ Gestisce corsi pieni (dividere corso o aggiungere posto)
+	public void gestisciCorsoPieno(Long corsoId, int scelta) {
+		Corso corso = corsoRepository.findById(corsoId)
+			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
+
+		if (scelta == 1) {
+			// Dividere il corso
+		} else if (scelta == 2) {
+			// Aggiungere posto extra
+		} else {
+			throw new IllegalArgumentException("Scelta non valida");
+		}
+	}
+
+	private CorsoResponseDTO convertToResponseDTO(Corso corso) {
+		CorsoResponseDTO dto = new CorsoResponseDTO();
+		BeanUtils.copyProperties(corso, dto);
+		return dto;
+	}
+}

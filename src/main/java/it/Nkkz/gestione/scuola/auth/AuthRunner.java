@@ -1,3 +1,5 @@
+package it.Nkkz.gestione.scuola.auth;
+
 import it.Nkkz.gestione.scuola.entity.app_users.AppUser;
 import it.Nkkz.gestione.scuola.service.AppUserService;
 import it.Nkkz.gestione.scuola.entity.app_users.Role;

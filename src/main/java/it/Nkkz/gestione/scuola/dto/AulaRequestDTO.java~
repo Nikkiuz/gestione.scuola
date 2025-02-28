@@ -1,0 +1,11 @@
+package it.Nkkz.gestione.scuola.dto;
+
+import lombok.Data;
+
+@Data
+public class AulaRequestDTO {
+	private Long id;
+	private String nome;
+	private int capacitaMax;
+	private boolean disponibile;
+}

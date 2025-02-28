@@ -1,8 +1,10 @@
 package it.Nkkz.gestione.scuola.controller;
 
-import it.Nkkz.gestione.scuola.entity.Studente;
+import it.Nkkz.gestione.scuola.dto.StudenteRequestDTO;
+import it.Nkkz.gestione.scuola.dto.StudenteResponseDTO;
 import it.Nkkz.gestione.scuola.service.StudenteService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,52 +20,64 @@ public class StudenteController {
 		this.studenteService = studenteService;
 	}
 
-	// ✅ Crea uno studente
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	public Studente createStudente(@RequestBody Studente studente) {
-		return studenteService.createStudente(studente);
-	}
-
-	// ✅ Recupera tutti gli studenti
+	// ✅ SOLO ADMIN - Recupera tutti gli studenti
 	@GetMapping
-	@ResponseStatus(HttpStatus.OK)
-	public List<Studente> getAllStudenti() {
-		return studenteService.getAllStudenti();
-	}
-
-	// ✅ Recupera uno studente per ID
-	@GetMapping("/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	public Studente getStudenteById(@PathVariable Long id) {
-		return studenteService.getStudenteById(id);
-	}
-
-	// ✅ Recupera tutti gli studenti che imparano una determinata lingua
-	@GetMapping("/lingua/{lingua}")
-	@ResponseStatus(HttpStatus.OK)
-	public List<Studente> getStudentiByLingua(@PathVariable String lingua) {
-		return studenteService.getStudentiByLingua(lingua);
-	}
-
-	// ✅ Recupera tutti gli studenti assegnati a un determinato insegnante
-	@GetMapping("/insegnante/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	public List<Studente> getStudentiByInsegnante(@PathVariable Long id) {
-		return studenteService.getStudentiByInsegnante(id);
-	}
-
-	// ✅ Aggiorna uno studente
-	@PutMapping("/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	public Studente updateStudente(@PathVariable Long id, @RequestBody Studente studenteDetails) {
-		return studenteService.updateStudente(id, studenteDetails);
-	}
-
-	// ✅ SOLO L'ADMIN può eliminare uno studente
-	@DeleteMapping("/{id}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public ResponseEntity<List<StudenteResponseDTO>> getAllStudenti() {
+		return ResponseEntity.ok(studenteService.getAllStudenti());
+	}
+
+	// ✅ SOLO ADMIN - Recupera uno studente per ID
+	@GetMapping("/{id}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public ResponseEntity<StudenteResponseDTO> getStudenteById(@PathVariable Long id) {
+		return ResponseEntity.ok(studenteService.getStudenteById(id));
+	}
+
+	// ✅ SOLO ADMIN - Recupera studenti per lingua e livello iniziale
+	@GetMapping("/filtra")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByLinguaELivello(
+		@RequestParam String lingua,
+		@RequestParam String livello) {
+		return ResponseEntity.ok(studenteService.getStudentiByLinguaELivello(lingua, livello));
+	}
+
+	// ✅ SOLO ADMIN - Recupera gli studenti di un insegnante specifico
+	@GetMapping("/insegnante/{id}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByInsegnante(@PathVariable Long id) {
+		return ResponseEntity.ok(studenteService.getStudentiByInsegnante(id));
+	}
+
+	// ✅ SOLO ADMIN - Recupera studenti per tipo di corso (privato o di gruppo)
+	@GetMapping("/tipo-corso")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByTipoCorso(@RequestParam boolean corsoPrivato) {
+		return ResponseEntity.ok(studenteService.getStudentiByTipoCorso(corsoPrivato));
+	}
+
+	// ✅ SOLO ADMIN - Crea un nuovo studente
+	@PostMapping
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@ResponseStatus(HttpStatus.CREATED)
+	public StudenteResponseDTO createStudente(@RequestBody StudenteRequestDTO studenteRequestDTO) {
+		return studenteService.createStudente(studenteRequestDTO);
+	}
+
+	// ✅ SOLO ADMIN - Modifica uno studente
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public ResponseEntity<StudenteResponseDTO> updateStudente(
+		@PathVariable Long id,
+		@RequestBody StudenteRequestDTO studenteRequestDTO) {
+		return ResponseEntity.ok(studenteService.updateStudente(id, studenteRequestDTO));
+	}
+
+	// ✅ SOLO ADMIN - Elimina uno studente
+	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteStudente(@PathVariable Long id) {
 		studenteService.deleteStudente(id);
 	}

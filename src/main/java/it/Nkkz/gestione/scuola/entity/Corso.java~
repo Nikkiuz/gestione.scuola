@@ -1,0 +1,40 @@
+package it.Nkkz.gestione.scuola.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.List;
+
+@Entity
+@Table(name = "corsi")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Corso {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	private String lingua;
+	private String tipoCorso; // "GRUPPO" o "PRIVATO"
+	private String frequenza; // "1 volta a settimana" o "2 volte a settimana"
+	private String giorno; // Es: "Lunedì"
+	private String orario; // Es: "16:00-18:00"
+
+	@ManyToOne
+	@JoinColumn(name = "insegnante_id", nullable = false)
+	private Insegnante insegnante;
+
+	@ManyToMany
+	@JoinTable(
+		name = "corso_studenti",
+		joinColumns = @JoinColumn(name = "corso_id"),
+		inverseJoinColumns = @JoinColumn(name = "studente_id")
+	)
+	private List<Studente> studenti;
+
+	@ManyToOne
+	@JoinColumn(name = "aula_id")
+	private Aula aula; // Aula assegnata al corso
+}
