@@ -12,7 +12,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,48 +27,48 @@ public class CorsoService {
 	@Autowired
 	private AulaRepository aulaRepository;
 
-	// ✅ Recupera tutti i corsi (Admin)
+	// ✅ Recupera tutti i corsi attivi (Admin)
 	public List<CorsoResponseDTO> getTuttiICorsi() {
-		return corsoRepository.findAll().stream()
+		return corsoRepository.findByAttivoTrue().stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera i corsi di un insegnante specifico
+	// ✅ Recupera i corsi di un insegnante
 	public List<CorsoResponseDTO> getCorsiByInsegnante(Long insegnanteId) {
-		return corsoRepository.findByInsegnanteId(insegnanteId).stream()
+		return corsoRepository.findByInsegnanteIdAndAttivoTrue(insegnanteId).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
 	// ✅ Recupera corsi per giorno e orario
 	public List<CorsoResponseDTO> getCorsiByGiornoEOrario(String giorno, String orario) {
-		return corsoRepository.findByGiornoAndOrario(giorno, orario).stream()
+		return corsoRepository.findByGiornoAndOrarioAndAttivoTrue(giorno, orario).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
 	// ✅ Recupera corsi per lingua e livello
 	public List<CorsoResponseDTO> getCorsiByLinguaELivello(String lingua, String livello) {
-		return corsoRepository.findByLinguaAndLivello(lingua, livello).stream()
+		return corsoRepository.findByLinguaAndLivelloAndAttivoTrue(lingua, livello).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera corsi privati o di gruppo
+	// ✅ Recupera corsi per tipologia (privati o di gruppo)
 	public List<CorsoResponseDTO> getCorsiByTipologia(String tipoCorso) {
-		return corsoRepository.findByTipoCorso(tipoCorso).stream()
+		return corsoRepository.findByTipoCorsoAndAttivoTrue(tipoCorso).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Crea un nuovo corso (Admin)
+	// ✅ Crea un nuovo corso
 	public CorsoResponseDTO creaCorso(CorsoRequestDTO request) {
 		Corso corso = new Corso();
 		BeanUtils.copyProperties(request, corso);
 		corso.setStudenti(studenteRepository.findAllById(request.getStudentiIds()));
+		corso.setAttivo(true);
 
-		// Assegna automaticamente un'aula disponibile
 		Optional<Aula> aulaDisponibile = aulaRepository.findById(request.getAulaId());
 		aulaDisponibile.ifPresent(corso::setAula);
 
@@ -77,7 +76,7 @@ public class CorsoService {
 		return convertToResponseDTO(corso);
 	}
 
-	// ✅ Modifica un corso esistente (Admin)
+	// ✅ Modifica un corso esistente
 	public CorsoResponseDTO modificaCorso(Long id, CorsoRequestDTO request) {
 		Corso corso = corsoRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
@@ -89,15 +88,30 @@ public class CorsoService {
 		return convertToResponseDTO(corso);
 	}
 
-	// ✅ Elimina un corso (Admin)
+	// ✅ **Interrompi un corso** (senza eliminarlo)
+	public void interrompiCorso(Long id) {
+		Corso corso = corsoRepository.findById(id)
+			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
+
+		corso.setAttivo(false);
+		corsoRepository.save(corso);
+	}
+
+	// ✅ **Elimina definitivamente un corso**
 	public void eliminaCorso(Long id) {
-		if (!corsoRepository.existsById(id)) {
-			throw new EntityNotFoundException("Corso non trovato");
+		Corso corso = corsoRepository.findById(id)
+			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
+
+		// Libera gli orari e l'aula del corso eliminato
+		if (corso.getAula() != null) {
+			corso.getAula().getDisponibilita().remove(corso.getGiorno());
+			aulaRepository.save(corso.getAula());
 		}
+
 		corsoRepository.deleteById(id);
 	}
 
-	// ✅ Gestione corsi pieni: Admin decide come procedere
+	// ✅ **Gestione corsi pieni**
 	public void gestisciCorsoPieno(Long corsoId, int scelta) {
 		Corso corso = corsoRepository.findById(corsoId)
 			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
@@ -114,7 +128,7 @@ public class CorsoService {
 		}
 	}
 
-	// ✅ Dividere un corso in due gruppi più piccoli
+	// ✅ **Dividere un corso in due gruppi più piccoli**
 	private void dividiCorso(Corso corso) {
 		List<Studente> studenti = new ArrayList<>(corso.getStudenti());
 
@@ -127,15 +141,16 @@ public class CorsoService {
 		List<Studente> primoGruppo = new ArrayList<>(studenti.subList(0, numeroStudentiPrimoGruppo));
 		List<Studente> secondoGruppo = new ArrayList<>(studenti.subList(numeroStudentiPrimoGruppo, studenti.size()));
 
-		// 🔹 Creiamo i nuovi corsi con nomi più chiari
 		Corso corso1 = new Corso();
 		corso1.setLingua(corso.getLingua());
 		corso1.setTipoCorso(corso.getTipoCorso());
 		corso1.setFrequenza(corso.getFrequenza());
 		corso1.setGiorno(corso.getGiorno());
 		corso1.setOrario(corso.getOrario());
+		corso1.setLivello(corso.getLivello());
 		corso1.setInsegnante(corso.getInsegnante());
 		corso1.setStudenti(primoGruppo);
+		corso1.setAttivo(true);
 
 		Corso corso2 = new Corso();
 		corso2.setLingua(corso.getLingua());
@@ -143,31 +158,21 @@ public class CorsoService {
 		corso2.setFrequenza(corso.getFrequenza());
 		corso2.setGiorno(corso.getGiorno());
 		corso2.setOrario(corso.getOrario());
+		corso2.setLivello(corso.getLivello());
 		corso2.setInsegnante(corso.getInsegnante());
 		corso2.setStudenti(secondoGruppo);
+		corso2.setAttivo(true);
 
-		// 🔹 Assegna le aule disponibili
-		Optional<Aula> aulaDisponibile1 = aulaRepository.findAuleDisponibiliByGiornoEOrario(corso.getGiorno(), corso.getOrario()).stream().findFirst();
-		aulaDisponibile1.ifPresent(corso1::setAula);
-
-		Optional<Aula> aulaDisponibile2 = aulaRepository.findAuleDisponibiliByGiornoEOrario(corso.getGiorno(), corso.getOrario()).stream().findFirst();
-		aulaDisponibile2.ifPresent(corso2::setAula);
-
-		// 🔹 Salvataggio
 		corsoRepository.save(corso1);
 		corsoRepository.save(corso2);
-
-		System.out.println("Il corso è stato diviso in due gruppi.");
 	}
 
-
-
-	// ✅ Aggiungere un posto extra al corso pieno
+	// ✅ **Aggiungere un posto extra al corso pieno**
 	private void aggiungiPostoExtra(Corso corso) {
 		System.out.println("Posto extra aggiunto al corso " + corso.getLingua());
 	}
 
-	// ✅ Generazione automatica dei corsi basata su preferenze, livello, età
+	// ✅ **Genera corsi automaticamente**
 	public void generaCorsiAutomaticamente() {
 		List<Studente> studenti = studenteRepository.findAll();
 
@@ -188,16 +193,14 @@ public class CorsoService {
 				corso.setGiorno("Lunedì");
 				corso.setOrario("16:00-18:00");
 				corso.setStudenti(corsoStudenti);
-
-				Optional<Aula> aulaDisponibile = aulaRepository.findAuleDisponibiliByGiornoEOrario("Lunedì", "16:00-18:00").stream().findFirst();
-				aulaDisponibile.ifPresent(corso::setAula);
+				corso.setAttivo(true);
 
 				corsoRepository.save(corso);
 			}
 		}
 	}
 
-	// ✅ Conversione Entity → DTO
+	// ✅ **Conversione Entity → DTO**
 	private CorsoResponseDTO convertToResponseDTO(Corso corso) {
 		CorsoResponseDTO dto = new CorsoResponseDTO();
 		BeanUtils.copyProperties(corso, dto);

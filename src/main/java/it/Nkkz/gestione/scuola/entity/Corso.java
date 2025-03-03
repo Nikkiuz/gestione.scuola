@@ -47,4 +47,7 @@ public class Corso {
 		inverseJoinColumns = @JoinColumn(name = "studente_id")
 	)
 	private List<Studente> studenti;
+
+	@Column(nullable = false)
+	private boolean attivo = true; // Indica se il corso è attivo o interrotto
 }
