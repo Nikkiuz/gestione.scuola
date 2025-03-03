@@ -55,4 +55,5 @@ public class Studente {
 	public Set<String> getGiorniDisponibili() {
 		return giorniPreferiti;
 	}
+
 }

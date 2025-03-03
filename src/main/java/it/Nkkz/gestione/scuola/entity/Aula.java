@@ -19,6 +19,10 @@ public class Aula {
 	private String nome;
 	private int capienzaMax;
 
+	public boolean isDisponibile(String giorno, String orario) {
+		return disponibilita.containsKey(giorno) && disponibilita.get(giorno).contains(orario);
+	}
+
 	@ElementCollection
 	@CollectionTable(name = "aula_disponibilita", joinColumns = @JoinColumn(name = "aula_id"))
 	@MapKeyColumn(name = "giorno")

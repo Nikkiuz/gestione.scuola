@@ -266,7 +266,8 @@ public class CorsoService {
 			}
 		}
 	}
-	
+
+
 	// ✅ **Conversione Entity → DTO**
 	private CorsoResponseDTO convertToResponseDTO(Corso corso) {
 		CorsoResponseDTO dto = new CorsoResponseDTO();

@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,7 +40,6 @@ public class ReportService {
 		YearMonth yearMonth = YearMonth.of(anno, mese);
 		LocalDate startDate = yearMonth.atDay(1);
 		LocalDate endDate = yearMonth.atEndOfMonth();
-
 		return generaReport(startDate, endDate, "Mensile");
 	}
 
@@ -50,7 +47,6 @@ public class ReportService {
 	public ReportDTO generaReportAnnuale(int anno) {
 		LocalDate startDate = LocalDate.of(anno, 1, 1);
 		LocalDate endDate = LocalDate.of(anno, 12, 31);
-
 		return generaReport(startDate, endDate, "Annuale");
 	}
 
@@ -64,20 +60,22 @@ public class ReportService {
 		report.setOreInsegnate(oreInsegnate);
 
 		// 🔹 Totale pagamenti ricevuti per metodo di pagamento
-		Map<String, Double> pagamentiRicevuti = pagamentoRepository.findByDataPagamentoBetween(startDate, endDate).stream()
+		Map<String, Double> pagamentiRicevuti = pagamentoRepository.findByDataPagamentoBetween(startDate, endDate)
+			.stream()
 			.collect(Collectors.groupingBy(
 				p -> p.getMetodoPagamento().toString(),
 				Collectors.summingDouble(p -> p.getImporto())
 			));
-		report.setPagamentiRicevuti(pagamentiRicevuti);
+		report.setPagamentiRicevuti(pagamentiRicevuti.isEmpty() ? Collections.emptyMap() : pagamentiRicevuti);
 
 		// 🔹 Totale spese registrate per categoria
-		Map<String, Double> speseRegistrate = spesaRepository.findByDataSpesaBetween(startDate, endDate).stream()
+		Map<String, Double> speseRegistrate = spesaRepository.findByDataSpesaBetween(startDate, endDate)
+			.stream()
 			.collect(Collectors.groupingBy(
 				s -> s.getCategoria().toString(),
 				Collectors.summingDouble(s -> s.getImporto())
 			));
-		report.setSpeseRegistrate(speseRegistrate);
+		report.setSpeseRegistrate(speseRegistrate.isEmpty() ? Collections.emptyMap() : speseRegistrate);
 
 		// 🔹 Calcolo bilancio (entrate - uscite)
 		double totaleEntrate = pagamentiRicevuti.values().stream().mapToDouble(Double::doubleValue).sum();
@@ -91,35 +89,41 @@ public class ReportService {
 	private Map<String, Integer> calcolaOreInsegnateNelPeriodo(LocalDate startDate, LocalDate endDate) {
 		Map<String, Integer> oreInsegnate = new HashMap<>();
 
-		List<Corso> corsi = corsoRepository.findAll();
-
+		List<Corso> corsi = corsoRepository.findByAttivoTrue();
 		for (Corso corso : corsi) {
-			// Se il corso è attivo e si svolge nel periodo considerato
-			if (corso.isAttivo()) {
-				String chiaveInsegnante = corso.getInsegnante().getNome() + " " + corso.getInsegnante().getCognome();
-				int orePerSettimana = corso.getFrequenza().equals("2 volte a settimana") ? 6 : 3;
+			String chiaveInsegnante = corso.getInsegnante().getNome() + " " + corso.getInsegnante().getCognome();
+			int orePerSettimana = corso.getFrequenza().equals("2 volte a settimana") ? 6 : 3;
 
-				// Calcoliamo quante settimane ci sono nel periodo
-				long settimaneNelPeriodo = startDate.datesUntil(endDate.plusDays(1))
-					.filter(date -> date.getDayOfWeek().toString().equalsIgnoreCase(corso.getGiorno()))
-					.count();
+			// Calcoliamo quante settimane ci sono nel periodo
+			long settimaneNelPeriodo = startDate.datesUntil(endDate.plusDays(1))
+				.filter(date -> date.getDayOfWeek().toString().equalsIgnoreCase(corso.getGiorno()))
+				.count();
 
-				int totaleOre = (int) (orePerSettimana * settimaneNelPeriodo);
-				oreInsegnate.put(chiaveInsegnante, oreInsegnate.getOrDefault(chiaveInsegnante, 0) + totaleOre);
-			}
+			int totaleOre = (int) (orePerSettimana * settimaneNelPeriodo);
+			oreInsegnate.put(chiaveInsegnante, oreInsegnate.getOrDefault(chiaveInsegnante, 0) + totaleOre);
 		}
 
-		return oreInsegnate;
+		return oreInsegnate.isEmpty() ? Collections.emptyMap() : oreInsegnate;
 	}
 
 	// 🔹 Genera e invia il report mensile via email
-	public void inviaReportMensile(int anno, int mese) {
+	public String inviaReportMensile(int anno, int mese) {
 		ReportDTO report = generaReportMensile(anno, mese);
+
+		// Controllo se il report è vuoto
+		if (report.getOreInsegnate().isEmpty() &&
+			report.getPagamentiRicevuti().isEmpty() &&
+			report.getSpeseRegistrate().isEmpty()) {
+			return "⚠️ Nessun dato disponibile per il report mensile di " + mese + "/" + anno;
+		}
+
 		byte[] pdfBytes = pdfReportService.generateReportPdf(report);
 
 		String subject = "📊 Report Mensile - " + mese + "/" + anno;
 		String body = "Ciao,\n\nIn allegato trovi il report mensile della scuola per " + mese + "/" + anno + ".\n\nSaluti,\nGestione Scuola";
 
 		emailService.sendEmailWithAttachment(adminEmail, subject, body, pdfBytes, "report_mensile_" + anno + "_" + mese + ".pdf");
+
+		return "✅ Email con il report mensile inviata con successo!";
 	}
 }

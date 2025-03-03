@@ -61,10 +61,12 @@ public class ReportController {
 	}
 
 	// Endpoint per inviare il report via email
+	/*
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@PostMapping("/mensile/email")
 	public String inviaReportMensile(@RequestParam int anno, @RequestParam int mese) {
 		reportService.inviaReportMensile(anno, mese);
 		return "Email con il report mensile inviata con successo!";
 	}
+	*/
 }
