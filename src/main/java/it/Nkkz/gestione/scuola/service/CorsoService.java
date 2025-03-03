@@ -266,6 +266,23 @@ public class CorsoService {
 			}
 		}
 	}
+
+	// ✅ Elimina un corso in modo definitivo
+	public void eliminaCorsoDefinitivamente(Long corsoId) {
+		Corso corso = corsoRepository.findById(corsoId)
+			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato con ID: " + corsoId));
+
+		// Rimuove il corso dagli studenti
+		corso.getStudenti().forEach(studente -> studente.getCorsi().remove(corso));
+
+		// Se il corso ha un'aula assegnata, rimuove il riferimento
+		if (corso.getAula() != null) {
+			corso.setAula(null);
+		}
+
+		// Elimina il corso dal repository
+		corsoRepository.delete(corso);
+	}
 	
 	// ✅ Conversione Entity → DTO
 	private CorsoResponseDTO convertToResponseDTO(Corso corso) {

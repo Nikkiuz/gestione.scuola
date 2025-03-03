@@ -3,6 +3,8 @@ package it.Nkkz.gestione.scuola.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -43,6 +45,9 @@ public class Studente {
 	private Integer frequenzaCorsoPrivato; // Valido solo se corsoPrivato == true (minimo 1 ora)
 
 	private String tipoCorsoGruppo; // "1 volta a settimana" oppure "2 volte a settimana"
+
+	@ManyToMany(mappedBy = "studenti")
+	private List<Corso> corsi = new ArrayList<>();
 
 	@ManyToOne
 	@JoinColumn(name = "insegnante_id")

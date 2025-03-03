@@ -97,4 +97,5 @@ public class CorsoController {
 		corsoService.generaCorsiAutomaticamente();
 		return ResponseEntity.ok("Corsi generati automaticamente.");
 	}
+
 }

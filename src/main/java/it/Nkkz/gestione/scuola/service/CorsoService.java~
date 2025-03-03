@@ -93,7 +93,7 @@ public class CorsoService {
 		return convertToResponseDTO(corso);
 	}
 
-	// ✅ **Interrompi un corso** (senza eliminarlo)
+	// ✅ Interrompi un corso (senza eliminarlo)
 	public void interrompiCorso(Long id) {
 		Corso corso = corsoRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
@@ -102,7 +102,7 @@ public class CorsoService {
 		corsoRepository.save(corso);
 	}
 
-	// ✅ **Elimina definitivamente un corso**
+	// ✅ Elimina definitivamente un corso
 	public void eliminaCorso(Long id) {
 		Corso corso = corsoRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
@@ -116,7 +116,7 @@ public class CorsoService {
 		corsoRepository.deleteById(id);
 	}
 
-	// ✅ **Gestione corsi pieni**
+	// ✅ Gestione corsi pieni
 	public void gestisciCorsoPieno(Long corsoId, int scelta) {
 		Corso corso = corsoRepository.findById(corsoId)
 			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
@@ -133,7 +133,7 @@ public class CorsoService {
 		}
 	}
 
-	// ✅ **Dividere un corso in due gruppi più piccoli**
+	// ✅ Dividere un corso in due gruppi più piccoli
 	private void dividiCorso(Corso corso) {
 		List<Studente> studenti = new ArrayList<>(corso.getStudenti());
 
@@ -172,7 +172,7 @@ public class CorsoService {
 		corsoRepository.save(corso2);
 	}
 
-	// ✅ **Aggiungere un posto extra al corso pieno**
+	// ✅ Aggiungere un posto extra al corso pieno
 	private void aggiungiPostoExtra(Corso corso) {
 		System.out.println("Posto extra aggiunto al corso " + corso.getLingua());
 	}
@@ -181,7 +181,7 @@ public class CorsoService {
 	public void generaCorsiAutomaticamente() {
 		List<Studente> studenti = studenteRepository.findAll();
 
-		// Raggruppa gli studenti per lingua, livello e età massima di 2 anni
+		// Raggruppa gli studenti per lingua, livello ed età massima di 2 anni
 		Map<String, List<Studente>> gruppi = studenti.stream()
 			.filter(s -> s.getGiorniPreferiti() != null && s.getFasceOrariePreferite() != null)
 			.collect(Collectors.groupingBy(s -> s.getLinguaDaImparare() + "-" + s.getLivello() + "-" + (s.getEta() / 2)));
@@ -266,8 +266,10 @@ public class CorsoService {
 			}
 		}
 	}
+
 	
-	// ✅ **Conversione Entity → DTO**
+	
+	// ✅ Conversione Entity → DTO
 	private CorsoResponseDTO convertToResponseDTO(Corso corso) {
 		CorsoResponseDTO dto = new CorsoResponseDTO();
 		BeanUtils.copyProperties(corso, dto);
