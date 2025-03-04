@@ -29,6 +29,9 @@ public class Corso {
 	@Column(nullable = false)
 	private String orario;
 
+	@Column(nullable = false)
+	private String livello;
+
 	@ManyToOne
 	@JoinColumn(name = "insegnante_id")
 	private Insegnante insegnante;
@@ -44,4 +47,7 @@ public class Corso {
 		inverseJoinColumns = @JoinColumn(name = "studente_id")
 	)
 	private List<Studente> studenti;
+
+	@Column(nullable = false)
+	private boolean attivo = true; // Indica se il corso è attivo o interrotto
 }

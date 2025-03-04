@@ -1,0 +1,4 @@
+package it.Nkkz.gestione.scuola.service;
+
+public class PdfReportService {
+}
