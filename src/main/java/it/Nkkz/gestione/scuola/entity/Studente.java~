@@ -51,7 +51,7 @@ public class Studente {
 
 	@ManyToOne
 	@JoinColumn(name = "insegnante_id")
-	private Insegnante insegnante;  //
+	private Insegnante insegnante;  // 🔥 ORA È GIUSTO! `Insegnante` è un'entità separata
 
 	@Column(nullable = false)
 	private String tipologiaPagamento;  // Ex "Tipo di iscrizione"

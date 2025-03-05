@@ -35,7 +35,7 @@ public class ReportService {
 	@Value("${spring.mail.username}")
 	private String adminEmail;
 
-	// 🔹 Genera il report mensile per un mese specifico
+	// Genera il report mensile per un mese specifico
 	public ReportDTO generaReportMensile(int anno, int mese) {
 		YearMonth yearMonth = YearMonth.of(anno, mese);
 		LocalDate startDate = yearMonth.atDay(1);
@@ -43,23 +43,23 @@ public class ReportService {
 		return generaReport(startDate, endDate, "Mensile");
 	}
 
-	// 🔹 Genera il report annuale per un anno specifico
+	// Genera il report annuale per un anno specifico
 	public ReportDTO generaReportAnnuale(int anno) {
 		LocalDate startDate = LocalDate.of(anno, 1, 1);
 		LocalDate endDate = LocalDate.of(anno, 12, 31);
 		return generaReport(startDate, endDate, "Annuale");
 	}
 
-	// 🔹 Metodo generico per generare un report
+	// Metodo generico per generare un report
 	private ReportDTO generaReport(LocalDate startDate, LocalDate endDate, String periodo) {
 		ReportDTO report = new ReportDTO();
 		report.setPeriodo(periodo);
 
-		// 🔹 Ore insegnate per insegnante
+		// Ore insegnate per insegnante
 		Map<String, Integer> oreInsegnate = calcolaOreInsegnateNelPeriodo(startDate, endDate);
 		report.setOreInsegnate(oreInsegnate);
 
-		// 🔹 Totale pagamenti ricevuti per metodo di pagamento
+		// Totale pagamenti ricevuti per metodo di pagamento
 		Map<String, Double> pagamentiRicevuti = pagamentoRepository.findByDataPagamentoBetween(startDate, endDate)
 			.stream()
 			.collect(Collectors.groupingBy(
@@ -68,7 +68,7 @@ public class ReportService {
 			));
 		report.setPagamentiRicevuti(pagamentiRicevuti.isEmpty() ? Collections.emptyMap() : pagamentiRicevuti);
 
-		// 🔹 Totale spese registrate per categoria
+		// Totale spese registrate per categoria
 		Map<String, Double> speseRegistrate = spesaRepository.findByDataSpesaBetween(startDate, endDate)
 			.stream()
 			.collect(Collectors.groupingBy(
@@ -77,7 +77,7 @@ public class ReportService {
 			));
 		report.setSpeseRegistrate(speseRegistrate.isEmpty() ? Collections.emptyMap() : speseRegistrate);
 
-		// 🔹 Calcolo bilancio (entrate - uscite)
+		// Calcolo bilancio (entrate - uscite)
 		double totaleEntrate = pagamentiRicevuti.values().stream().mapToDouble(Double::doubleValue).sum();
 		double totaleUscite = speseRegistrate.values().stream().mapToDouble(Double::doubleValue).sum();
 		report.setBilancio(totaleEntrate - totaleUscite);
@@ -85,7 +85,7 @@ public class ReportService {
 		return report;
 	}
 
-	// 🔹 Calcola il numero di ore insegnate nel periodo
+	// Calcola il numero di ore insegnate nel periodo
 	private Map<String, Integer> calcolaOreInsegnateNelPeriodo(LocalDate startDate, LocalDate endDate) {
 		Map<String, Integer> oreInsegnate = new HashMap<>();
 
@@ -106,7 +106,7 @@ public class ReportService {
 		return oreInsegnate.isEmpty() ? Collections.emptyMap() : oreInsegnate;
 	}
 
-	// 🔹 Genera e invia il report mensile via email
+	// Genera e invia il report mensile via email
 	public String inviaReportMensile(int anno, int mese) {
 		ReportDTO report = generaReportMensile(anno, mese);
 

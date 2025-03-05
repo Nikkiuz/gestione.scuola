@@ -32,42 +32,42 @@ public class CorsoService {
 	@Autowired
 	private InsegnanteRepository insegnanteRepository;
 
-	// ✅ Recupera tutti i corsi attivi (Admin)
+	// Recupera tutti i corsi attivi (Admin)
 	public List<CorsoResponseDTO> getTuttiICorsi() {
 		return corsoRepository.findByAttivoTrue().stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera i corsi di un insegnante
+	// Recupera i corsi di un insegnante
 	public List<CorsoResponseDTO> getCorsiByInsegnante(Long insegnanteId) {
 		return corsoRepository.findByInsegnanteIdAndAttivoTrue(insegnanteId).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera corsi per giorno e orario
+	// Recupera corsi per giorno e orario
 	public List<CorsoResponseDTO> getCorsiByGiornoEOrario(String giorno, String orario) {
 		return corsoRepository.findByGiornoAndOrarioAndAttivoTrue(giorno, orario).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera corsi per lingua e livello
+	// Recupera corsi per lingua e livello
 	public List<CorsoResponseDTO> getCorsiByLinguaELivello(String lingua, String livello) {
 		return corsoRepository.findByLinguaAndLivelloAndAttivoTrue(lingua, livello).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera corsi per tipologia (privati o di gruppo)
+	// Recupera corsi per tipologia (privati o di gruppo)
 	public List<CorsoResponseDTO> getCorsiByTipologia(String tipoCorso) {
 		return corsoRepository.findByTipoCorsoAndAttivoTrue(tipoCorso).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Crea un nuovo corso
+	// Crea un nuovo corso
 	public CorsoResponseDTO creaCorso(CorsoRequestDTO request) {
 		Corso corso = new Corso();
 		BeanUtils.copyProperties(request, corso);
@@ -81,7 +81,7 @@ public class CorsoService {
 		return convertToResponseDTO(corso);
 	}
 
-	// ✅ Modifica un corso esistente
+	// Modifica un corso esistente
 	public CorsoResponseDTO modificaCorso(Long id, CorsoRequestDTO request) {
 		Corso corso = corsoRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
@@ -93,7 +93,7 @@ public class CorsoService {
 		return convertToResponseDTO(corso);
 	}
 
-	// ✅ Interrompi un corso (senza eliminarlo)
+	// Interrompi un corso (senza eliminarlo)
 	public void interrompiCorso(Long id) {
 		Corso corso = corsoRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
@@ -102,7 +102,7 @@ public class CorsoService {
 		corsoRepository.save(corso);
 	}
 
-	// ✅ Elimina definitivamente un corso
+	// Elimina definitivamente un corso
 	public void eliminaCorso(Long id) {
 		Corso corso = corsoRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
@@ -116,7 +116,7 @@ public class CorsoService {
 		corsoRepository.deleteById(id);
 	}
 
-	// ✅ Gestione corsi pieni
+	// Gestione corsi pieni
 	public void gestisciCorsoPieno(Long corsoId, int scelta) {
 		Corso corso = corsoRepository.findById(corsoId)
 			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
@@ -133,7 +133,7 @@ public class CorsoService {
 		}
 	}
 
-	// ✅ Dividere un corso in due gruppi più piccoli
+	// Dividere un corso in due gruppi più piccoli
 	private void dividiCorso(Corso corso) {
 		List<Studente> studenti = new ArrayList<>(corso.getStudenti());
 
@@ -172,17 +172,22 @@ public class CorsoService {
 		corsoRepository.save(corso2);
 	}
 
-	// ✅ Aggiungere un posto extra al corso pieno
+	// Aggiungere un posto extra al corso pieno
 	private void aggiungiPostoExtra(Corso corso) {
 		System.out.println("Posto extra aggiunto al corso " + corso.getLingua());
 	}
 
-	// ✅ Genera corsi automaticamente tenendo conto di tutte le preferenze
+	// Genera corsi automaticamente tenendo conto di tutte le preferenze
 	public void generaCorsiAutomaticamente() {
 		List<Studente> studenti = studenteRepository.findAll();
 
+		// Escludi gli studenti già assegnati a un corso
+		List<Studente> studentiDisponibili = studenti.stream()
+			.filter(s -> s.getCorsi() == null || s.getCorsi().isEmpty())
+			.collect(Collectors.toList());
+
 		// Raggruppa gli studenti per lingua, livello ed età massima di 2 anni
-		Map<String, List<Studente>> gruppi = studenti.stream()
+		Map<String, List<Studente>> gruppi = studentiDisponibili.stream()
 			.filter(s -> s.getGiorniPreferiti() != null && s.getFasceOrariePreferite() != null)
 			.collect(Collectors.groupingBy(s -> s.getLinguaDaImparare() + "-" + s.getLivello() + "-" + (s.getEta() / 2)));
 
@@ -193,16 +198,16 @@ public class CorsoService {
 				List<Studente> corsoStudenti = new ArrayList<>(gruppoStudenti.subList(0, Math.min(gruppoStudenti.size(), 9)));
 				gruppoStudenti.removeAll(corsoStudenti);
 
-				// ✅ Determina la frequenza più richiesta
+				// Determina la frequenza più richiesta
 				Map<String, Long> frequenzePreferite = corsoStudenti.stream()
 					.collect(Collectors.groupingBy(Studente::getTipoCorsoGruppo, Collectors.counting()));
 
 				String frequenzaSelezionata = frequenzePreferite.entrySet().stream()
 					.max(Map.Entry.comparingByValue())
 					.map(Map.Entry::getKey)
-					.orElse("1 volta a settimana"); // Default
+					.orElse("1 volta a settimana");
 
-				// ✅ Trova il giorno e l'orario più comuni tra gli studenti
+				// Trova il giorno e l'orario più comuni tra gli studenti
 				Map<String, Long> giorniFrequenza = corsoStudenti.stream()
 					.flatMap(s -> s.getGiorniPreferiti().stream())
 					.collect(Collectors.groupingBy(g -> g, Collectors.counting()));
@@ -214,14 +219,14 @@ public class CorsoService {
 				String giornoSelezionato = giorniFrequenza.entrySet().stream()
 					.max(Map.Entry.comparingByValue())
 					.map(Map.Entry::getKey)
-					.orElse("Lunedì"); // Default
+					.orElse("Lunedì");
 
 				String orarioSelezionato = orariFrequenza.entrySet().stream()
 					.max(Map.Entry.comparingByValue())
 					.map(Map.Entry::getKey)
-					.orElse("16:00-18:00"); // Default
+					.orElse("16:00-18:00");
 
-				// ✅ Trova un insegnante disponibile
+				// Trova un insegnante disponibile
 				Optional<Insegnante> insegnanteDisponibile = insegnanteRepository.findAll().stream()
 					.filter(i ->
 						corsoStudenti.stream().allMatch(s ->
@@ -237,7 +242,7 @@ public class CorsoService {
 					continue;
 				}
 
-				// ✅ Trova un'aula disponibile
+				// Trova un'aula disponibile
 				Optional<Aula> aulaDisponibile = aulaRepository.findAll().stream()
 					.filter(aula -> aula.getCapienzaMax() >= corsoStudenti.size())
 					.filter(aula -> aula.getDisponibilita().containsKey(giornoSelezionato))
@@ -249,7 +254,7 @@ public class CorsoService {
 					continue;
 				}
 
-				// ✅ Crea il corso con i parametri selezionati
+				// Crea il corso con i parametri selezionati
 				Corso corso = new Corso();
 				corso.setLingua(entry.getKey().split("-")[0]);
 				corso.setLivello(entry.getKey().split("-")[1]);
@@ -267,7 +272,7 @@ public class CorsoService {
 		}
 	}
 
-	// ✅ Elimina un corso in modo definitivo
+	// Elimina un corso in modo definitivo
 	public void eliminaCorsoDefinitivamente(Long corsoId) {
 		Corso corso = corsoRepository.findById(corsoId)
 			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato con ID: " + corsoId));
@@ -284,7 +289,7 @@ public class CorsoService {
 		corsoRepository.delete(corso);
 	}
 	
-	// ✅ Conversione Entity → DTO
+	// Conversione Entity → DTO
 	private CorsoResponseDTO convertToResponseDTO(Corso corso) {
 		CorsoResponseDTO dto = new CorsoResponseDTO();
 		BeanUtils.copyProperties(corso, dto);
