@@ -177,7 +177,6 @@ public class CorsoService {
 		System.out.println("Posto extra aggiunto al corso " + corso.getLingua());
 	}
 
-	// Genera corsi automaticamente tenendo conto di tutte le preferenze
 	public void generaCorsiAutomaticamente() {
 		List<Studente> studenti = studenteRepository.findAll();
 
@@ -189,16 +188,29 @@ public class CorsoService {
 		// Raggruppa gli studenti per lingua, livello ed età massima di 2 anni
 		Map<String, List<Studente>> gruppi = studentiDisponibili.stream()
 			.filter(s -> s.getGiorniPreferiti() != null && s.getFasceOrariePreferite() != null)
-			.collect(Collectors.groupingBy(s -> s.getLinguaDaImparare() + "-" + s.getLivello() + "-" + (s.getEta() / 2)));
+			.collect(Collectors.groupingBy(s -> s.getLinguaDaImparare() + "-" + s.getLivello()));
 
 		for (Map.Entry<String, List<Studente>> entry : gruppi.entrySet()) {
 			List<Studente> gruppoStudenti = new ArrayList<>(entry.getValue());
 
 			while (gruppoStudenti.size() >= 3) {
-				List<Studente> corsoStudenti = new ArrayList<>(gruppoStudenti.subList(0, Math.min(gruppoStudenti.size(), 9)));
+				// **Ordina gli studenti per età per garantire una differenza massima di 2 anni**
+				gruppoStudenti.sort(Comparator.comparingInt(Studente::getEta));
+
+				List<Studente> corsoStudenti = new ArrayList<>();
+				Studente primoStudente = gruppoStudenti.get(0); // Studente più giovane come riferimento
+
+				for (Studente studente : new ArrayList<>(gruppoStudenti)) {
+					if (Math.abs(studente.getEta() - primoStudente.getEta()) <= 2) {
+						corsoStudenti.add(studente);
+					}
+					if (corsoStudenti.size() == 9) break; // Massimo 9 studenti per corso
+				}
+
+				// Rimuove gli studenti assegnati dal gruppo principale
 				gruppoStudenti.removeAll(corsoStudenti);
 
-				// Determina la frequenza più richiesta
+				// **Determina la frequenza più richiesta**
 				Map<String, Long> frequenzePreferite = corsoStudenti.stream()
 					.collect(Collectors.groupingBy(Studente::getTipoCorsoGruppo, Collectors.counting()));
 
@@ -207,7 +219,7 @@ public class CorsoService {
 					.map(Map.Entry::getKey)
 					.orElse("1 volta a settimana");
 
-				// Trova il giorno e l'orario più comuni tra gli studenti
+				// **Trova il giorno e l'orario più comuni tra gli studenti**
 				Map<String, Long> giorniFrequenza = corsoStudenti.stream()
 					.flatMap(s -> s.getGiorniPreferiti().stream())
 					.collect(Collectors.groupingBy(g -> g, Collectors.counting()));
@@ -226,15 +238,11 @@ public class CorsoService {
 					.map(Map.Entry::getKey)
 					.orElse("16:00-18:00");
 
-				// Trova un insegnante disponibile
+				// **Trova un insegnante disponibile che rispetti le preferenze**
 				Optional<Insegnante> insegnanteDisponibile = insegnanteRepository.findAll().stream()
-					.filter(i ->
-						corsoStudenti.stream().allMatch(s ->
-							s.getInsegnante() == null || s.getInsegnante().equals(i)
-						) &&
-							i.getGiorniDisponibili().contains(giornoSelezionato) &&
-							i.getFasceOrarieDisponibili().contains(orarioSelezionato)
-					)
+					.filter(i -> corsoStudenti.stream().allMatch(s -> s.getInsegnante() == null || s.getInsegnante().equals(i)))
+					.filter(i -> i.getGiorniDisponibili().contains(giornoSelezionato))
+					.filter(i -> i.getFasceOrarieDisponibili().contains(orarioSelezionato))
 					.findFirst();
 
 				if (insegnanteDisponibile.isEmpty()) {
@@ -242,7 +250,7 @@ public class CorsoService {
 					continue;
 				}
 
-				// Trova un'aula disponibile
+				// **Trova un'aula disponibile per il corso**
 				Optional<Aula> aulaDisponibile = aulaRepository.findAll().stream()
 					.filter(aula -> aula.getCapienzaMax() >= corsoStudenti.size())
 					.filter(aula -> aula.getDisponibilita().containsKey(giornoSelezionato))
@@ -254,7 +262,7 @@ public class CorsoService {
 					continue;
 				}
 
-				// Crea il corso con i parametri selezionati
+				// **Crea il corso con i parametri selezionati**
 				Corso corso = new Corso();
 				corso.setLingua(entry.getKey().split("-")[0]);
 				corso.setLivello(entry.getKey().split("-")[1]);
@@ -271,6 +279,7 @@ public class CorsoService {
 			}
 		}
 	}
+
 
 	// Elimina un corso in modo definitivo
 	public void eliminaCorsoDefinitivamente(Long corsoId) {
