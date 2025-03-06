@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { loginSuccess } from '../redux/authSlice.js'
+import { loginSuccess } from '../redux/slices/authSlice.js'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient.js'
 
