@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { loginSuccess } from '../redux/slices/authSlice.js'
+import { loginSuccess, setTeacherDetails } from '../redux/slices/authSlice.js'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient.js'
 
@@ -12,29 +12,38 @@ const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+  const handleLogin = async () => {
     try {
       const response = await apiClient.post('/auth/login', { email, password })
       const { token, user } = response.data
 
-      // Salviamo il token
+      // ✅ Se "Ricordami" è attivo, salva il token nel localStorage
       if (rememberMe) {
         localStorage.setItem('token', token)
       }
+
+      // ✅ Dispatch per salvare user e token nello stato globale (Redux)
       dispatch(loginSuccess({ user, token }))
 
-      // Reindirizzamento in base al ruolo
+      // ✅ Gestione ruoli
       if (user.role === 'ADMIN') {
-        navigate('/dashboard')
+        navigate('/admin-dashboard')
       } else if (user.role === 'INSEGNANTE') {
-        navigate('/miei-corsi')
+        // Recupera i dettagli dell'insegnante prima di reindirizzarlo
+        const teacherResponse = await apiClient.get(`/insegnanti/${user.id}`)
+        dispatch(setTeacherDetails(teacherResponse.data))
+        navigate('/teacher-dashboard')
       }
     } catch (error) {
       console.error('Errore login:', error)
       setError('Email o password errati')
     }
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setError('')
+    handleLogin()
   }
 
   return (

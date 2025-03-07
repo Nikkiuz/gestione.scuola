@@ -2,6 +2,7 @@ package it.Nkkz.gestione.scuola.controller;
 
 import it.Nkkz.gestione.scuola.dto.StudenteRequestDTO;
 import it.Nkkz.gestione.scuola.dto.StudenteResponseDTO;
+import it.Nkkz.gestione.scuola.entity.Studente;
 import it.Nkkz.gestione.scuola.service.StudenteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,5 +81,12 @@ public class StudenteController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteStudente(@PathVariable Long id) {
 		studenteService.deleteStudente(id);
+	}
+
+	// ✅ Recupera gli studenti senza corso
+	@GetMapping("/senza-corso")
+	public ResponseEntity<List<Studente>> getStudentiSenzaCorso() {
+		List<Studente> studentiSenzaCorso = studenteService.getStudentiSenzaCorso();
+		return ResponseEntity.ok(studentiSenzaCorso);
 	}
 }

@@ -1,8 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-  user: null,
+  user: null, // Dati base dell'utente loggato
   token: localStorage.getItem('token') || null,
+  teacherDetails: null, // Dati completi dell'insegnante
 }
 
 const authSlice = createSlice({
@@ -17,10 +18,14 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null
       state.token = null
+      state.teacherDetails = null
       localStorage.removeItem('token')
+    },
+    setTeacherDetails: (state, action) => {
+      state.teacherDetails = action.payload // Memorizziamo i dettagli insegnante
     },
   },
 })
 
-export const { loginSuccess, logout } = authSlice.actions
+export const { loginSuccess, logout, setTeacherDetails } = authSlice.actions
 export default authSlice.reducer
