@@ -1,56 +1,51 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import Login from '../pages/Login'
 import AdminDashboard from '../pages/AdminDashboard'
+import CourseList from '../pages/CourseList'
+import CourseDetail from '../pages/CourseDetail'
+import StudentList from '../pages/StudentList'
+import StudentDetails from '../pages/StudentDetails'
 import TeacherDashboard from '../pages/TeacherDashboard'
 import TeacherCourses from '../pages/TeacherCourses'
 import TeacherProfile from '../pages/TeacherProfile'
-import ProtectedRoute from './ProtectedRoute'
 
 const AppRouter = () => {
+  const { user } = useSelector((state) => state.auth)
+
   return (
     <Router>
       <Routes>
-        {/* Rotta per il login */}
-        <Route path="/" element={<Login />} />
+        {/* Pagina di Login */}
+        <Route path="/login" element={<Login />} />
 
-        {/* Rotta per Admin */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute role="ADMIN">
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
+        {/* Rotte Admin */}
+        {user?.role === 'ADMIN' && (
+          <>
+            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route path="/corsi" element={<CourseList />} />
+            <Route path="/corsi/:id" element={<CourseDetail />} />
+            <Route path="/studenti" element={<StudentList />} />
+            <Route path="/studenti/:id" element={<StudentDetails />} />
+          </>
+        )}
 
-        {/* Rotte per Insegnanti */}
-        <Route
-          path="/teacher/dashboard"
-          element={
-            <ProtectedRoute role="INSEGNANTE">
-              <TeacherDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/teacher/corsi"
-          element={
-            <ProtectedRoute role="INSEGNANTE">
-              <TeacherCourses />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/teacher/profilo"
-          element={
-            <ProtectedRoute role="INSEGNANTE">
-              <TeacherProfile />
-            </ProtectedRoute>
-          }
-        />
+        {/* Rotte Insegnante */}
+        {user?.role === 'INSEGNANTE' && (
+          <>
+            <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+            <Route path="/miei-corsi" element={<TeacherCourses />} />
+            <Route path="/profilo" element={<TeacherProfile />} />
+          </>
+        )}
 
-        {/* Pagina di default in caso di errore */}
-        <Route path="*" element={<h2>404 - Pagina non trovata</h2>} />
+        {/* Redirect alla login se non autenticato */}
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
   )
