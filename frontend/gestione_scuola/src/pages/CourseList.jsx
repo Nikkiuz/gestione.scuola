@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../api/apiClient';
+import AdminNavbar from '../components/AdminNavbar';
 
 const CourseList = () => {
   const [corsiGruppo, setCorsiGruppo] = useState([]);
@@ -50,6 +51,9 @@ const CourseList = () => {
   };
 
   return (
+    <>
+    <AdminNavbar />
+
     <div className="container mt-5">
       <h2 className="text-center mb-4">Gestione Corsi</h2>
 
@@ -118,6 +122,7 @@ const CourseList = () => {
         </>
       )}
     </div>
+    </>
   );
 };
 

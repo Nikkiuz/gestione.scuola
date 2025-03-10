@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
+import AdminNavbar from '../components/AdminNavbar'
 
 const CourseDetails = () => {
   const { id } = useParams() // ID del corso dalla URL
@@ -83,6 +84,9 @@ const CourseDetails = () => {
   if (error) return <div className="alert alert-danger">{error}</div>
 
   return (
+    <>
+    <AdminNavbar />
+
     <div className="container mt-4">
       <h2 className="text-center mb-4">📚 Dettagli Corso</h2>
 
@@ -164,6 +168,7 @@ const CourseDetails = () => {
         )}
       </div>
     </div>
+    </>
   )
 }
 

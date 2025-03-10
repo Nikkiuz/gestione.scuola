@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
 import { Bar } from 'react-chartjs-2'
 import 'chart.js/auto'
+import AdminNavbar from '../components/AdminNavbar'
+
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({ studenti: 0, corsi: 0, pagamenti: 0 })
@@ -50,6 +52,8 @@ const AdminDashboard = () => {
   }
 
   return (
+    <>
+    <AdminNavbar />
     <div className="container mt-5">
       <h2 className="text-center mb-4">Dashboard Admin</h2>
 
@@ -109,6 +113,7 @@ const AdminDashboard = () => {
         />
       </div>
     </div>
+    </>
   )
 }
 

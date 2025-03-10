@@ -14,6 +14,14 @@ import StudentDetails from '../pages/StudentDetails'
 import TeacherDashboard from '../pages/TeacherDashboard'
 import TeacherCourses from '../pages/TeacherCourses'
 import TeacherProfile from '../pages/TeacherProfile'
+import TeacherList from '../pages/TeacherList'
+import SpeseList from '../pages/SpeseList'
+import SpesaDetail from '../pages/SpeseDetail'
+import TeacherDetail from '../pages/TeacherDetail'
+import AulaList from '../pages/AulaList'
+import AulaDetail from '../pages/AulaDetail'
+import Calendario from '../pages/Calendario'
+import Report from '../pages/Report'
 
 const AppRouter = () => {
   const { user } = useSelector((state) => state.auth)
@@ -32,6 +40,14 @@ const AppRouter = () => {
             <Route path="/corsi/:id" element={<CourseDetail />} />
             <Route path="/studenti" element={<StudentList />} />
             <Route path="/studenti/:id" element={<StudentDetails />} />
+            <Route path="/insegnanti" element={<TeacherList />} />
+            <Route path="/insegnanti/:id" element={<TeacherDetail />} />
+            <Route path="/spese" element={<SpeseList />} />
+            <Route path='/spese/:id' element={<SpesaDetail />} />
+            <Route path="/calendario" element={<Calendario />} />
+            <Route path="/report" element={<Report />} />
+            <Route path="/aule" element={<AulaList />} />
+            <Route path="/aule/:id" element={<AulaDetail />} />
           </>
         )}
 
