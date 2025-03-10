@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
+import AdminNavbar from '../components/AdminNavbar'
 
 const TeacherDetail = () => {
   const { id } = useParams()
@@ -9,9 +10,11 @@ const TeacherDetail = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [modifica, setModifica] = useState(false)
+  const [corsiAssegnati, setCorsiAssegnati] = useState([])
 
   useEffect(() => {
     fetchInsegnante()
+    fetchCorsiAssegnati()
   }, [])
 
   const fetchInsegnante = async () => {
@@ -23,6 +26,15 @@ const TeacherDetail = () => {
       setError('Errore nel caricamento dell’insegnante.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchCorsiAssegnati = async () => {
+    try {
+      const response = await apiClient.get(`/corsi/insegnante/${id}`)
+      setCorsiAssegnati(response.data)
+    } catch (error) {
+      console.error('Errore nel recupero dei corsi', error)
     }
   }
 
@@ -44,16 +56,18 @@ const TeacherDetail = () => {
     }
   }
 
-  // Funzione per eliminare l'insegnante
   const handleDelete = async () => {
-    if (
-      window.confirm(
-        '⚠️ Sei sicuro di voler eliminare questo insegnante? Questa operazione è irreversibile.'
+    if (corsiAssegnati.length > 0) {
+      alert(
+        '⚠️ Questo insegnante ha ancora corsi attivi e non può essere eliminato.'
       )
-    ) {
+      return
+    }
+
+    if (window.confirm('⚠️ Sei sicuro di voler eliminare questo insegnante?')) {
       try {
         await apiClient.delete(`/insegnanti/${id}`)
-        navigate('/insegnanti') // Torna alla lista dopo l'eliminazione
+        navigate('/insegnanti')
       } catch (error) {
         console.error('Errore nella cancellazione dell’insegnante', error)
       }
@@ -64,96 +78,72 @@ const TeacherDetail = () => {
   if (error) return <div className="alert alert-danger">{error}</div>
 
   return (
-    <div className="container mt-4">
-      <h2 className="text-center mb-4">👨‍🏫 Dettagli Insegnante</h2>
+    <>
+      <AdminNavbar />
+      <div className="container mt-4">
+        <h2 className="text-center mb-4">👨‍🏫 Dettagli Insegnante</h2>
 
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Nome</label>
-          <input
-            type="text"
-            name="nome"
-            className="form-control"
-            value={insegnante.nome}
-            onChange={handleChange}
-            disabled={!modifica}
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label className="form-label">Nome</label>
+            <input
+              type="text"
+              name="nome"
+              className="form-control"
+              value={insegnante.nome}
+              onChange={handleChange}
+              disabled={!modifica}
+            />
+          </div>
 
-        <div className="mb-3">
-          <label className="form-label">Email</label>
-          <input
-            type="email"
-            name="email"
-            className="form-control"
-            value={insegnante.email}
-            onChange={handleChange}
-            disabled={!modifica}
-          />
-        </div>
+          <div className="mb-3">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              name="email"
+              className="form-control"
+              value={insegnante.email}
+              onChange={handleChange}
+              disabled={!modifica}
+            />
+          </div>
 
-        <div className="mb-3">
-          <label className="form-label">Giorni Disponibili</label>
-          <input
-            type="text"
-            name="giorniDisponibili"
-            className="form-control"
-            value={insegnante.giorniDisponibili.join(', ')}
-            onChange={(e) => handleArrayChange(e, 'giorniDisponibili')}
-            disabled={!modifica}
-          />
-          <small className="text-muted">
-            Inserisci i giorni separati da virgola (Es: Lunedì, Mercoledì)
-          </small>
-        </div>
+          <div className="mb-3">
+            <label className="form-label">Giorni Disponibili</label>
+            <input
+              type="text"
+              name="giorniDisponibili"
+              className="form-control"
+              value={insegnante.giorniDisponibili.join(', ')}
+              onChange={(e) => handleArrayChange(e, 'giorniDisponibili')}
+              disabled={!modifica}
+            />
+          </div>
 
-        <div className="mb-3">
-          <label className="form-label">Orari Disponibili</label>
-          <input
-            type="text"
-            name="fasceOrarieDisponibili"
-            className="form-control"
-            value={insegnante.fasceOrarieDisponibili.join(', ')}
-            onChange={(e) => handleArrayChange(e, 'fasceOrarieDisponibili')}
-            disabled={!modifica}
-          />
-          <small className="text-muted">
-            Inserisci gli orari separati da virgola (Es: 16:00-18:00,
-            18:00-20:00)
-          </small>
-        </div>
+          {modifica ? (
+            <button type="submit" className="btn btn-success">
+              💾 Salva Modifiche
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setModifica(true)}
+            >
+              ✏️ Modifica
+            </button>
+          )}
 
-        {modifica ? (
-          <button type="submit" className="btn btn-success">
-            💾 Salva Modifiche
-          </button>
-        ) : (
           <button
             type="button"
-            className="btn btn-primary"
-            onClick={() => setModifica(true)}
+            className="btn btn-danger ms-3"
+            onClick={handleDelete}
           >
-            ✏️ Modifica
+            🗑 Elimina
           </button>
-        )}
-
-        {/* Pulsante per eliminare l'insegnante */}
-        <button
-          type="button"
-          className="btn btn-danger ms-3"
-          onClick={handleDelete}
-        >
-          🗑 Elimina
-        </button>
-      </form>
-
-      <button
-        className="btn btn-secondary mt-3"
-        onClick={() => navigate('/insegnanti')}
-      >
-        🔙 Torna alla lista
-      </button>
-    </div>
+        </form>
+      </div>
+    </>
   )
 }
 

@@ -1,53 +1,55 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
 
 const StudentDetail = () => {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [studente, setStudente] = useState(null)
   const [corsi, setCorsi] = useState([])
   const [pagamenti, setPagamenti] = useState([])
   const [importoPagamento, setImportoPagamento] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [modifica, setModifica] = useState(false)
 
   useEffect(() => {
-    fetchStudente()
-    fetchCorsi()
-    fetchPagamenti()
+    fetchDatiStudente()
   }, [])
 
-  // 🔹 Recupera i dettagli dello studente
-  const fetchStudente = async () => {
+  // 🔹 Recupera i dettagli dello studente, corsi e pagamenti in una sola chiamata
+  const fetchDatiStudente = async () => {
     try {
-      const response = await apiClient.get(`/studenti/${id}`)
-      setStudente(response.data)
+      const [studenteRes, corsiRes, pagamentiRes] = await Promise.all([
+        apiClient.get(`/studenti/${id}`),
+        apiClient.get(`/studenti/${id}/corsi`),
+        apiClient.get(`/studenti/${id}/pagamenti`),
+      ])
+
+      setStudente(studenteRes.data)
+      setCorsi(corsiRes.data)
+      setPagamenti(pagamentiRes.data)
     } catch (error) {
-      console.error('Errore nel recupero dello studente', error)
-      setError('Errore nel caricamento dello studente.')
+      console.error('Errore nel recupero dei dati dello studente', error)
+      setError('Errore nel caricamento dei dati.')
     } finally {
       setLoading(false)
     }
   }
 
-  // 🔹 Recupera i corsi dello studente
-  const fetchCorsi = async () => {
-    try {
-      const response = await apiClient.get(`/studenti/${id}/corsi`)
-      setCorsi(response.data)
-    } catch (error) {
-      console.error('Errore nel recupero dei corsi', error)
-    }
+  // 🔹 Modifica i dati dello studente
+  const handleChange = (e) => {
+    setStudente({ ...studente, [e.target.name]: e.target.value })
   }
 
-  // 🔹 Recupera i pagamenti dello studente
-  const fetchPagamenti = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault()
     try {
-      const response = await apiClient.get(`/studenti/${id}/pagamenti`)
-      setPagamenti(response.data)
+      await apiClient.put(`/studenti/${id}`, studente)
+      setModifica(false)
     } catch (error) {
-      console.error('Errore nel recupero dei pagamenti', error)
+      console.error('Errore nella modifica dello studente', error)
     }
   }
 
@@ -56,7 +58,7 @@ const StudentDetail = () => {
     if (window.confirm('Vuoi rimuovere lo studente da questo corso?')) {
       try {
         await apiClient.delete(`/studenti/${id}/rimuovi-da-corso/${corsoId}`)
-        fetchCorsi() // Aggiorna la lista dei corsi
+        fetchDatiStudente() // Aggiorna i dati dopo la rimozione
       } catch (error) {
         console.error('Errore nella rimozione dal corso', error)
       }
@@ -75,9 +77,28 @@ const StudentDetail = () => {
         importo: parseFloat(importoPagamento),
       })
       setImportoPagamento('')
-      fetchPagamenti() // Aggiorna la lista pagamenti
+      fetchDatiStudente()
     } catch (error) {
       console.error('Errore nell’aggiunta del pagamento', error)
+    }
+  }
+
+  // 🔹 Elimina lo studente solo se non ha corsi assegnati
+  const eliminaStudente = async () => {
+    if (corsi.length > 0) {
+      alert(
+        '⚠️ Questo studente è ancora iscritto a un corso e non può essere eliminato.'
+      )
+      return
+    }
+
+    if (window.confirm('Sei sicuro di voler eliminare questo studente?')) {
+      try {
+        await apiClient.delete(`/studenti/${id}`)
+        navigate('/studenti')
+      } catch (error) {
+        console.error('Errore nella cancellazione dello studente', error)
+      }
     }
   }
 
@@ -86,93 +107,145 @@ const StudentDetail = () => {
 
   return (
     <>
-    <AdminNavbar />
-    <div className="container mt-4">
-      <h2 className="text-center mb-4">🎓 Dettagli Studente</h2>
+      <AdminNavbar />
+      <div className="container mt-4">
+        <h2 className="text-center mb-4">🎓 Dettagli Studente</h2>
 
-      {studente && (
-        <div className="card shadow p-4">
-          <h5>
-            {studente.nome} {studente.cognome}
-          </h5>
-          <p>
-            <strong>🕒 Età:</strong> {studente.eta}
-          </p>
-          <p>
-            <strong>🌍 Lingua da imparare:</strong> {studente.linguaDaImparare}
-          </p>
-          <p>
-            <strong>📖 Livello:</strong> {studente.livello}
-          </p>
-          <p>
-            <strong>🧑‍🏫 Insegnante preferito:</strong>{' '}
-            {studente.insegnante
-              ? `${studente.insegnante.nome} ${studente.insegnante.cognome}`
-              : 'Nessuno'}
-          </p>
-          <p>
-            <strong>💳 Tipo di pagamento:</strong> {studente.tipologiaPagamento}
-          </p>
-        </div>
-      )}
+        {/* 🔹 Modifica Studente */}
+        <form onSubmit={handleSubmit} className="card shadow p-4">
+          <h5>👤 Informazioni Studente</h5>
 
-      {/* Lista corsi */}
-      <div className="mt-4">
-        <h5>📚 Corsi Assegnati</h5>
-        {corsi.length === 0 ? (
-          <p>Nessun corso assegnato</p>
-        ) : (
-          <ul className="list-group">
-            {corsi.map((corso) => (
-              <li
-                key={corso.id}
-                className="list-group-item d-flex justify-content-between align-items-center"
-              >
-                {corso.lingua} - {corso.livello} ({corso.giorno} -{' '}
-                {corso.orario})
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => rimuoviDaCorso(corso.id)}
-                >
-                  ❌ Rimuovi
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+          <div className="mb-3">
+            <label className="form-label">Nome</label>
+            <input
+              type="text"
+              name="nome"
+              className="form-control"
+              value={studente.nome}
+              onChange={handleChange}
+              disabled={!modifica}
+            />
+          </div>
 
-      {/* Lista pagamenti */}
-      <div className="mt-4">
-        <h5>💰 Pagamenti</h5>
-        {pagamenti.length === 0 ? (
-          <p>Nessun pagamento registrato</p>
-        ) : (
-          <ul className="list-group">
-            {pagamenti.map((pagamento) => (
-              <li key={pagamento.id} className="list-group-item">
-                {new Date(pagamento.dataPagamento).toLocaleDateString()} - 💵 €
-                {pagamento.importo}
-              </li>
-            ))}
-          </ul>
-        )}
+          <div className="mb-3">
+            <label className="form-label">Cognome</label>
+            <input
+              type="text"
+              name="cognome"
+              className="form-control"
+              value={studente.cognome}
+              onChange={handleChange}
+              disabled={!modifica}
+            />
+          </div>
 
-        {/* Aggiungi pagamento */}
-        <div className="mt-3">
-          <input
-            type="number"
-            className="form-control"
-            placeholder="Importo (€)"
-            value={importoPagamento}
-            onChange={(e) => setImportoPagamento(e.target.value)}
-          />
-          <button className="btn btn-success mt-2" onClick={aggiungiPagamento}>
-            ➕ Aggiungi Pagamento
+          <div className="mb-3">
+            <label className="form-label">Livello</label>
+            <input
+              type="text"
+              name="livello"
+              className="form-control"
+              value={studente.livello}
+              onChange={handleChange}
+              disabled={!modifica}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Tipologia di Pagamento</label>
+            <input
+              type="text"
+              name="tipologiaPagamento"
+              className="form-control"
+              value={studente.tipologiaPagamento}
+              onChange={handleChange}
+              disabled={!modifica}
+            />
+          </div>
+
+          {modifica ? (
+            <button type="submit" className="btn btn-success">
+              💾 Salva Modifiche
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setModifica(true)}
+            >
+              ✏️ Modifica
+            </button>
+          )}
+
+          <button
+            type="button"
+            className="btn btn-danger ms-3"
+            onClick={eliminaStudente}
+          >
+            🗑 Elimina Studente
           </button>
+        </form>
+
+        {/* 🔹 Corsi Assegnati */}
+        <div className="mt-4">
+          <h5>📚 Corsi Assegnati</h5>
+          {corsi.length === 0 ? (
+            <p>Nessun corso assegnato</p>
+          ) : (
+            <ul className="list-group">
+              {corsi.map((corso) => (
+                <li
+                  key={corso.id}
+                  className="list-group-item d-flex justify-content-between align-items-center"
+                >
+                  {corso.lingua} - {corso.livello} ({corso.giorno} -{' '}
+                  {corso.orario})
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => rimuoviDaCorso(corso.id)}
+                  >
+                    ❌ Rimuovi
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* 🔹 Pagamenti */}
+        <div className="mt-4">
+          <h5>💰 Pagamenti</h5>
+          {pagamenti.length === 0 ? (
+            <p>Nessun pagamento registrato</p>
+          ) : (
+            <ul className="list-group">
+              {pagamenti.map((pagamento) => (
+                <li key={pagamento.id} className="list-group-item">
+                  {new Date(pagamento.dataPagamento).toLocaleDateString()} - 💵
+                  €{pagamento.importo}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Aggiungi pagamento */}
+          <div className="mt-3">
+            <input
+              type="number"
+              className="form-control"
+              placeholder="Importo (€)"
+              value={importoPagamento}
+              onChange={(e) => setImportoPagamento(e.target.value)}
+            />
+            <button
+              className="btn btn-success mt-2"
+              onClick={aggiungiPagamento}
+            >
+              ➕ Aggiungi Pagamento
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </>
   )
 }
