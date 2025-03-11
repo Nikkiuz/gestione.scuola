@@ -1,17 +1,14 @@
 import axios from 'axios'
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api', // URL del backend
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: 'http://localhost:8080/api',
 })
 
-// Funzione per aggiungere il token JWT a ogni richiesta
+// 🔥 Intercettore per aggiungere automaticamente il token JWT a ogni richiesta
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token') // Prendiamo il token dallo storage
+  const token = localStorage.getItem('token') // Recupera il token dal localStorage
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.Authorization = `Bearer ${token}` // Aggiunge il token all'header
   }
   return config
 })

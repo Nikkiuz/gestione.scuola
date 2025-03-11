@@ -1,9 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-  user: null, // Dati base dell'utente loggato
-  token: localStorage.getItem('token') || null,
-  teacherDetails: null, // Dati completi dell'insegnante
+  user: null,
+  token: null,
+  role: null,
+  userId: null,
+  teacherDetails: null,
 }
 
 const authSlice = createSlice({
@@ -11,18 +13,28 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginSuccess: (state, action) => {
-      state.user = action.payload.user
+      console.log('🔄 Reducer loginSuccess chiamato con:', action.payload)
       state.token = action.payload.token
-      localStorage.setItem('token', action.payload.token)
+      state.role = action.payload.role
+      state.userId = action.payload.userId || null
+      state.user = {
+        role: action.payload.role,
+        id: action.payload.userId || null,
+      }
+      console.log('✅ Stato Redux aggiornato:', state) // 🔥 Debug
     },
     logout: (state) => {
-      state.user = null
+      console.log('🚪 Logout effettuato')
       state.token = null
+      state.user = null
+      state.role = null
+      state.userId = null
       state.teacherDetails = null
       localStorage.removeItem('token')
     },
     setTeacherDetails: (state, action) => {
-      state.teacherDetails = action.payload // Memorizziamo i dettagli insegnante
+      console.log('📌 Salvataggio dettagli insegnante:', action.payload)
+      state.teacherDetails = action.payload
     },
   },
 })

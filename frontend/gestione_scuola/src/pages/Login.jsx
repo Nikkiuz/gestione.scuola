@@ -15,27 +15,46 @@ const Login = () => {
   const handleLogin = async () => {
     try {
       const response = await apiClient.post('/auth/login', { email, password })
-      const { token, user } = response.data
+      console.log('🔹 Dati ricevuti:', response.data) // Debug per i dati ricevuti
 
-      // ✅ Se "Ricordami" è attivo, salva il token nel localStorage
-      if (rememberMe) {
-        localStorage.setItem('token', token)
+      const { token, role, userId } = response.data
+
+      // Controllo errori sui dati ricevuti
+      if (!token || !role) {
+        console.error('❌ Errore: Dati mancanti nel login')
+        setError('Errore nel login. Riprova.')
+        return
       }
 
-      // ✅ Dispatch per salvare user e token nello stato globale (Redux)
-      dispatch(loginSuccess({ user, token }))
+      // Salva sempre il token nel localStorage
+      localStorage.setItem('token', token)
 
-      // ✅ Gestione ruoli
-      if (user.role === 'ADMIN') {
+      // Dispatch per salvare token, ruolo e userId nello stato globale (Redux)
+      dispatch(loginSuccess({ token, role, userId }))
+
+      // Gestione reindirizzamento
+      if (role === 'ADMIN') {
+        console.log('✅ Reindirizzamento a /admin-dashboard')
         navigate('/admin-dashboard')
-      } else if (user.role === 'INSEGNANTE') {
-        // Recupera i dettagli dell'insegnante prima di reindirizzarlo
-        const teacherResponse = await apiClient.get(`/insegnanti/${user.id}`)
-        dispatch(setTeacherDetails(teacherResponse.data))
-        navigate('/teacher-dashboard')
+      } else if (role === 'INSEGNANTE') {
+        if (!userId) {
+          console.error('❌ Errore: userId mancante per insegnante')
+          setError('Errore nel caricamento dei dati.')
+          return
+        }
+        console.log('✅ Recupero dettagli insegnante...')
+        try {
+          const teacherResponse = await apiClient.get(`/insegnanti/${userId}`)
+          dispatch(setTeacherDetails(teacherResponse.data))
+          console.log('✅ Reindirizzamento a /teacher-dashboard')
+          navigate('/teacher-dashboard')
+        } catch (error) {
+          console.error('❌ Errore nel recupero dettagli insegnante:', error)
+          setError('Errore nel caricamento dei dati. Riprova.')
+        }
       }
     } catch (error) {
-      console.error('Errore login:', error)
+      console.error('❌ Errore login:', error)
       setError('Email o password errati')
     }
   }
@@ -61,6 +80,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
               />
             </div>
             <div className="mb-3">
@@ -71,6 +91,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
               />
             </div>
             <div className="mb-3 form-check">

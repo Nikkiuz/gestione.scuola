@@ -5,6 +5,8 @@ import {
   Navigate,
 } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { useEffect, useState } from 'react'
+
 import Login from '../pages/Login'
 import AdminDashboard from '../pages/AdminDashboard'
 import CourseList from '../pages/CourseList'
@@ -16,7 +18,7 @@ import TeacherCourses from '../pages/TeacherCourses'
 import TeacherProfile from '../pages/TeacherProfile'
 import TeacherList from '../pages/TeacherList'
 import SpeseList from '../pages/SpeseList'
-import SpesaDetail from '../pages/SpesaDetail'
+import SpeseDetail from '../pages/SpeseDetail'
 import TeacherDetail from '../pages/TeacherDetail'
 import AulaList from '../pages/AulaList'
 import AulaDetail from '../pages/AulaDetail'
@@ -25,20 +27,31 @@ import Report from '../pages/Report'
 
 const ProtectedRoute = ({ children, role }) => {
   const { user } = useSelector((state) => state.auth)
+  const [loading, setLoading] = useState(true)
 
-  if (!user) {
-    return <Navigate to="/login" />
-  }
+  useEffect(() => {
+    console.log('🧐 Stato Redux user:', user)
 
-  if (user.role !== role) {
-    return (
-      <Navigate
-        to={user.role === 'ADMIN' ? '/dashboard' : '/teacher-dashboard'}
-      />
-    )
-  }
+    if (user === null) {
+      console.log('⏳ Aspettando che Redux aggiorni user...')
+      return
+    }
 
-  return children
+    setLoading(false) // ✅ L'utente è stato caricato
+
+    if (!user) {
+      console.log('🔴 Utente non autenticato, reindirizzamento a /login')
+      window.location.href = '/login'
+    } else if (user.role !== role) {
+      console.log('⚠️ Accesso negato, reindirizzamento alla dashboard corretta')
+      window.location.href =
+        user.role === 'ADMIN' ? '/admin-dashboard' : '/teacher-dashboard'
+    }
+  }, [user, role])
+
+  if (loading) return <p>⏳ Caricamento...</p>
+
+  return user && user.role === role ? children : null
 }
 
 const AppRouter = () => {
@@ -50,7 +63,7 @@ const AppRouter = () => {
 
         {/* Rotte Admin Protette */}
         <Route
-          path="/dashboard"
+          path="/admin-dashboard"
           element={
             <ProtectedRoute role="ADMIN">
               <AdminDashboard />
@@ -117,7 +130,7 @@ const AppRouter = () => {
           path="/spese/:id"
           element={
             <ProtectedRoute role="ADMIN">
-              <SpesaDetail />
+              <SpeseDetail />
             </ProtectedRoute>
           }
         />
