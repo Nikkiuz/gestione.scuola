@@ -75,11 +75,6 @@ public class StudenteService {
 		studenteRepository.deleteById(id);
 	}
 
-	// ✅ Recupera gli studenti senza corso
-	public List<Studente> getStudentiSenzaCorso() {
-		return studenteRepository.findStudentiSenzaCorso();
-	}
-
 	// ✅ Converte un'entità Studente in DTO
 	private StudenteResponseDTO convertToResponseDTO(Studente studente) {
 		StudenteResponseDTO dto = new StudenteResponseDTO();

@@ -27,17 +27,8 @@ public class StudenteController {
 	private final CorsoRepository corsoRepository;
 	private final PagamentoRepository pagamentoRepository;
 
-	// 🔹 Costruttore per iniettare i repository e il service
-	public StudenteController(
-		StudenteService studenteService,
-		StudenteRepository studenteRepository,
-		CorsoRepository corsoRepository,
-		PagamentoRepository pagamentoRepository
-	) {
+	public StudenteController(StudenteService studenteService) {
 		this.studenteService = studenteService;
-		this.studenteRepository = studenteRepository;
-		this.corsoRepository = corsoRepository;
-		this.pagamentoRepository = pagamentoRepository;
 	}
 
 	// ✅ SOLO ADMIN - Recupera tutti gli studenti
