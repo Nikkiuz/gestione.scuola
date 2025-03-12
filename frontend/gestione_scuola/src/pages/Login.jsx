@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { loginSuccess } from '../redux/authSlice.js'
+import { loginSuccess, setTeacherDetails } from '../redux/slices/authSlice.js'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient.js'
 
@@ -12,29 +12,60 @@ const Login = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+  const handleLogin = async () => {
     try {
       const response = await apiClient.post('/auth/login', { email, password })
-      const { token, user } = response.data
+      console.log('🔹 Dati ricevuti:', response.data) // Debug
 
-      // Salviamo il token
+      const { token, role, userId } = response.data
+
+      // Controllo dei dati essenziali
+      if (!token || !role) {
+        console.error('❌ Errore: Dati mancanti nel login')
+        setError('Errore nel login. Riprova.')
+        return
+      }
+
+      // Se "Ricordami" è attivo, salva il token nel localStorage
       if (rememberMe) {
         localStorage.setItem('token', token)
       }
-      dispatch(loginSuccess({ user, token }))
 
-      // Reindirizzamento in base al ruolo
-      if (user.role === 'ADMIN') {
-        navigate('/dashboard')
-      } else if (user.role === 'INSEGNANTE') {
-        navigate('/miei-corsi')
+      // Salva token, ruolo e userId nello stato Redux
+      dispatch(loginSuccess({ token, role, userId }))
+
+      // Gestione del reindirizzamento in base al ruolo
+      if (role === 'ADMIN') {
+        console.log('✅ Reindirizzamento a /admin-dashboard')
+        navigate('/admin-dashboard')
+      } else if (role === 'INSEGNANTE') {
+        if (!userId) {
+          console.error('❌ Errore: userId mancante per insegnante')
+          setError('Errore nel caricamento dei dati.')
+          return
+        }
+        console.log('✅ Recupero dettagli insegnante...')
+        try {
+          // Chiamata all'endpoint dedicato ai dettagli dell'insegnante
+          const teacherResponse = await apiClient.get('/api/insegnante/me')
+          dispatch(setTeacherDetails(teacherResponse.data))
+          console.log('✅ Reindirizzamento a /teacher-dashboard')
+          navigate('/teacher-dashboard')
+        } catch (error) {
+          console.error('❌ Errore nel recupero dettagli insegnante:', error)
+          setError('Errore nel caricamento dei dati. Riprova.')
+        }
       }
     } catch (error) {
-      console.error('Errore login:', error)
+      console.error('❌ Errore login:', error)
       setError('Email o password errati')
     }
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setError('')
+    handleLogin()
   }
 
   return (
@@ -52,6 +83,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
               />
             </div>
             <div className="mb-3">
@@ -62,6 +94,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
               />
             </div>
             <div className="mb-3 form-check">
