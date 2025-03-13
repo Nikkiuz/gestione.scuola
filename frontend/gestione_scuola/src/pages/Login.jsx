@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { loginSuccess, fetchTeacherDetails } from '../redux/slices/authSlice.js'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { loginSuccess, setTeacherDetails } from '../redux/slices/authSlice.js'
+import { useNavigate, Link } from 'react-router-dom'
 import apiClient from '../api/apiClient.js'
 
 const Login = () => {
@@ -12,46 +12,46 @@ const Login = () => {
 
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { role } = useSelector((state) => state.auth) // 🔹 Recupera il ruolo utente da Redux
-
-  // ✅ Dopo il login, se è un insegnante, recupera i dettagli
-  useEffect(() => {
-    if (role === 'INSEGNANTE') {
-      dispatch(fetchTeacherDetails())
-    }
-  }, [role, dispatch])
 
   const handleLogin = async () => {
     try {
       const response = await apiClient.post('/auth/login', { email, password })
-      console.log('🔹 Dati ricevuti:', response.data) // Debug
+      console.log('🔹 Dati ricevuti:', response.data)
 
       const { token, role, userId } = response.data
 
       if (!token || !role) {
-        console.error('❌ Errore: Dati mancanti nel login')
         setError('Errore nel login. Riprova.')
         return
       }
 
-      // ✅ Se "Ricordami" è attivo, salva il token nel localStorage
       if (rememberMe) {
         localStorage.setItem('token', token)
+        localStorage.setItem('role', role)
+        localStorage.setItem('userId', userId)
       }
 
-      // ✅ Salva token, ruolo e userId nello stato Redux
       dispatch(loginSuccess({ token, role, userId }))
 
-      // ✅ Reindirizzamento in base al ruolo
-      if (role === 'ADMIN') {
-        console.log('✅ Reindirizzamento a /admin-dashboard')
-        navigate('/admin-dashboard')
-      } else if (role === 'INSEGNANTE') {
-        console.log('✅ Reindirizzamento a /teacher-dashboard')
-        navigate('/teacher-dashboard')
+      if (role === 'ROLE_INSEGNANTE') {
+        try {
+          const teacherResponse = await apiClient.get('/insegnanti/me', {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          dispatch(setTeacherDetails(teacherResponse.data))
+        } catch (error) {
+          console.error(
+            'Errore nel recupero dettagli insegnante:',
+            error.response?.data || error.message
+          )
+        }
       }
+
+      navigate(
+        role === 'ROLE_ADMIN' ? '/admin-dashboard' : '/teacher-dashboard'
+      )
     } catch (error) {
-      console.error('❌ Errore login:', error)
+      console.error('❌ Errore login:', error.response?.data || error.message)
       setError(
         error.response?.data?.message || 'Email o password errati. Riprova.'
       )
@@ -106,8 +106,11 @@ const Login = () => {
               Login
             </button>
           </form>
+
           <div className="mt-3 text-center">
-            <a href="#">Dimenticato la password?</a>
+            <Link to="/register" className="btn btn-secondary">
+              Registrati
+            </Link>
           </div>
         </div>
       </div>

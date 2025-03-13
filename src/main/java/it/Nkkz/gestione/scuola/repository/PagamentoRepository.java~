@@ -23,8 +23,4 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 		"FROM Pagamento p GROUP BY mese ORDER BY MIN(p.dataPagamento)")
 	List<Object[]> getPagamentiMensili();
 
-	@Query("SELECT COALESCE(SUM(p.importo), 0) FROM Pagamento p")
-	Double getTotalePagamenti();
-
-
 }

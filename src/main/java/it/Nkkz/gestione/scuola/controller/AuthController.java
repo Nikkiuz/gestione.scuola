@@ -1,43 +1,63 @@
 package it.Nkkz.gestione.scuola.controller;
 
+import it.Nkkz.gestione.scuola.auth.JwtTokenUtil;
 import it.Nkkz.gestione.scuola.auth.LoginRequest;
 import it.Nkkz.gestione.scuola.auth.LoginResponse;
-import it.Nkkz.gestione.scuola.auth.RegisterRequest;
-import it.Nkkz.gestione.scuola.service.AppUserService;
+import it.Nkkz.gestione.scuola.entity.app_users.AppUser;
 import it.Nkkz.gestione.scuola.entity.app_users.Role;
-import lombok.RequiredArgsConstructor;
+import it.Nkkz.gestione.scuola.service.AppUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
-    private final AppUserService appUserService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-    @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequest registerRequest) {
-        // Controllo che il ruolo sia valido (ROLE_ADMIN o ROLE_INSEGNANTE)
-        if (!registerRequest.getRole().equals(Role.ROLE_ADMIN) && !registerRequest.getRole().equals(Role.ROLE_INSEGNANTE)) {
-            return ResponseEntity.badRequest().body("Ruolo non valido. Usa 'ROLE_ADMIN' o 'ROLE_INSEGNANTE'");
-        }
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
-        appUserService.registerUser(
-            registerRequest.getUsername(),
-            registerRequest.getEmail(),
-            registerRequest.getPassword(),
-            Set.of(registerRequest.getRole()) // Permettiamo di scegliere il ruolo
-        );
-        return ResponseEntity.ok("Registrazione avvenuta con successo");
-    }
+    @Autowired
+    private AppUserService appUserService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok(appUserService.authenticate(loginRequest));
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        try {
+            // Cerca l'utente tramite email
+            AppUser user = appUserService.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Usa il nome utente dell'utente trovato per l'autenticazione
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(user.getUsername(), loginRequest.getPassword())
+            );
+
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String token = jwtTokenUtil.generateToken(userDetails);
+
+            // Seleziona il ruolo (prendendo il primo tra quelli assegnati)
+            String role = String.valueOf(user.getRoles().stream().findFirst().orElse(Role.ROLE_INSEGNANTE));
+            // Rimuove il prefisso "ROLE_" se presente
+            if (role.startsWith("ROLE_")) {
+                role = role.substring(5);
+            }
+
+            LoginResponse loginResponse = new LoginResponse(token, role, user.getId());
+            return ResponseEntity.ok(loginResponse);
+        } catch (Exception e) {
+            // Puoi loggare l'eccezione e/o restituire maggiori dettagli per il debug
+            return ResponseEntity.badRequest().body("Email o password errati");
+        }
     }
 }
-
-

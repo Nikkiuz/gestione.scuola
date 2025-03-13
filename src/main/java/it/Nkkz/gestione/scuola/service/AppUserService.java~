@@ -40,15 +40,15 @@ public class AppUserService {
     @Autowired
     private EmailService emailService;
 
-    @Value("${spring.mail.username}") // Ottiene l'email dell'Admin
+    @Value("${spring.mail.username}") // 🔹 Ottiene l'email dell'Admin dal file application.properties
     private String adminEmail;
 
     public AppUser registerUser(String username, String email, String password, Set<Role> roles) {
         if (appUserRepository.existsByUsername(username)) {
-            throw new EntityExistsException("Username già in uso");
+            throw new EntityExistsException("❌ Username già in uso");
         }
         if (appUserRepository.existsByEmail(email)) {
-            throw new EntityExistsException("Email già in uso");
+            throw new EntityExistsException("❌ Email già in uso");
         }
 
         AppUser appUser = new AppUser();
@@ -57,27 +57,31 @@ public class AppUserService {
         appUser.setPassword(passwordEncoder.encode(password));
         appUser.setRoles(roles);
 
-        // Salva utente
+        // ✅ Salva utente
         appUserRepository.save(appUser);
-        logger.info("Nuovo utente registrato: {}", username);
+        logger.info("✅ Nuovo utente registrato: {}", username);
 
-        // Invia email di conferma all'utente
+        // 📧 Invia email di conferma all'utente
         try {
             String subject = "Benvenuto in Gestione Scuola!";
             String text = "<h1>Benvenuto, " + username + "!</h1><p>Il tuo account è stato creato con successo.</p>";
             emailService.sendEmail(email, subject, text);
-            logger.info("Email di conferma inviata a {}", email);
+            logger.info("📨 Email di conferma inviata a {}", email);
         } catch (Exception e) {
-            logger.error("Errore nell'invio dell'email a {}: {}", email, e.getMessage());
+            logger.error("❌ Errore nell'invio dell'email a {}: {}", email, e.getMessage());
         }
 
-        // Invia notifica all'Admin
+        // 📧 INVIA NOTIFICA ALL'ADMIN SU NUOVA REGISTRAZIONE
         try {
-            String adminNotification = "<h1>Nuovo utente registrato!</h1><p>Username: " + username + "</p><p>Email: " + email + "</p>";
-            emailService.sendEmail(adminEmail, "Nuovo utente registrato", adminNotification);
-            logger.info("Notifica admin inviata a {}", adminEmail);
+            String adminNotification = "<h1>Nuovo utente registrato!</h1>" +
+                "<p>Username: " + username + "</p>" +
+                "<p>Email: " + email + "</p>" +
+                "<p>Ruolo: " + roles.iterator().next().name() + "</p>";
+
+            emailService.sendEmail(adminEmail, "📢 Nuovo utente registrato!", adminNotification);
+            logger.info("📨 Notifica inviata all'Admin: {}", adminEmail);
         } catch (Exception e) {
-            logger.error("Errore nell'invio della notifica all'admin {}: {}", adminEmail, e.getMessage());
+            logger.error("❌ Errore nell'invio della notifica all'admin {}: {}", adminEmail, e.getMessage());
         }
 
         return appUser;
@@ -86,7 +90,7 @@ public class AppUserService {
     public LoginResponse authenticate(LoginRequest loginRequest) {
         System.out.println("➡️ Tentativo di login con email: " + loginRequest.getEmail());
 
-        // 🔹 Troviamo l'utente nel database
+        // 🔹 Trova l'utente nel database usando l'email
         AppUser user = appUserRepository.findByEmail(loginRequest.getEmail())
             .orElseThrow(() -> {
                 System.out.println("❌ Utente non trovato per email: " + loginRequest.getEmail());
@@ -95,27 +99,28 @@ public class AppUserService {
 
         System.out.println("🔑 Trovato utente: " + user.getEmail());
 
-        // 🔐 Autenticazione con Spring Security
+        // 🔹 Autenticazione usando l'email e la password
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(user.getEmail(), loginRequest.getPassword())
         );
 
         System.out.println("✅ Autenticazione riuscita per: " + user.getEmail());
 
-        // 🔑 Generazione token
         String token = jwtTokenUtil.generateToken(user);
         System.out.println("🛡️ Token generato: " + token);
 
-        // 🔄 Otteniamo il ruolo corretto senza "ROLE_"
+        // 🔹 Rimuovi il prefisso "ROLE_" dal ruolo
         String role = user.getRoles().iterator().next().name().replace("ROLE_", "");
 
-        // ✅ Includiamo anche l'ID utente nella risposta
+        // 🔹 Restituisci anche l'ID dell'utente
         return new LoginResponse(token, role, user.getId());
     }
-
-
 
     public Optional<AppUser> findByUsername(String username) {
         return appUserRepository.findByUsername(username);
     }
+
+	public Optional<AppUser> findByEmail(String email) {
+		return appUserRepository.findByEmail(email);
+	}
 }

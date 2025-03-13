@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,15 +41,15 @@ public class AppUserService {
     @Autowired
     private EmailService emailService;
 
-    @Value("${spring.mail.username}") // Ottiene l'email dell'Admin
+    @Value("${spring.mail.username}")
     private String adminEmail;
 
     public AppUser registerUser(String username, String email, String password, Set<Role> roles) {
         if (appUserRepository.existsByUsername(username)) {
-            throw new EntityExistsException("Username già in uso");
+            throw new EntityExistsException("❌ Username già in uso");
         }
         if (appUserRepository.existsByEmail(email)) {
-            throw new EntityExistsException("Email già in uso");
+            throw new EntityExistsException("❌ Email già in uso");
         }
 
         AppUser appUser = new AppUser();
@@ -57,65 +58,67 @@ public class AppUserService {
         appUser.setPassword(passwordEncoder.encode(password));
         appUser.setRoles(roles);
 
-        // Salva utente
         appUserRepository.save(appUser);
-        logger.info("Nuovo utente registrato: {}", username);
+        logger.info("✅ Nuovo utente registrato: {}", username);
 
-        // Invia email di conferma all'utente
         try {
             String subject = "Benvenuto in Gestione Scuola!";
             String text = "<h1>Benvenuto, " + username + "!</h1><p>Il tuo account è stato creato con successo.</p>";
             emailService.sendEmail(email, subject, text);
-            logger.info("Email di conferma inviata a {}", email);
+            logger.info("📨 Email di conferma inviata a {}", email);
         } catch (Exception e) {
-            logger.error("Errore nell'invio dell'email a {}: {}", email, e.getMessage());
+            logger.error("❌ Errore nell'invio dell'email a {}: {}", email, e.getMessage());
         }
 
-        // Invia notifica all'Admin
         try {
-            String adminNotification = "<h1>Nuovo utente registrato!</h1><p>Username: " + username + "</p><p>Email: " + email + "</p>";
-            emailService.sendEmail(adminEmail, "Nuovo utente registrato", adminNotification);
-            logger.info("Notifica admin inviata a {}", adminEmail);
+            String adminNotification = "<h1>Nuovo utente registrato!</h1>" +
+                "<p>Username: " + username + "</p>" +
+                "<p>Email: " + email + "</p>" +
+                "<p>Ruolo: " + roles.iterator().next().name() + "</p>";
+
+            emailService.sendEmail(adminEmail, "📢 Nuovo utente registrato!", adminNotification);
+            logger.info("📨 Notifica inviata all'Admin: {}", adminEmail);
         } catch (Exception e) {
-            logger.error("Errore nell'invio della notifica all'admin {}: {}", adminEmail, e.getMessage());
+            logger.error("❌ Errore nell'invio della notifica all'admin {}: {}", adminEmail, e.getMessage());
         }
 
         return appUser;
     }
 
     public LoginResponse authenticate(LoginRequest loginRequest) {
-        System.out.println("➡️ Tentativo di login con email: " + loginRequest.getEmail());
+        logger.info("➡️ Tentativo di login con email: {}", loginRequest.getEmail());
 
-        // Trova l'utente nel database usando l'email
         AppUser user = appUserRepository.findByEmail(loginRequest.getEmail())
             .orElseThrow(() -> {
-                System.out.println("❌ Utente non trovato per email: " + loginRequest.getEmail());
+                logger.warn("❌ Utente non trovato per email: {}", loginRequest.getEmail());
                 return new UsernameNotFoundException("Utente non trovato");
             });
 
-        System.out.println("🔑 Trovato utente: " + user.getEmail());
+        logger.info("🔑 Trovato utente: {}", user.getEmail());
 
-        // Autenticazione usando l'email e la password
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException("❌ Password errata");
+        }
+
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(user.getEmail(), loginRequest.getPassword())
         );
 
-        System.out.println("✅ Autenticazione riuscita per: " + user.getEmail());
+        logger.info("✅ Autenticazione riuscita per: {}", user.getEmail());
 
         String token = jwtTokenUtil.generateToken(user);
-        System.out.println("🛡️ Token generato: " + token);
+        logger.info("🛡️ Token generato: {}", token);
 
-        // Rimuovi il prefisso "ROLE_" dal ruolo
         String role = user.getRoles().iterator().next().name().replace("ROLE_", "");
 
-        // Restituisci anche l'ID dell'utente
         return new LoginResponse(token, role, user.getId());
     }
 
-
-
-
     public Optional<AppUser> findByUsername(String username) {
         return appUserRepository.findByUsername(username);
+    }
+
+    public Optional<AppUser> findByEmail(String email) {
+        return appUserRepository.findByEmail(email);
     }
 }
