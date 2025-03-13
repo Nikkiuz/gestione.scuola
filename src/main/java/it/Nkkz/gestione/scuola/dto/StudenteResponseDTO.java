@@ -17,5 +17,5 @@ public class StudenteResponseDTO {
 	private Integer frequenzaCorsoPrivato;
 	private String tipoCorsoGruppo;
 	private InsegnanteResponseDTO insegnante; // ✅ Adesso è un DTO, non una stringa
-	private String tipologiaPagamento;
+	private String tipologiaIscrizione;
 }

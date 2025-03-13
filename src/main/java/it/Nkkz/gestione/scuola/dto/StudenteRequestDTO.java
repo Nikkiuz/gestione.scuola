@@ -16,5 +16,5 @@ public class StudenteRequestDTO {
 	private Integer frequenzaCorsoPrivato;
 	private String tipoCorsoGruppo;
 	private Long insegnanteId;
-	private String tipologiaPagamento;
+	private String tipologiaIscrizione;
 }

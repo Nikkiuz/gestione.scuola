@@ -13,13 +13,8 @@ import CourseList from '../pages/CourseList'
 import CourseDetail from '../pages/CourseDetail'
 import StudentList from '../pages/StudentList'
 import StudentDetails from '../pages/StudentDetails'
-import TeacherDashboard from '../pages/TeacherDashboard'
-import TeacherCourses from '../pages/TeacherCourses'
-import TeacherProfile from '../pages/TeacherProfile'
-import TeacherList from '../pages/TeacherList'
 import SpeseList from '../pages/SpeseList'
 import SpeseDetail from '../pages/SpeseDetail'
-import TeacherDetail from '../pages/TeacherDetail'
 import AulaList from '../pages/AulaList'
 import AulaDetail from '../pages/AulaDetail'
 import Calendario from '../pages/Calendario'
@@ -43,9 +38,8 @@ const ProtectedRoute = ({ children, role }) => {
       console.log('🔴 Utente non autenticato, reindirizzamento a /login')
       window.location.href = '/login'
     } else if (user.role !== role) {
-      console.log('⚠️ Accesso negato, reindirizzamento alla dashboard corretta')
-      window.location.href =
-        user.role === 'ADMIN' ? '/admin-dashboard' : '/teacher-dashboard'
+      console.log('⚠️ Accesso negato, reindirizzamento alla dashboard admin')
+      window.location.href = '/admin-dashboard'
     }
   }, [user, role])
 
@@ -103,22 +97,6 @@ const AppRouter = () => {
           }
         />
         <Route
-          path="/insegnanti"
-          element={
-            <ProtectedRoute role="ADMIN">
-              <TeacherList />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/insegnanti/:id"
-          element={
-            <ProtectedRoute role="ADMIN">
-              <TeacherDetail />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/spese"
           element={
             <ProtectedRoute role="ADMIN">
@@ -163,32 +141,6 @@ const AppRouter = () => {
           element={
             <ProtectedRoute role="ADMIN">
               <AulaDetail />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Rotte Insegnante Protette */}
-        <Route
-          path="/teacher-dashboard"
-          element={
-            <ProtectedRoute role="INSEGNANTE">
-              <TeacherDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/miei-corsi"
-          element={
-            <ProtectedRoute role="INSEGNANTE">
-              <TeacherCourses />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profilo"
-          element={
-            <ProtectedRoute role="INSEGNANTE">
-              <TeacherProfile />
             </ProtectedRoute>
           }
         />

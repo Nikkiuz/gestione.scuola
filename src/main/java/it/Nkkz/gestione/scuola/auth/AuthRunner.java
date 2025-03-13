@@ -25,11 +25,6 @@ public class AuthRunner implements ApplicationRunner {
             appUserService.registerUser("admin", "admin@mail.com", "adminpwd", Set.of(Role.ROLE_ADMIN));
         }
 
-        // Creazione dell'utente Insegnante se non esiste
-        Optional<AppUser> normalUser = appUserService.findByUsername("utente");
-        if (normalUser.isEmpty()) {
-            appUserService.registerUser("utente", "utente@mail.com", "utentepwd", Set.of(Role.ROLE_INSEGNANTE));
-        }
     }
 }
 

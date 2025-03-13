@@ -54,7 +54,7 @@ public class Studente {
 	private Insegnante insegnante;  //
 
 	@Column(nullable = false)
-	private String tipologiaPagamento;  // Ex "Tipo di iscrizione"
+	private String tipologiaIscrizione;
 
 	// ✅ Metodo per ottenere i giorni disponibili
 	public Set<String> getGiorniDisponibili() {

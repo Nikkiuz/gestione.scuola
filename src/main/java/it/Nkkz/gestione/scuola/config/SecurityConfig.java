@@ -48,7 +48,6 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api/auth/**").permitAll() // ✅ Accesso libero a login e registrazione
 				.requestMatchers("/api/admin/**").hasRole("ADMIN") // 🔐 Solo Admin può gestire tutto
-				.requestMatchers("/api/insegnante/**").hasRole("INSEGNANTE") // 🔐 Un insegnante può accedere solo alle sue aree
 				.anyRequest().authenticated() // 🔒 Tutti gli altri endpoint richiedono autenticazione
 			)
 			.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)) // 🔐 Gestione errori di autenticazione

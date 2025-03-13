@@ -109,7 +109,7 @@ public class AppUserService {
         String role = user.getRoles().iterator().next().name().replace("ROLE_", "");
 
         // Restituisci anche l'ID dell'utente
-        return new LoginResponse(token, role, user.getId());
+        return new LoginResponse(token, user.getId());
     }
 
 

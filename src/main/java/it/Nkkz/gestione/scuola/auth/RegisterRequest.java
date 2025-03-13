@@ -8,5 +8,4 @@ public class RegisterRequest {
     private String username;
     private String email;  // Aggiunto
     private String password;
-    private Role role;  // Aggiunto
 }
