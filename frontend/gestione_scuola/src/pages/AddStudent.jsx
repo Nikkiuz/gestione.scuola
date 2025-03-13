@@ -18,7 +18,7 @@ const AddStudent = () => {
     frequenzaCorsoPrivato: 1,
     tipoCorsoGruppo: '1 volta a settimana',
     insegnanteId: '', // Nuovo campo per la preferenza insegnante
-    tipologiaPagamento: '',
+    tipologiaIscrizione: '',
   })
 
   useEffect(() => {
@@ -183,12 +183,12 @@ const AddStudent = () => {
           </div>
 
           <div className="mb-3">
-            <label className="form-label">Tipologia di Pagamento</label>
+            <label className="form-label">Tipologia di Iscrizione</label>
             <input
               type="text"
               className="form-control"
-              name="tipologiaPagamento"
-              value={formData.tipologiaPagamento}
+              name="tipologiaIscrizione"
+              value={formData.tipologiaIscrizione}
               onChange={handleChange}
               required
             />

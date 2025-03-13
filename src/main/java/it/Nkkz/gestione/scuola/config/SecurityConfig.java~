@@ -18,8 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
@@ -39,38 +37,33 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-			.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Usa il bean CORS
-			.csrf(csrf -> csrf.disable()) // Disabilita CSRF per JWT
+			.cors(cors -> cors.configurationSource(request -> {
+				CorsConfiguration config = new CorsConfiguration();
+				config.setAllowedOrigins(List.of("http://localhost:5173")); // Permetti richieste solo da localhost:5173
+				config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+				config.setAllowedHeaders(List.of("*"));
+				return config;
+			}))
+			.csrf(csrf -> csrf.disable()) // 🔴 Disabilitiamo CSRF perché usiamo JWT
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/auth/**").permitAll()
-				.requestMatchers("/api/admin/**").hasRole("ADMIN")
-				.anyRequest().authenticated()
+				.requestMatchers("/api/auth/**").permitAll() // ✅ Accesso libero a login e registrazione
+				.requestMatchers("/api/admin/**").hasRole("ADMIN") // 🔐 Solo Admin può gestire tutto
+				.anyRequest().authenticated() // 🔒 Tutti gli altri endpoint richiedono autenticazione
 			)
-			.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
-			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+			.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)) // 🔐 Gestione errori di autenticazione
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ❌ Disabilitiamo sessioni
+			.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class); // ✅ Aggiungiamo il filtro JWT
 
 		return http.build();
 	}
 
-	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("http://localhost:5174")); // ⚠️ Usa la porta giusta
-		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-		configuration.setAllowCredentials(true); // Consente credenziali come token di autenticazione
-
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", configuration);
-		return source;
-	}
-
+	// 🔹 Usa il nostro CustomUserDetailsService e imposta l'email come chiave di autenticazione
 	@Bean
 	public UserDetailsService userDetailsService(CustomUserDetailsService customUserDetailsService) {
 		return customUserDetailsService;
 	}
 
+	// 🔹 Impostiamo il provider di autenticazione per usare l'email al posto dello username
 	@Bean
 	public DaoAuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

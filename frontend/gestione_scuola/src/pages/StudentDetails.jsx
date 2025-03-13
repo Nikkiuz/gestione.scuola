@@ -1,34 +1,38 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
+import Modal from 'react-bootstrap/Modal'
+import Button from 'react-bootstrap/Button'
 
 const StudentDetail = () => {
   const { id } = useParams()
-  const navigate = useNavigate()
   const [studente, setStudente] = useState(null)
-  const [corsi, setCorsi] = useState([])
   const [pagamenti, setPagamenti] = useState([])
-  const [importoPagamento, setImportoPagamento] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
-  const [modifica, setModifica] = useState(false)
+  const [error, setError] = useState(null)
+  const [showModal, setShowModal] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [pagamentoSelezionato, setPagamentoSelezionato] = useState(null)
+
+  // Stati per il form pagamento
+  const [importoPagamento, setImportoPagamento] = useState('')
+  const [mensilita, setMensilita] = useState('')
+  const [metodoPagamento, setMetodoPagamento] = useState('CARTA')
+  const [note, setNote] = useState('')
 
   useEffect(() => {
     fetchDatiStudente()
   }, [])
 
-  // 🔹 Recupera i dettagli dello studente, corsi e pagamenti in una sola chiamata
   const fetchDatiStudente = async () => {
     try {
-      const [studenteRes, corsiRes, pagamentiRes] = await Promise.all([
+      const [studenteRes, pagamentiRes] = await Promise.all([
         apiClient.get(`/studenti/${id}`),
-        apiClient.get(`/studenti/${id}/corsi`),
         apiClient.get(`/studenti/${id}/pagamenti`),
       ])
 
       setStudente(studenteRes.data)
-      setCorsi(corsiRes.data)
       setPagamenti(pagamentiRes.data)
     } catch (error) {
       console.error('Errore nel recupero dei dati dello studente', error)
@@ -38,67 +42,70 @@ const StudentDetail = () => {
     }
   }
 
-  // 🔹 Modifica i dati dello studente
-  const handleChange = (e) => {
-    setStudente({ ...studente, [e.target.name]: e.target.value })
+  const handleAggiungiPagamento = () => {
+    setPagamentoSelezionato(null)
+    setImportoPagamento('')
+    setMensilita('')
+    setMetodoPagamento('CARTA')
+    setNote('')
+    setIsEditing(false)
+    setShowModal(true)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      await apiClient.put(`/studenti/${id}`, studente)
-      setModifica(false)
-    } catch (error) {
-      console.error('Errore nella modifica dello studente', error)
-    }
+  const handleModificaPagamento = (pagamento) => {
+    setPagamentoSelezionato(pagamento)
+    setImportoPagamento(pagamento.importo)
+    setMensilita(pagamento.mensilitaSaldata)
+    setMetodoPagamento(pagamento.metodoPagamento)
+    setNote(pagamento.note || '')
+    setIsEditing(true)
+    setShowModal(true)
   }
 
-  // 🔹 Rimuove lo studente da un corso
-  const rimuoviDaCorso = async (corsoId) => {
-    if (window.confirm('Vuoi rimuovere lo studente da questo corso?')) {
+  const handleEliminaPagamento = async (pagamentoId) => {
+    if (window.confirm('Sei sicuro di voler eliminare questo pagamento?')) {
       try {
-        await apiClient.delete(`/studenti/${id}/rimuovi-da-corso/${corsoId}`)
-        fetchDatiStudente() // Aggiorna i dati dopo la rimozione
+        await apiClient.delete(`/pagamenti/${pagamentoId}`)
+        fetchDatiStudente()
       } catch (error) {
-        console.error('Errore nella rimozione dal corso', error)
+        console.error('Errore nell’eliminazione del pagamento', error)
+        alert('Errore nell’eliminazione del pagamento.')
       }
     }
   }
 
-  // 🔹 Aggiunge un pagamento
-  const aggiungiPagamento = async () => {
-    if (!importoPagamento) {
+  const handleSalvaPagamento = async () => {
+    if (!importoPagamento || parseFloat(importoPagamento) <= 0) {
       alert('Inserisci un importo valido.')
       return
     }
-
-    try {
-      await apiClient.post(`/studenti/${id}/pagamenti`, {
-        importo: parseFloat(importoPagamento),
-      })
-      setImportoPagamento('')
-      fetchDatiStudente()
-    } catch (error) {
-      console.error('Errore nell’aggiunta del pagamento', error)
-    }
-  }
-
-  // 🔹 Elimina lo studente solo se non ha corsi assegnati
-  const eliminaStudente = async () => {
-    if (corsi.length > 0) {
-      alert(
-        '⚠️ Questo studente è ancora iscritto a un corso e non può essere eliminato.'
-      )
+    if (!mensilita) {
+      alert('Seleziona la mensilità saldata.')
       return
     }
 
-    if (window.confirm('Sei sicuro di voler eliminare questo studente?')) {
-      try {
-        await apiClient.delete(`/studenti/${id}`)
-        navigate('/studenti')
-      } catch (error) {
-        console.error('Errore nella cancellazione dello studente', error)
+    try {
+      if (isEditing && pagamentoSelezionato) {
+        await apiClient.put(`/pagamenti/${pagamentoSelezionato.id}`, {
+          importo: parseFloat(importoPagamento),
+          mensilitaSaldata: mensilita,
+          metodoPagamento: metodoPagamento,
+          note: note,
+        })
+      } else {
+        await apiClient.post(`/studenti/${id}/pagamenti`, {
+          importo: parseFloat(importoPagamento),
+          mensilitaSaldata: mensilita,
+          metodoPagamento: metodoPagamento,
+          note: note,
+        })
       }
+
+      setShowModal(false)
+      fetchDatiStudente()
+    } catch (error) {
+      console.error('Errore nel salvataggio del pagamento', error)
+      alert('Errore nel salvataggio del pagamento.')
     }
   }
 
@@ -111,108 +118,33 @@ const StudentDetail = () => {
       <div className="container mt-4">
         <h2 className="text-center mb-4">🎓 Dettagli Studente</h2>
 
-        {/* 🔹 Modifica Studente */}
-        <form onSubmit={handleSubmit} className="card shadow p-4">
-          <h5>👤 Informazioni Studente</h5>
-
-          <div className="mb-3">
-            <label className="form-label">Nome</label>
-            <input
-              type="text"
-              name="nome"
-              className="form-control"
-              value={studente.nome}
-              onChange={handleChange}
-              disabled={!modifica}
-            />
+        {/* Informazioni Studente */}
+        {studente && (
+          <div className="card p-4 shadow">
+            <h5>👤 Informazioni Studente</h5>
+            <p>
+              <strong>Nome:</strong> {studente.nome}
+            </p>
+            <p>
+              <strong>Cognome:</strong> {studente.cognome}
+            </p>
+            <p>
+              <strong>Età:</strong> {studente.eta}
+            </p>
+            <p>
+              <strong>Lingua da imparare:</strong> {studente.linguaDaImparare}
+            </p>
+            <p>
+              <strong>Livello:</strong> {studente.livello}
+            </p>
+            <p>
+              <strong>Tipologia Iscrizione:</strong>{' '}
+              {studente.tipologiaIscrizione}
+            </p>
           </div>
+        )}
 
-          <div className="mb-3">
-            <label className="form-label">Cognome</label>
-            <input
-              type="text"
-              name="cognome"
-              className="form-control"
-              value={studente.cognome}
-              onChange={handleChange}
-              disabled={!modifica}
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Livello</label>
-            <input
-              type="text"
-              name="livello"
-              className="form-control"
-              value={studente.livello}
-              onChange={handleChange}
-              disabled={!modifica}
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Tipologia di Pagamento</label>
-            <input
-              type="text"
-              name="tipologiaPagamento"
-              className="form-control"
-              value={studente.tipologiaPagamento}
-              onChange={handleChange}
-              disabled={!modifica}
-            />
-          </div>
-
-          {modifica ? (
-            <button type="submit" className="btn btn-success">
-              💾 Salva Modifiche
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => setModifica(true)}
-            >
-              ✏️ Modifica
-            </button>
-          )}
-
-          <button
-            type="button"
-            className="btn btn-danger ms-3"
-            onClick={eliminaStudente}
-          >
-            🗑 Elimina Studente
-          </button>
-        </form>
-
-        {/* 🔹 Corsi Assegnati */}
-        <div className="mt-4">
-          <h5>📚 Corsi Assegnati</h5>
-          {corsi.length === 0 ? (
-            <p>Nessun corso assegnato</p>
-          ) : (
-            <ul className="list-group">
-              {corsi.map((corso) => (
-                <li
-                  key={corso.id}
-                  className="list-group-item d-flex justify-content-between align-items-center"
-                >
-                  {corso.lingua} - {corso.livello} ({corso.giorno} -{' '}
-                  {corso.orario})
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => rimuoviDaCorso(corso.id)}
-                  >
-                    ❌ Rimuovi
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* 🔹 Pagamenti */}
+        {/* Pagamenti */}
         <div className="mt-4">
           <h5>💰 Pagamenti</h5>
           {pagamenti.length === 0 ? (
@@ -220,32 +152,87 @@ const StudentDetail = () => {
           ) : (
             <ul className="list-group">
               {pagamenti.map((pagamento) => (
-                <li key={pagamento.id} className="list-group-item">
-                  {new Date(pagamento.dataPagamento).toLocaleDateString()} - 💵
-                  €{pagamento.importo}
+                <li
+                  key={pagamento.id}
+                  className="list-group-item d-flex justify-content-between align-items-center"
+                >
+                  <span>
+                    📅 {pagamento.mensilitaSaldata} - 💵 €
+                    {pagamento.importo.toFixed(2)} - 🏦{' '}
+                    {pagamento.metodoPagamento}
+                  </span>
+                  <button
+                    className="btn btn-warning btn-sm me-2"
+                    onClick={() => handleModificaPagamento(pagamento)}
+                  >
+                    ✏️ Modifica
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleEliminaPagamento(pagamento.id)}
+                  >
+                    🗑 Elimina
+                  </button>
                 </li>
               ))}
             </ul>
           )}
-
-          {/* Aggiungi pagamento */}
-          <div className="mt-3">
-            <input
-              type="number"
-              className="form-control"
-              placeholder="Importo (€)"
-              value={importoPagamento}
-              onChange={(e) => setImportoPagamento(e.target.value)}
-            />
-            <button
-              className="btn btn-success mt-2"
-              onClick={aggiungiPagamento}
-            >
-              ➕ Aggiungi Pagamento
-            </button>
-          </div>
+          <button
+            className="btn btn-success mt-3"
+            onClick={handleAggiungiPagamento}
+          >
+            ➕ Aggiungi Pagamento
+          </button>
         </div>
       </div>
+
+      {/* 🔹 MODALE PER AGGIUNGERE O MODIFICARE UN PAGAMENTO */}
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {isEditing ? '✏️ Modifica Pagamento' : '➕ Aggiungi Pagamento'}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <input
+            type="number"
+            className="form-control mb-2"
+            placeholder="Importo (€)"
+            value={importoPagamento}
+            onChange={(e) => setImportoPagamento(e.target.value)}
+          />
+          <input
+            type="text"
+            className="form-control mb-2"
+            placeholder="Mensilità"
+            value={mensilita}
+            onChange={(e) => setMensilita(e.target.value)}
+          />
+          <select
+            className="form-select mb-2"
+            value={metodoPagamento}
+            onChange={(e) => setMetodoPagamento(e.target.value)}
+          >
+            <option value="CARTA">Carta</option>
+            <option value="CONTANTI">Contanti</option>
+            <option value="BONIFICO">Bonifico</option>
+          </select>
+          <textarea
+            className="form-control"
+            placeholder="Note (opzionale)"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Annulla
+          </Button>
+          <Button variant="success" onClick={handleSalvaPagamento}>
+            {isEditing ? '💾 Salva Modifiche' : '➕ Aggiungi'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   )
 }

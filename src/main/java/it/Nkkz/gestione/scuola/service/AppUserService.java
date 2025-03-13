@@ -4,7 +4,6 @@ import it.Nkkz.gestione.scuola.auth.LoginRequest;
 import it.Nkkz.gestione.scuola.auth.LoginResponse;
 import it.Nkkz.gestione.scuola.entity.app_users.AppUser;
 import it.Nkkz.gestione.scuola.repository.AppUserRepository;
-import it.Nkkz.gestione.scuola.entity.app_users.Role;
 import it.Nkkz.gestione.scuola.auth.JwtTokenUtil;
 import jakarta.persistence.EntityExistsException;
 import org.slf4j.Logger;
@@ -18,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class AppUserService {
@@ -43,7 +41,7 @@ public class AppUserService {
     @Value("${spring.mail.username}") // Ottiene l'email dell'Admin
     private String adminEmail;
 
-    public AppUser registerUser(String username, String email, String password, Set<Role> roles) {
+    public AppUser registerUser(String username, String email, String password) {
         if (appUserRepository.existsByUsername(username)) {
             throw new EntityExistsException("Username già in uso");
         }
@@ -55,7 +53,6 @@ public class AppUserService {
         appUser.setUsername(username);
         appUser.setEmail(email);
         appUser.setPassword(passwordEncoder.encode(password));
-        appUser.setRoles(roles);
 
         // Salva utente
         appUserRepository.save(appUser);
@@ -105,15 +102,9 @@ public class AppUserService {
         String token = jwtTokenUtil.generateToken(user);
         System.out.println("🛡️ Token generato: " + token);
 
-        // Rimuovi il prefisso "ROLE_" dal ruolo
-        String role = user.getRoles().iterator().next().name().replace("ROLE_", "");
-
-        // Restituisci anche l'ID dell'utente
+        // Restituiamo solo il token e l'ID utente (senza il ruolo)
         return new LoginResponse(token, user.getId());
     }
-
-
-
 
     public Optional<AppUser> findByUsername(String username) {
         return appUserRepository.findByUsername(username);
