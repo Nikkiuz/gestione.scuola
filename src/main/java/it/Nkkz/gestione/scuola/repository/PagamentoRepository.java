@@ -2,6 +2,7 @@ package it.Nkkz.gestione.scuola.repository;
 
 import it.Nkkz.gestione.scuola.entity.Pagamento;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -18,6 +19,8 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
 	List<Pagamento> findByDataPagamentoBetween(LocalDate start, LocalDate end);
 
-
+	@Query("SELECT TO_CHAR(p.dataPagamento, 'Month') AS mese, SUM(p.importo) AS totale " +
+		"FROM Pagamento p GROUP BY mese ORDER BY MIN(p.dataPagamento)")
+	List<Object[]> getPagamentiMensili();
 
 }

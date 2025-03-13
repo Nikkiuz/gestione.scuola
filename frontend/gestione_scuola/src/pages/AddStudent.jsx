@@ -18,7 +18,7 @@ const AddStudent = () => {
     frequenzaCorsoPrivato: 1,
     tipoCorsoGruppo: '1 volta a settimana',
     insegnanteId: '', // Nuovo campo per la preferenza insegnante
-    tipologiaPagamento: '',
+     tipologiaPagamento: 'PACCHETTO',
   })
 
   useEffect(() => {
@@ -184,14 +184,18 @@ const AddStudent = () => {
 
           <div className="mb-3">
             <label className="form-label">Tipologia di Pagamento</label>
-            <input
-              type="text"
-              className="form-control"
+            <select
+              className="form-select"
               name="tipologiaPagamento"
               value={formData.tipologiaPagamento}
               onChange={handleChange}
               required
-            />
+            >
+              <option value="">Seleziona</option>
+              <option value="PACCHETTO">Pacchetto</option>
+              <option value="SINGOLA">Lezione Singola</option>
+              <option value="ALTRO">Altro</option>
+            </select>
           </div>
 
           {/* Checkbox per corso privato */}

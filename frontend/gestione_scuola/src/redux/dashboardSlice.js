@@ -109,3 +109,16 @@ const dashboardSlice = createSlice({
 })
 
 export default dashboardSlice.reducer
+
+export const fetchPaginatedCorsi = createAsyncThunk(
+  'dashboard/fetchPaginatedCorsi',
+  async ({ page = 0, size = 10 }, thunkAPI) => {
+    try {
+      const response = await apiClient.get(`/corsi?page=${page}&size=${size}`)
+      return response.data
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data)
+    }
+  }
+)
+

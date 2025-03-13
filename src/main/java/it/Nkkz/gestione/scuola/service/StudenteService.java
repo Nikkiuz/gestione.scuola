@@ -55,20 +55,33 @@ public class StudenteService {
 
 	// ✅ Crea uno studente
 	public StudenteResponseDTO createStudente(StudenteRequestDTO studenteRequestDTO) {
+		// 🔹 Imposta un valore di default per tipologiaPagamento se non è specificato
+		if (studenteRequestDTO.getTipologiaPagamento() == null || studenteRequestDTO.getTipologiaPagamento().isEmpty()) {
+			studenteRequestDTO.setTipologiaPagamento("PACCHETTO"); // Default: pacchetto di lezioni
+		}
+
 		Studente studente = new Studente();
 		BeanUtils.copyProperties(studenteRequestDTO, studente);
 		studenteRepository.save(studente);
 		return convertToResponseDTO(studente);
 	}
 
+
 	// ✅ Modifica uno studente
 	public StudenteResponseDTO updateStudente(Long id, StudenteRequestDTO studenteRequestDTO) {
 		Studente studente = studenteRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato con ID: " + id));
+
+		// 🔹 Se tipologiaPagamento è vuota, assegna il valore di default "SINGOLA"
+		if (studenteRequestDTO.getTipologiaPagamento() == null || studenteRequestDTO.getTipologiaPagamento().isEmpty()) {
+			studenteRequestDTO.setTipologiaPagamento("PACCHETTO");
+		}
+
 		BeanUtils.copyProperties(studenteRequestDTO, studente);
 		studenteRepository.save(studente);
 		return convertToResponseDTO(studente);
 	}
+
 
 	// ✅ Elimina uno studente
 	public void deleteStudente(Long id) {

@@ -18,6 +18,9 @@ public class Corso {
 	private String lingua;
 
 	@Column(nullable = false)
+	private String livello;
+
+	@Column(nullable = false)
 	private String tipoCorso;
 
 	@Column(nullable = false)
@@ -29,8 +32,11 @@ public class Corso {
 	@Column(nullable = false)
 	private String orario;
 
-	@Column(nullable = false)
-	private String livello;
+	@Column
+	private String secondoGiorno; // 🔹 Nuovo campo per corsi "2 volte a settimana"
+
+	@Column
+	private String secondoOrario; // 🔹 Nuovo campo per corsi "2 volte a settimana"
 
 	@ManyToOne
 	@JoinColumn(name = "insegnante_id")
@@ -50,4 +56,5 @@ public class Corso {
 
 	@Column(nullable = false)
 	private boolean attivo = true; // Indica se il corso è attivo o interrotto
+
 }

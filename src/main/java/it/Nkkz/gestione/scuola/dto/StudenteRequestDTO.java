@@ -1,5 +1,6 @@
 package it.Nkkz.gestione.scuola.dto;
 
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import java.util.Set;
 
@@ -16,5 +17,7 @@ public class StudenteRequestDTO {
 	private Integer frequenzaCorsoPrivato;
 	private String tipoCorsoGruppo;
 	private Long insegnanteId;
+	@Pattern(regexp = "^(PACCHETTO|SINGOLA|ALTRO)$", message = "Tipologia di pagamento non valida")
 	private String tipologiaPagamento;
+
 }

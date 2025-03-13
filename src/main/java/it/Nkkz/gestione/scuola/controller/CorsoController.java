@@ -31,17 +31,19 @@ public class CorsoController {
 		return ResponseEntity.ok(corsoService.getCorsiByInsegnante(id));
 	}
 
-	// ✅ Recupera corsi per giorno e orario
+	// ✅ Recupera corsi per giorno e orario (considerando anche il secondo giorno se il corso è "2 volte a settimana")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/giorno-orario")
-	public ResponseEntity<List<CorsoResponseDTO>> getCorsiByGiornoEOrario(@RequestParam String giorno, @RequestParam String orario) {
+	public ResponseEntity<List<CorsoResponseDTO>> getCorsiByGiornoEOrario(
+		@RequestParam String giorno, @RequestParam String orario) {
 		return ResponseEntity.ok(corsoService.getCorsiByGiornoEOrario(giorno, orario));
 	}
 
 	// ✅ Recupera corsi per lingua e livello
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/lingua-livello")
-	public ResponseEntity<List<CorsoResponseDTO>> getCorsiByLinguaELivello(@RequestParam String lingua, @RequestParam String livello) {
+	public ResponseEntity<List<CorsoResponseDTO>> getCorsiByLinguaELivello(
+		@RequestParam String lingua, @RequestParam String livello) {
 		return ResponseEntity.ok(corsoService.getCorsiByLinguaELivello(lingua, livello));
 	}
 
@@ -52,14 +54,14 @@ public class CorsoController {
 		return ResponseEntity.ok(corsoService.getCorsiByTipologia(tipoCorso));
 	}
 
-	// ✅ Crea un nuovo corso (solo Admin)
+	// ✅ Crea un nuovo corso (supporta corsi con doppia frequenza e preferenza insegnante)
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@PostMapping
 	public ResponseEntity<CorsoResponseDTO> creaCorso(@RequestBody CorsoRequestDTO request) {
 		return ResponseEntity.ok(corsoService.creaCorso(request));
 	}
 
-	// ✅ Modifica un corso esistente (solo Admin)
+	// ✅ Modifica un corso esistente (supporta corsi con doppia frequenza e preferenza insegnante)
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@PutMapping("/{id}")
 	public ResponseEntity<CorsoResponseDTO> modificaCorso(@PathVariable Long id, @RequestBody CorsoRequestDTO request) {
@@ -90,12 +92,14 @@ public class CorsoController {
 		return ResponseEntity.ok("Operazione eseguita con successo.");
 	}
 
-	// ✅ Genera corsi automaticamente basandosi su preferenze, livello e età (solo Admin)
+	// ✅ Genera corsi automaticamente basandosi su:
+	//    - preferenze studenti (giorno, orario, insegnante)
+	//    - lingua, livello, età con range massimo di ±2 anni
+	//    - disponibilità insegnante e aula
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@PostMapping("/genera-automatico")
 	public ResponseEntity<String> generaCorsiAutomaticamente() {
 		corsoService.generaCorsiAutomaticamente();
 		return ResponseEntity.ok("Corsi generati automaticamente.");
 	}
-
 }

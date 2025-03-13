@@ -6,6 +6,10 @@ const AdminNavbar = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
+   const handleDashboardClick = () => {
+     navigate('/admin-dashboard', { replace: true }) 
+   }
+
   const handleLogout = () => {
     dispatch(logout())
     navigate('/login')
@@ -14,11 +18,12 @@ const AdminNavbar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow">
       <div className="container">
-        <Link className="navbar-brand fw-bold" to="/dashboard">
+        <Link className="navbar-brand fw-bold" to="/admin-dashboard">
           🏫 Gestione Scuola
         </Link>
 
         <button
+          onClick={handleDashboardClick}
           className="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
@@ -30,7 +35,7 @@ const AdminNavbar = () => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <Link className="nav-link" to="/dashboard">
+              <Link className="nav-link" to="/admin-dashboard">
                 📊 Dashboard
               </Link>
             </li>

@@ -1,4 +1,20 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import apiClient from '../api/apiClient'
+
+// ✅ Recupera dettagli insegnante
+export const fetchTeacherDetails = createAsyncThunk(
+  'auth/fetchTeacherDetails',
+  async (_, thunkAPI) => {
+    try {
+      const response = await apiClient.get('/insegnanti/me')
+      return response.data
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data || 'Errore nel recupero dettagli'
+      )
+    }
+  }
+)
 
 const initialState = {
   user: null,
@@ -13,18 +29,13 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginSuccess: (state, action) => {
-      console.log('🔄 Reducer loginSuccess chiamato con:', action.payload)
-      state.token = action.payload.token
-      state.role = action.payload.role
-      state.userId = action.payload.userId || null
-      state.user = {
-        role: action.payload.role,
-        id: action.payload.userId || null,
-      }
-      console.log('✅ Stato Redux aggiornato:', state) // 🔥 Debug
+      const { token, role, userId } = action.payload
+      state.token = token
+      state.role = role
+      state.userId = userId || null
+      state.user = { role, id: userId || null }
     },
     logout: (state) => {
-      console.log('🚪 Logout effettuato')
       state.token = null
       state.user = null
       state.role = null
@@ -32,12 +43,13 @@ const authSlice = createSlice({
       state.teacherDetails = null
       localStorage.removeItem('token')
     },
-    setTeacherDetails: (state, action) => {
-      console.log('📌 Salvataggio dettagli insegnante:', action.payload)
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchTeacherDetails.fulfilled, (state, action) => {
       state.teacherDetails = action.payload
-    },
+    })
   },
 })
 
-export const { loginSuccess, logout, setTeacherDetails } = authSlice.actions
+export const { loginSuccess, logout } = authSlice.actions
 export default authSlice.reducer

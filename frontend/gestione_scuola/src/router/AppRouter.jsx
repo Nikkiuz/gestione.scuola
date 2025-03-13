@@ -6,6 +6,7 @@ import {
 } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import Login from '../pages/Login'
 import AdminDashboard from '../pages/AdminDashboard'
@@ -27,29 +28,24 @@ import Report from '../pages/Report'
 
 const ProtectedRoute = ({ children, role }) => {
   const { user } = useSelector((state) => state.auth)
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    console.log('🧐 Stato Redux user:', user)
-
-    if (user === null) {
-      console.log('⏳ Aspettando che Redux aggiorni user...')
-      return
-    }
-
-    setLoading(false) // ✅ L'utente è stato caricato
-
     if (!user) {
       console.log('🔴 Utente non autenticato, reindirizzamento a /login')
-      window.location.href = '/login'
+      navigate('/login', { replace: true })
     } else if (user.role !== role) {
       console.log('⚠️ Accesso negato, reindirizzamento alla dashboard corretta')
-      window.location.href =
-        user.role === 'ADMIN' ? '/admin-dashboard' : '/teacher-dashboard'
+      navigate(
+        user.role === 'ADMIN' ? '/admin-dashboard' : '/teacher-dashboard',
+        { replace: true }
+      )
     }
-  }, [user, role])
+    setLoading(false)
+  }, [user, role, navigate])
 
-  if (loading) return <p>⏳ Caricamento...</p>
+  if (loading) return null // Evita rendering prematuro
 
   return user && user.role === role ? children : null
 }

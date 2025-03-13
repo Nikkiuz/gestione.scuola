@@ -1,6 +1,7 @@
 package it.Nkkz.gestione.scuola.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -54,7 +55,8 @@ public class Studente {
 	private Insegnante insegnante;  //
 
 	@Column(nullable = false)
-	private String tipologiaPagamento;  // Ex "Tipo di iscrizione"
+	@Pattern(regexp = "^(PACCHETTO|SINGOLA|ALTRO)$", message = "Tipologia di pagamento non valida")
+	private String tipologiaPagamento;
 
 	// ✅ Metodo per ottenere i giorni disponibili
 	public Set<String> getGiorniDisponibili() {

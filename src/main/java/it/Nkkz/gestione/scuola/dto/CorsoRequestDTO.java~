@@ -10,8 +10,8 @@ public class CorsoRequestDTO {
 	private String frequenza;
 	private String giorno;
 	private String orario;
-	private String secondoGiorno; // 🔹 Nuovo campo per corsi "2 volte a settimana"
-	private String secondoOrario; // 🔹 Nuovo campo per corsi "2 volte a settimana"
+	private String secondoGiorno;  // ✅ Nuovo campo per corsi 2 volte a settimana
+	private String secondoOrario;  // ✅ Nuovo campo per corsi 2 volte a settimana
 	private Long insegnanteId;
 	private Long aulaId;
 	private List<Long> studentiIds;

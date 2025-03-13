@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { loginSuccess, setTeacherDetails } from '../redux/slices/authSlice.js'
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { loginSuccess, fetchTeacherDetails } from '../redux/slices/authSlice.js'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient.js'
 
@@ -9,8 +9,17 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
+
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { role } = useSelector((state) => state.auth) // 🔹 Recupera il ruolo utente da Redux
+
+  // ✅ Dopo il login, se è un insegnante, recupera i dettagli
+  useEffect(() => {
+    if (role === 'INSEGNANTE') {
+      dispatch(fetchTeacherDetails())
+    }
+  }, [role, dispatch])
 
   const handleLogin = async () => {
     try {
@@ -19,46 +28,33 @@ const Login = () => {
 
       const { token, role, userId } = response.data
 
-      // Controllo dei dati essenziali
       if (!token || !role) {
         console.error('❌ Errore: Dati mancanti nel login')
         setError('Errore nel login. Riprova.')
         return
       }
 
-      // Se "Ricordami" è attivo, salva il token nel localStorage
+      // ✅ Se "Ricordami" è attivo, salva il token nel localStorage
       if (rememberMe) {
         localStorage.setItem('token', token)
       }
 
-      // Salva token, ruolo e userId nello stato Redux
+      // ✅ Salva token, ruolo e userId nello stato Redux
       dispatch(loginSuccess({ token, role, userId }))
 
-      // Gestione del reindirizzamento in base al ruolo
+      // ✅ Reindirizzamento in base al ruolo
       if (role === 'ADMIN') {
         console.log('✅ Reindirizzamento a /admin-dashboard')
         navigate('/admin-dashboard')
       } else if (role === 'INSEGNANTE') {
-        if (!userId) {
-          console.error('❌ Errore: userId mancante per insegnante')
-          setError('Errore nel caricamento dei dati.')
-          return
-        }
-        console.log('✅ Recupero dettagli insegnante...')
-        try {
-          // Chiamata all'endpoint dedicato ai dettagli dell'insegnante
-          const teacherResponse = await apiClient.get('/api/insegnante/me')
-          dispatch(setTeacherDetails(teacherResponse.data))
-          console.log('✅ Reindirizzamento a /teacher-dashboard')
-          navigate('/teacher-dashboard')
-        } catch (error) {
-          console.error('❌ Errore nel recupero dettagli insegnante:', error)
-          setError('Errore nel caricamento dei dati. Riprova.')
-        }
+        console.log('✅ Reindirizzamento a /teacher-dashboard')
+        navigate('/teacher-dashboard')
       }
     } catch (error) {
       console.error('❌ Errore login:', error)
-      setError('Email o password errati')
+      setError(
+        error.response?.data?.message || 'Email o password errati. Riprova.'
+      )
     }
   }
 

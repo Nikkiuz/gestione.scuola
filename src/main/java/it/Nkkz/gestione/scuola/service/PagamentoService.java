@@ -1,5 +1,6 @@
 package it.Nkkz.gestione.scuola.service;
 
+import it.Nkkz.gestione.scuola.dto.PagamentoMensileDTO;
 import it.Nkkz.gestione.scuola.dto.PagamentoRequestDTO;
 import it.Nkkz.gestione.scuola.dto.PagamentoResponseDTO;
 import it.Nkkz.gestione.scuola.entity.Pagamento;
@@ -74,4 +75,20 @@ public class PagamentoService {
 		dto.setStudenteNome(pagamento.getStudente().getNome() + " " + pagamento.getStudente().getCognome());
 		return dto;
 	}
+
+	// ✅ Recupera il totale dei pagamenti suddivisi per mese (per la Dashboard)
+	public PagamentoMensileDTO getPagamentiMensili() {
+		List<Object[]> results = pagamentoRepository.getPagamentiMensili();
+
+		List<String> mesi = results.stream()
+			.map(result -> (String) result[0])
+			.toList();
+
+		List<Double> importi = results.stream()
+			.map(result -> (Double) result[1])
+			.toList();
+
+		return new PagamentoMensileDTO(mesi, importi);
+	}
+
 }
