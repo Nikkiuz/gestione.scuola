@@ -42,10 +42,10 @@ public class SecurityConfig {
 			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/auth/**").permitAll()  // 🔓 Permetti login senza token
-				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()  // 🔓 Swagger accessibile
-				.requestMatchers("/api/admin/**", "/api/dashboard/**").authenticated()  // 🔐 Protegge dashboard
-				.anyRequest().authenticated()
+				.requestMatchers("/api/auth/**").permitAll()  // ✅ Permetti login e registrazione senza autenticazione
+				.requestMatchers("/api/studenti/**").hasRole("ADMIN")  // 🔒 SOLO Admin può gestire gli studenti
+				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()  // ✅ Swagger libero
+				.anyRequest().authenticated()  // 🔐 Tutto il resto richiede autenticazione!
 			)
 			.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

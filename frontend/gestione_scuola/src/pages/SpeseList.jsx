@@ -9,6 +9,7 @@ const SpeseList = () => {
   const [mese, setMese] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  
 
   useEffect(() => {
     fetchSpese()
