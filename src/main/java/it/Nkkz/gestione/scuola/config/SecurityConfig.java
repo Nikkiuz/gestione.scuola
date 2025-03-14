@@ -39,16 +39,18 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-			.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Usa il bean CORS
-			.csrf(csrf -> csrf.disable()) // Disabilita CSRF per JWT
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/auth/**").permitAll()
-				.requestMatchers("/api/admin/**").hasRole("ADMIN")
+				.requestMatchers("/api/auth/**").permitAll()  // 🔓 Permetti login senza token
+				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()  // 🔓 Swagger accessibile
+				.requestMatchers("/api/admin/**", "/api/dashboard/**").authenticated()  // 🔐 Protegge dashboard
 				.anyRequest().authenticated()
 			)
 			.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+
 
 		return http.build();
 	}
@@ -56,7 +58,7 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("http://localhost:5174")); // ⚠️ Usa la porta giusta
+		configuration.setAllowedOrigins(List.of("http://localhost:5173")); // ⚠️ Usa la porta giusta
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 		configuration.setAllowCredentials(true); // Consente credenziali come token di autenticazione

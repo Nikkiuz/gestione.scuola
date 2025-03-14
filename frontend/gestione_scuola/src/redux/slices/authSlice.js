@@ -11,13 +11,11 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginSuccess: (state, action) => {
-      console.log('🔄 Reducer loginSuccess chiamato con:', action.payload)
+      console.log('🔄 Reducer loginSuccess chiamato con:', action.payload) // 🔍 Debug
       state.token = action.payload.token
-      state.userId = action.payload.userId || null
-      state.user = {
-        id: action.payload.userId || null,
-      }
-      console.log('✅ Stato Redux aggiornato:', state) // 🔥 Debug
+      state.userId = action.payload.userId
+      state.user = { id: action.payload.userId }
+      console.log('✅ Stato Redux aggiornato:', state) // 🔍 Debug
     },
     logout: (state) => {
       console.log('🚪 Logout effettuato')

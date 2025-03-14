@@ -5,7 +5,6 @@ import {
   Navigate,
 } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { useEffect, useState } from 'react'
 
 import Login from '../pages/Login'
 import AdminDashboard from '../pages/AdminDashboard'
@@ -19,47 +18,25 @@ import AulaList from '../pages/AulaList'
 import AulaDetail from '../pages/AulaDetail'
 import Calendario from '../pages/Calendario'
 import Report from '../pages/Report'
-
-const ProtectedRoute = ({ children, role }) => {
-  const { user } = useSelector((state) => state.auth)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    console.log('🧐 Stato Redux user:', user)
-
-    if (user === null) {
-      console.log('⏳ Aspettando che Redux aggiorni user...')
-      return
-    }
-
-    setLoading(false) // ✅ L'utente è stato caricato
-
-    if (!user) {
-      console.log('🔴 Utente non autenticato, reindirizzamento a /login')
-      window.location.href = '/login'
-    } else if (user.role !== role) {
-      console.log('⚠️ Accesso negato, reindirizzamento alla dashboard admin')
-      window.location.href = '/admin-dashboard'
-    }
-  }, [user, role])
-
-  if (loading) return <p>⏳ Caricamento...</p>
-
-  return user && user.role === role ? children : null
-}
+import ProtectedRoute from './ProtectedRoute'
 
 const AppRouter = () => {
+  const { token } = useSelector((state) => state.auth)
+
   return (
     <Router>
       <Routes>
         {/* Pagina di Login */}
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={token ? <Navigate to="/admin-dashboard" /> : <Login />}
+        />
 
         {/* Rotte Admin Protette */}
         <Route
           path="/admin-dashboard"
           element={
-            <ProtectedRoute role="ADMIN">
+            <ProtectedRoute>
               <AdminDashboard />
             </ProtectedRoute>
           }
@@ -67,7 +44,7 @@ const AppRouter = () => {
         <Route
           path="/corsi"
           element={
-            <ProtectedRoute role="ADMIN">
+            <ProtectedRoute>
               <CourseList />
             </ProtectedRoute>
           }
@@ -75,7 +52,7 @@ const AppRouter = () => {
         <Route
           path="/corsi/:id"
           element={
-            <ProtectedRoute role="ADMIN">
+            <ProtectedRoute>
               <CourseDetail />
             </ProtectedRoute>
           }
@@ -83,7 +60,7 @@ const AppRouter = () => {
         <Route
           path="/studenti"
           element={
-            <ProtectedRoute role="ADMIN">
+            <ProtectedRoute>
               <StudentList />
             </ProtectedRoute>
           }
@@ -91,7 +68,7 @@ const AppRouter = () => {
         <Route
           path="/studenti/:id"
           element={
-            <ProtectedRoute role="ADMIN">
+            <ProtectedRoute>
               <StudentDetails />
             </ProtectedRoute>
           }
@@ -99,7 +76,7 @@ const AppRouter = () => {
         <Route
           path="/spese"
           element={
-            <ProtectedRoute role="ADMIN">
+            <ProtectedRoute>
               <SpeseList />
             </ProtectedRoute>
           }
@@ -107,7 +84,7 @@ const AppRouter = () => {
         <Route
           path="/spese/:id"
           element={
-            <ProtectedRoute role="ADMIN">
+            <ProtectedRoute>
               <SpeseDetail />
             </ProtectedRoute>
           }
@@ -115,7 +92,7 @@ const AppRouter = () => {
         <Route
           path="/calendario"
           element={
-            <ProtectedRoute role="ADMIN">
+            <ProtectedRoute>
               <Calendario />
             </ProtectedRoute>
           }
@@ -123,7 +100,7 @@ const AppRouter = () => {
         <Route
           path="/report"
           element={
-            <ProtectedRoute role="ADMIN">
+            <ProtectedRoute>
               <Report />
             </ProtectedRoute>
           }
@@ -131,7 +108,7 @@ const AppRouter = () => {
         <Route
           path="/aule"
           element={
-            <ProtectedRoute role="ADMIN">
+            <ProtectedRoute>
               <AulaList />
             </ProtectedRoute>
           }
@@ -139,14 +116,17 @@ const AppRouter = () => {
         <Route
           path="/aule/:id"
           element={
-            <ProtectedRoute role="ADMIN">
+            <ProtectedRoute>
               <AulaDetail />
             </ProtectedRoute>
           }
         />
 
-        {/* Redirect alla pagina corretta in base al ruolo */}
-        <Route path="*" element={<Navigate to="/login" />} />
+        {/* Redirect alla pagina corretta in base al token */}
+        <Route
+          path="*"
+          element={<Navigate to={token ? '/admin-dashboard' : '/login'} />}
+        />
       </Routes>
     </Router>
   )

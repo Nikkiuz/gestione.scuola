@@ -3,7 +3,6 @@ package it.Nkkz.gestione.scuola.auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import it.Nkkz.gestione.scuola.entity.app_users.AppUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -55,23 +54,23 @@ public class JwtTokenUtil {
     }
 
     // Genera un token JWT per l'utente, includendo i ruoli
-    public String generateToken(AppUser user) { // 🔹 Modifica: Prende un oggetto AppUser invece di UserDetails
-        List<String> roles = user.getRoles().stream()
-            .map(Enum::name)
+    public String generateToken(UserDetails userDetails) {
+        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+        List<String> roles = authorities.stream()
+            .map(GrantedAuthority::getAuthority)
             .collect(Collectors.toList());
 
         String token = Jwts.builder()
-            .setSubject(user.getEmail()) // ✅ Ora usa l'email come identificatore
+            .setSubject(userDetails.getUsername()) // ✅ Usiamo l'email come identificatore
             .claim("roles", roles) // Aggiunge i ruoli come claim
             .setIssuedAt(new Date(System.currentTimeMillis()))
             .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
             .signWith(SignatureAlgorithm.HS256, secret)
             .compact();
 
-        System.out.println("🛡️ Token generato per " + user.getEmail() + ": " + token); // 🔍 Debug
+        System.out.println("🛡️ Token generato per " + userDetails.getUsername() + ": " + token); // 🔍 Debug
         return token;
     }
-
 
     // Estrae i ruoli dal token JWT
     public List<String> getRolesFromToken(String token) {

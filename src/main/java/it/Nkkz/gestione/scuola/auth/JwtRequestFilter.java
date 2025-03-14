@@ -1,7 +1,6 @@
 package it.Nkkz.gestione.scuola.auth;
 
 import io.jsonwebtoken.ExpiredJwtException;
-import it.Nkkz.gestione.scuola.exception.JwtTokenMissingException;
 import it.Nkkz.gestione.scuola.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,62 +32,79 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
-        final String requestTokenHeader = request.getHeader("Authorization");
 
-        if(shouldNotFilter(request)) {
+        if (shouldNotFilter(request)) {
+            System.out.println("🟡 [JWT Filter] Escludendo il controllo per: " + request.getRequestURI());
             chain.doFilter(request, response);
             return;
         }
-        String username = null;
+
+        final String requestTokenHeader = request.getHeader("Authorization");
+        System.out.println("🔍 [JWT Filter] Header Authorization ricevuto: " + requestTokenHeader);
+
+        String email = null;
         String jwtToken = null;
 
-        // Estrae il token JWT dal header Authorization
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
             try {
-                username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                email = jwtTokenUtil.getUsernameFromToken(jwtToken); // 🔹 Ora estrae l'email
+                System.out.println("✅ [JWT Filter] Token valido, utente: " + email);
             } catch (IllegalArgumentException e) {
-                System.out.println("Impossibile ottenere il token JWT");
+                System.out.println("❌ Impossibile ottenere il token JWT");
             } catch (ExpiredJwtException e) {
-                System.out.println("Il token JWT è scaduto");
+                System.out.println("❌ Token JWT scaduto");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token JWT scaduto");
+                return;
             }
         } else {
-
-                request.setAttribute("javax.servlet.error.exception", new JwtTokenMissingException("JWT Token is missing"));
-                request.getRequestDispatcher("/error").forward(request, response);
-                return;
+            System.out.println("❌ Token JWT assente o non valido");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token JWT mancante");
+            return;
         }
 
-        // Valida il token e configura l'autenticazione nel contesto di sicurezza
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(email);
+                System.out.println("🔍 [JWT Filter] UserDetails caricato: " + userDetails.getUsername());
 
-            if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    System.out.println("✅ [JWT Filter] Autenticazione impostata per: " + email);
+                } else {
+                    System.out.println("❌ [JWT Filter] Token non valido per l'utente: " + email);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token JWT non valido");
+                    return;
+                }
+            } catch (Exception e) {
+                System.out.println("❌ Errore nel caricamento dell'utente dal database: " + e.getMessage());
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Errore nell'autenticazione");
+                return;
             }
         }
+
         chain.doFilter(request, response);
     }
 
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI().substring(request.getContextPath().length());
-        return EXCLUDED_URLS.stream().anyMatch(pattern -> antPathMatcher.match(pattern, path));
+        boolean isExcluded = EXCLUDED_URLS.stream().anyMatch(pattern -> antPathMatcher.match(pattern, path));
+        System.out.println("🔍 [JWT Filter] Controllo esclusione per path: " + path + " - Escluso: " + isExcluded);
+        return isExcluded;
     }
 
     private static final List<String> EXCLUDED_URLS = Arrays.asList(
-            "/api/public",
-            "/api/auth/**",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/error",
-            "/sw.js"
+        "/api/auth/**",  // ✅ Permetti solo l'autenticazione senza token
+        "/swagger-ui/**",
+        "/v3/api-docs/**",
+        "/error",
+        "/sw.js"
     );
-
-
 }
+

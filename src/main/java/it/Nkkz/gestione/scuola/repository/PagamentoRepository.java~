@@ -18,6 +18,6 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
 	List<Pagamento> findByDataPagamentoBetween(LocalDate start, LocalDate end);
 
-	
+
 
 }

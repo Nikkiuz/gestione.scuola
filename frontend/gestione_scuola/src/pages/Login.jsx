@@ -8,41 +8,44 @@ const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
   const handleLogin = async () => {
+    setLoading(true)
+    setError('')
+
     try {
       const response = await apiClient.post('/auth/login', { email, password })
-      console.log('🔹 Dati ricevuti:', response.data) // Debug per i dati ricevuti
+      console.log('🔹 Dati ricevuti:', response.data) // 🔍 Debug
 
       const { token, userId } = response.data
 
-      // Controllo errori sui dati ricevuti
       if (!token || !userId) {
         console.error('❌ Errore: Dati mancanti nel login')
         setError('Errore nel login. Riprova.')
+        setLoading(false)
         return
       }
 
-      // Salva sempre il token nel localStorage
       localStorage.setItem('token', token)
-
-      // Dispatch per salvare token e userId nello stato globale (Redux)
       dispatch(loginSuccess({ token, userId }))
 
-      // Reindirizzamento diretto alla dashboard admin
-      console.log('✅ Reindirizzamento a /admin-dashboard')
+      console.log('✅ Token salvato:', localStorage.getItem('token')) // 🔍 Debug
+      console.log('✅ Dispatch inviato a Redux') // 🔍 Debug
+
       navigate('/admin-dashboard')
     } catch (error) {
       console.error('❌ Errore login:', error)
       setError('Email o password errati')
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    setError('')
     handleLogin()
   }
 
@@ -61,7 +64,6 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                autoComplete="email"
               />
             </div>
             <div className="mb-3">
@@ -72,11 +74,14 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoComplete="current-password"
               />
             </div>
-            <button type="submit" className="btn btn-primary w-100">
-              Login
+            <button
+              type="submit"
+              className="btn btn-primary w-100"
+              disabled={loading}
+            >
+              {loading ? '⏳ Accesso...' : 'Login'}
             </button>
           </form>
         </div>

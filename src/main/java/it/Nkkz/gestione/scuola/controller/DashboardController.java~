@@ -1,0 +1,43 @@
+package it.Nkkz.gestione.scuola.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/dashboard")
+public class DashboardController {
+
+	@GetMapping("/stats")
+	public ResponseEntity<Map<String, Object>> getStats() {
+		// 🔹 Simuliamo dati per la dashboard (da sostituire con dati reali dal database)
+		Map<String, Object> stats = Map.of(
+			"studenti", 120,  // Numero totale di studenti
+			"corsi", 25,      // Numero di corsi attivi
+			"pagamenti", 7500 // Totale entrate dai pagamenti (€)
+		);
+		return ResponseEntity.ok(stats);
+	}
+
+	@GetMapping("/avvisi")
+	public ResponseEntity<List<Map<String, String>>> getAvvisi() {
+		// 🔹 Simuliamo una lista di avvisi per l'admin
+		List<Map<String, String>> avvisi = List.of(
+			Map.of("messaggio", "📌 Scadenza pagamenti il 30 Marzo!", "link", "/pagamenti"),
+			Map.of("messaggio", "🔔 Nuovo corso disponibile per il livello intermedio!", "link", "/corsi")
+		);
+		return ResponseEntity.ok(avvisi);
+	}
+
+	@GetMapping("/pagamenti-mensili")
+	public ResponseEntity<Map<String, Object>> getPagamentiMensili() {
+		// 🔹 Simuliamo dati sui pagamenti mensili
+		Map<String, Object> pagamenti = Map.of(
+			"mesi", List.of("Gennaio", "Febbraio", "Marzo"),
+			"importi", List.of(1800, 2500, 2200) // Totale incassato ogni mese (€)
+		);
+		return ResponseEntity.ok(pagamenti);
+	}
+}
