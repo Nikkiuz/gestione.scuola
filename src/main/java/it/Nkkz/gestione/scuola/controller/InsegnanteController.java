@@ -28,7 +28,7 @@ public class InsegnanteController {
 		return ResponseEntity.ok(insegnanteService.getAllInsegnanti());
 	}
 
-	// ✅ ADMIN & INSEGNANTE - Recupera un insegnante per ID
+	// ✅ ADMIN - Recupera un insegnante per ID
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or #id == authentication.principal.id")
 	public ResponseEntity<InsegnanteResponseDTO> getInsegnanteById(@PathVariable Long id, Authentication authentication) {

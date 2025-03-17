@@ -34,15 +34,27 @@ const StudentList = () => {
     fetchInsegnanti()
   }, [])
 
-  const fetchStudenti = async () => {
-    try {
-      const response = await apiClient.get('/studenti')
-      setStudenti(response.data.filter((s) => s.corsi.length > 0))
-      setStudentiSenzaCorso(response.data.filter((s) => s.corsi.length === 0))
-    } catch (error) {
-      console.error('Errore nel recupero degli studenti', error)
-    }
-  }
+ const fetchStudenti = async () => {
+   try {
+     const response = await apiClient.get('/studenti')
+
+     if (!response.data || !Array.isArray(response.data)) {
+       console.error(
+         '❌ Errore: response.data non è un array valido',
+         response.data
+       )
+       return
+     }
+
+     setStudenti(response.data.filter((s) => s.corsi?.length > 0))
+     setStudentiSenzaCorso(
+       response.data.filter((s) => !s.corsi || s.corsi.length === 0)
+     )
+   } catch (error) {
+     console.error('❌ Errore nel recupero degli studenti:', error)
+   }
+ }
+
 
   const fetchInsegnanti = async () => {
     try {
@@ -78,18 +90,20 @@ const StudentList = () => {
     setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value })
   }
 
- const handleSubmit = async (e) => {
-   e.preventDefault()
-   console.log('📤 Dati inviati:', formData) // ✅ Debug per vedere cosa viene inviato
-   try {
-     const response = await apiClient.post('/studenti', formData)
-     console.log('✅ Studente aggiunto con successo:', response.data)
-     setShowModal(false)
-     fetchStudenti()
-   } catch (error) {
-     console.error('❌ Errore nella creazione dello studente:', error)
-   }
- }
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  try {
+    const response = await apiClient.post('/studenti', formData)
+    console.log('✅ Studente aggiunto con successo:', response.data)
+
+    alert('✅ Studente aggiunto correttamente!') // Mostra un alert
+    setShowModal(false) // Chiudi il modale
+    fetchStudenti() // Aggiorna la lista degli studenti
+  } catch (error) {
+    console.error('❌ Errore nella creazione dello studente', error)
+  }
+}
+
 
 
   return (
@@ -394,6 +408,19 @@ const StudentList = () => {
                 <td>{studente.nome}</td>
                 <td>{studente.cognome}</td>
                 <td>{studente.livello}</td>
+
+                <button
+                  className="btn btn-primary btn-sm me-2"
+                  onClick={() => navigate(`/studenti/${studente.id}`)}
+                >
+                  📄 Dettagli
+                </button>
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => eliminaStudente(studente.id)}
+                >
+                  🗑 Elimina
+                </button>
               </tr>
             ))}
           </tbody>

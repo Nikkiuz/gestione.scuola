@@ -29,4 +29,8 @@ public class Insegnante {
 
 	@ElementCollection
 	private Set<String> fasceOrarieDisponibili;
+
+	public boolean isDisponibile(String giorno, String orario) {
+		return giorniDisponibili.contains(giorno) && fasceOrarieDisponibili.contains(orario);
+	}
 }

@@ -55,10 +55,10 @@ public class JwtTokenUtil {
     }
 
     // Genera un token JWT per l'utente, includendo i ruoli
-    public String generateToken(AppUser user) { // 🔹 Modifica: Prende un oggetto AppUser invece di UserDetails
-        List<String> roles = user.getRoles().stream()
-            .map(Enum::name)
-            .collect(Collectors.toList());
+    public String generateToken(AppUser user) {
+        List<String> roles = user.getRoles() != null ?
+            user.getRoles().stream().map(Enum::name).collect(Collectors.toList()) :
+            List.of(); // Se roles è null, usa una lista vuota
 
         String token = Jwts.builder()
             .setSubject(user.getEmail()) // ✅ Ora usa l'email come identificatore
@@ -73,6 +73,7 @@ public class JwtTokenUtil {
     }
 
 
+
     // Estrae i ruoli dal token JWT
     public List<String> getRolesFromToken(String token) {
         Claims claims = getAllClaimsFromToken(token);
@@ -84,5 +85,6 @@ public class JwtTokenUtil {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
+
 }
 

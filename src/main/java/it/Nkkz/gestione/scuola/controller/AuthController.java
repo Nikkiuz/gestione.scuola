@@ -20,7 +20,8 @@ public class AuthController {
         appUserService.registerUser(
             registerRequest.getUsername(),
             registerRequest.getEmail(),
-            registerRequest.getPassword()
+            registerRequest.getPassword(),
+            registerRequest.getRole()
         );
 
         return ResponseEntity.ok("Registrazione avvenuta con successo");

@@ -24,11 +24,16 @@ public class Insegnante {
 	@Column(nullable = false, unique = true)
 	private String email;
 
+	@Column(nullable = false)
+	private String lingua;
+
 	@ElementCollection
 	private Set<String> giorniDisponibili;
 
 	@ElementCollection
 	private Set<String> fasceOrarieDisponibili;
+
+
 
 	public boolean isDisponibile(String giorno, String orario) {
 		return giorniDisponibili.contains(giorno) && fasceOrarieDisponibili.contains(orario);

@@ -19,6 +19,8 @@ import AulaDetail from '../pages/AulaDetail'
 import Calendario from '../pages/Calendario'
 import Report from '../pages/Report'
 import ProtectedRoute from './ProtectedRoute'
+import TeacherList from '../pages/TeacherList'
+import TeacherDetail from '../pages/TeacherDetail'
 
 const AppRouter = () => {
   const { token } = useSelector((state) => state.auth)
@@ -118,6 +120,22 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <AulaDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/insegnanti'
+          element={
+            <ProtectedRoute>
+              <TeacherList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/insegnanti/:id'
+          element={
+            <ProtectedRoute>
+              <TeacherDetail />
             </ProtectedRoute>
           }
         />
