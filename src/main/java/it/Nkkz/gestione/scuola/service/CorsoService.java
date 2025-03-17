@@ -69,17 +69,27 @@ public class CorsoService {
 
 	// Crea un nuovo corso
 	public CorsoResponseDTO creaCorso(CorsoRequestDTO request) {
+		List<Corso> corsiAttivi = corsoRepository.findByAttivoTrue();
+
+		// Trova un'aula disponibile
+		Optional<Aula> aulaDisponibile = aulaRepository.findAll().stream()
+			.filter(aula -> aula.isDisponibile(request.getGiorno(), request.getOrario(), corsiAttivi))
+			.findFirst();
+
+		if (aulaDisponibile.isEmpty()) {
+			throw new IllegalStateException("Nessuna aula disponibile per il giorno " + request.getGiorno() + " alle " + request.getOrario());
+		}
+
 		Corso corso = new Corso();
 		BeanUtils.copyProperties(request, corso);
+		corso.setAula(aulaDisponibile.get());
 		corso.setStudenti(studenteRepository.findAllById(request.getStudentiIds()));
 		corso.setAttivo(true);
-
-		Optional<Aula> aulaDisponibile = aulaRepository.findById(request.getAulaId());
-		aulaDisponibile.ifPresent(corso::setAula);
 
 		corsoRepository.save(corso);
 		return convertToResponseDTO(corso);
 	}
+
 
 	// Modifica un corso esistente
 	public CorsoResponseDTO modificaCorso(Long id, CorsoRequestDTO request) {
@@ -252,9 +262,7 @@ public class CorsoService {
 
 				// **Trova un'aula disponibile per il corso**
 				Optional<Aula> aulaDisponibile = aulaRepository.findAll().stream()
-					.filter(aula -> aula.getCapienzaMax() >= corsoStudenti.size())
-					.filter(aula -> aula.getDisponibilita().containsKey(giornoSelezionato))
-					.filter(aula -> aula.getDisponibilita().get(giornoSelezionato).contains(orarioSelezionato))
+					.filter(aula -> aula.isDisponibile(giornoSelezionato, orarioSelezionato, corsoRepository.findByAttivoTrue()))
 					.findFirst();
 
 				if (aulaDisponibile.isEmpty()) {

@@ -4,7 +4,7 @@ import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
 
 const CourseDetails = () => {
-  const { id } = useParams() // ID del corso dalla URL
+  const { id } = useParams()
   const navigate = useNavigate()
 
   const [corso, setCorso] = useState(null)
@@ -18,7 +18,6 @@ const CourseDetails = () => {
     fetchStudentiDisponibili()
   }, [])
 
-  // Recupera i dettagli del corso
   const fetchCorso = async () => {
     try {
       const response = await apiClient.get(`/corsi/${id}`)
@@ -31,7 +30,6 @@ const CourseDetails = () => {
     }
   }
 
-  // Recupera gli studenti che non sono assegnati a nessun corso
   const fetchStudentiDisponibili = async () => {
     try {
       const response = await apiClient.get('/studenti/senza-corso')
@@ -41,22 +39,20 @@ const CourseDetails = () => {
     }
   }
 
-  // Assegna uno studente al corso
   const assegnaStudente = async (studenteId) => {
     try {
       await apiClient.post(`/corsi/${corso.id}/aggiungi-studente`, {
         studenteId,
       })
       setSuccessMessage('Studente assegnato con successo!')
-      fetchCorso() // Aggiorna i dati del corso
-      fetchStudentiDisponibili() // Aggiorna la lista degli studenti disponibili
+      fetchCorso()
+      fetchStudentiDisponibili()
     } catch (error) {
       console.error('Errore nell’assegnare lo studente', error)
       setError('Errore nell’assegnazione dello studente.')
     }
   }
 
-  // Disattiva il corso (lo rimuove dal calendario, ma non lo elimina)
   const disattivaCorso = async () => {
     if (window.confirm('Vuoi disattivare questo corso?')) {
       try {
@@ -68,7 +64,6 @@ const CourseDetails = () => {
     }
   }
 
-  // Elimina il corso definitivamente
   const eliminaCorso = async () => {
     if (window.confirm('Vuoi eliminare definitivamente questo corso?')) {
       try {
@@ -85,89 +80,84 @@ const CourseDetails = () => {
 
   return (
     <>
-    <AdminNavbar />
+      <AdminNavbar />
+      <div className="container mt-4">
+        <h2 className="text-center mb-4">📚 Dettagli Corso</h2>
 
-    <div className="container mt-4">
-      <h2 className="text-center mb-4">📚 Dettagli Corso</h2>
-
-      {/* Messaggio di conferma */}
-      {successMessage && (
-        <div className="alert alert-success">{successMessage}</div>
-      )}
-
-      <div className="card shadow p-4">
-        <h5>
-          {corso.lingua} - Livello {corso.livello}
-        </h5>
-        <p>
-          <strong>🗓 Giorno:</strong> {corso.giorno}
-        </p>
-        <p>
-          <strong>⏰ Orario:</strong> {corso.orario}
-        </p>
-        <p>
-          <strong>🏫 Aula:</strong> {corso.aula.nome}
-        </p>
-        <p>
-          <strong>👨‍🏫 Insegnante:</strong> {corso.insegnante.nome}{' '}
-          {corso.insegnante.cognome}
-        </p>
-
-        {/* Pulsante per disattivare o riattivare il corso */}
-        <button
-          className={`btn ${corso.attivo ? 'btn-warning' : 'btn-success'} me-2`}
-          onClick={disattivaCorso}
-        >
-          {corso.attivo ? '🚫 Disattiva Corso' : '✅ Riattiva Corso'}
-        </button>
-
-        {/* Pulsante per eliminare definitivamente il corso */}
-        <button className="btn btn-danger" onClick={eliminaCorso}>
-          🗑 Elimina Corso
-        </button>
-      </div>
-
-      {/* Lista studenti iscritti */}
-      <div className="mt-4">
-        <h5>🎓 Studenti Iscritti</h5>
-        {corso.studenti.length === 0 ? (
-          <p>Nessuno studente iscritto</p>
-        ) : (
-          <ul className="list-group">
-            {corso.studenti.map((studente) => (
-              <li key={studente.id} className="list-group-item">
-                {studente.nome} {studente.cognome}
-              </li>
-            ))}
-          </ul>
+        {successMessage && (
+          <div className="alert alert-success">{successMessage}</div>
         )}
-      </div>
 
-      {/* Lista studenti disponibili */}
-      <div className="mt-4">
-        <h5>🎓 Studenti disponibili</h5>
-        {studentiDisponibili.length === 0 ? (
-          <p>Nessun studente disponibile</p>
-        ) : (
-          <ul className="list-group">
-            {studentiDisponibili.map((studente) => (
-              <li
-                key={studente.id}
-                className="list-group-item d-flex justify-content-between align-items-center"
-              >
-                {studente.nome} {studente.cognome}
-                <button
-                  className="btn btn-success btn-sm"
-                  onClick={() => assegnaStudente(studente.id)}
+        <div className="card shadow p-4">
+          <h5>
+            {corso.lingua} - Livello {corso.livello}
+          </h5>
+          <p>
+            <strong>🗓 Giorno:</strong> {corso.giorno}
+          </p>
+          <p>
+            <strong>⏰ Orario:</strong> {corso.orario}
+          </p>
+          <p>
+            <strong>🏫 Aula:</strong> {corso.aula?.nome || 'Non assegnata'}
+          </p>
+          <p>
+            <strong>👨‍🏫 Insegnante:</strong> {corso.insegnante?.nome}{' '}
+            {corso.insegnante?.cognome}
+          </p>
+
+          <button
+            className={`btn ${
+              corso.attivo ? 'btn-warning' : 'btn-success'
+            } me-2`}
+            onClick={disattivaCorso}
+          >
+            {corso.attivo ? '🚫 Disattiva Corso' : '✅ Riattiva Corso'}
+          </button>
+          <button className="btn btn-danger" onClick={eliminaCorso}>
+            🗑 Elimina Corso
+          </button>
+        </div>
+
+        <div className="mt-4">
+          <h5>🎓 Studenti Iscritti</h5>
+          {corso.studenti.length === 0 ? (
+            <p>Nessuno studente iscritto</p>
+          ) : (
+            <ul className="list-group">
+              {corso.studenti.map((studente) => (
+                <li key={studente.id} className="list-group-item">
+                  {studente.nome} {studente.cognome}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="mt-4">
+          <h5>🎓 Studenti disponibili</h5>
+          {studentiDisponibili.length === 0 ? (
+            <p>Nessun studente disponibile</p>
+          ) : (
+            <ul className="list-group">
+              {studentiDisponibili.map((studente) => (
+                <li
+                  key={studente.id}
+                  className="list-group-item d-flex justify-content-between align-items-center"
                 >
-                  ➕ Assegna
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+                  {studente.nome} {studente.cognome}
+                  <button
+                    className="btn btn-success btn-sm"
+                    onClick={() => assegnaStudente(studente.id)}
+                  >
+                    ➕ Assegna
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
-    </div>
     </>
   )
 }

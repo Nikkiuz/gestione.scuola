@@ -22,6 +22,8 @@ const AulaList = () => {
   }, [])
 
   const fetchAule = async () => {
+    setLoading(true) // 🔄 Attiva il caricamento prima della richiesta
+
     try {
       const response = await apiClient.get('/aule') // ✅ Endpoint corretto
       setAule(response.data)
@@ -50,38 +52,48 @@ const AulaList = () => {
     setFormData({ ...formData, [name]: value })
   }
 
-  // 🔹 Gestisce le checkbox per la disponibilità giornaliera
-  const handleDisponibilitaChange = (e) => {
-    const { value, checked } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      disponibilita: checked
-        ? [...prev.disponibilita, value]
-        : prev.disponibilita.filter((g) => g !== value),
-    }))
-  }
 
   // 🔹 Invia il form per creare una nuova aula
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    try {
-      await apiClient.post('/aule', formData)
-      setShowModal(false) // Chiude il modale
-      fetchAule() // Aggiorna la lista
-      alert('✅ Aula creata con successo!')
-    } catch (error) {
-      console.error('Errore nella creazione dell’aula', error)
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  setError('')
+
+  // Trasforma l'array in una mappa (esempio: { "Lunedì": "", "Martedì": "" })
+  const formattedData = {
+    ...formData,
+    disponibilita: formData.disponibilita.reduce((acc, giorno) => {
+      acc[giorno] = "" // Il backend si aspetta un valore stringa, lascia vuoto per ora
+      return acc
+    }, {}),
   }
 
-  if (loading) return <p>Caricamento in corso...</p>
-  if (error) return <div className="alert alert-danger">{error}</div>
+  console.log('📤 Dati inviati:', formattedData) // 🔍 Debug
+
+  try {
+    const response = await apiClient.post('/aule', formattedData)
+    console.log('✅ Aula creata con successo:', response.data)
+
+    setShowModal(false)
+    fetchAule()
+    alert('✅ Aula creata con successo!')
+  } catch (error) {
+    console.error('❌ Errore nella creazione dell’aula', error)
+    setError(error.response ? JSON.stringify(error.response.data, null, 2) : 'Errore generico.')
+  }
+}
+
 
   return (
     <>
       <AdminNavbar />
       <div className="container mt-4">
         <h2 className="text-center mb-4">🏫 Lista Aule</h2>
+
+        {/* 🔄 Mostra messaggio di caricamento */}
+        {loading && <p className="text-center">⏳ Caricamento in corso...</p>}
+
+        {/* ❌ Mostra eventuale errore */}
+        {error && <div className="alert alert-danger">{error}</div>}
 
         {/* Pulsante per aprire il Modale di Aggiunta */}
         <button
@@ -97,6 +109,11 @@ const AulaList = () => {
             <Modal.Title>Aggiungi Aula</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+            {error && (
+              <div className="alert alert-danger">
+                <pre>{error}</pre> {/* Usa <pre> per formattare meglio JSON */}
+              </div>
+            )}
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
                 <Form.Label>Nome Aula</Form.Label>
@@ -120,26 +137,6 @@ const AulaList = () => {
                 />
               </Form.Group>
 
-              {/* Giorni Disponibili - Checkbox */}
-              <Form.Group className="mb-3">
-                <Form.Label>Disponibilità Giornaliera</Form.Label>
-                <div className="d-flex flex-wrap">
-                  {['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'].map(
-                    (giorno) => (
-                      <Form.Check
-                        key={giorno}
-                        type="checkbox"
-                        label={giorno}
-                        value={giorno}
-                        checked={formData.disponibilita.includes(giorno)}
-                        onChange={handleDisponibilitaChange}
-                        className="me-3"
-                      />
-                    )
-                  )}
-                </div>
-              </Form.Group>
-
               <div className="d-flex justify-content-end">
                 <Button variant="secondary" onClick={() => setShowModal(false)}>
                   Annulla
@@ -158,7 +155,6 @@ const AulaList = () => {
             <tr>
               <th>Nome</th>
               <th>Capienza</th>
-              <th>Disponibilità</th>
               <th>Azioni</th>
             </tr>
           </thead>
@@ -167,7 +163,6 @@ const AulaList = () => {
               <tr key={aula.id}>
                 <td>{aula.nome}</td>
                 <td>{aula.capienzaMax} studenti</td>
-                <td>{aula.disponibilita.join(', ')}</td>
                 <td>
                   <Link
                     to={`/aule/${aula.id}`}
