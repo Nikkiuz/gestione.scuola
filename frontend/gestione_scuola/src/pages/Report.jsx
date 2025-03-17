@@ -11,10 +11,6 @@ const Report = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    fetchReportMensile()
-  }, [anno, mese])
-
   const fetchReportMensile = async () => {
     setLoading(true)
     setError('')
@@ -22,6 +18,7 @@ const Report = () => {
       const response = await apiClient.get(
         `/report/mensile?anno=${anno}&mese=${mese}`
       )
+      console.log('📊 Report ricevuto:', response.data) // 🔍 Debug
       setReport(response.data)
     } catch (error) {
       console.error('Errore nel recupero del report', error)
@@ -31,16 +28,23 @@ const Report = () => {
     }
   }
 
+  useEffect(() => {
+    fetchReportMensile()
+  }, [anno, mese])
+
+  useEffect(() => {
+    console.log('📊 Report Aggiornato:', report) // 🔍 Debug
+  }, [report])
+
   const scaricaReportPdf = async () => {
     try {
       const response = await apiClient.get(
         `/report/mensile/pdf?anno=${anno}&mese=${mese}`,
         {
-          responseType: 'blob', // Imposta la risposta come file
+          responseType: 'blob',
         }
       )
 
-      // Crea un link per scaricare il file
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
@@ -52,6 +56,13 @@ const Report = () => {
       setError('Errore nel download del report.')
     }
   }
+
+  // ✅ Debug per verificare che i dati siano corretti prima di passarli al grafico
+  console.log(
+    '📊 Dati passati al grafico:',
+    report?.totaleEntrate,
+    report?.totaleUscite
+  )
 
   return (
     <>
@@ -141,15 +152,31 @@ const Report = () => {
             <div className="mt-5">
               <h4>📈 Entrate vs Uscite</h4>
               <Bar
+                key={`${report?.totaleEntrate}-${report?.totaleUscite}`} // 👈 Forza il re-render se cambiano i dati
                 data={{
                   labels: ['Entrate', 'Uscite'],
                   datasets: [
                     {
                       label: '€',
-                      data: [report.totaleEntrate, report.totaleUscite],
+                      data: [
+                        report?.totaleEntrate ?? 0,
+                        report?.totaleUscite ?? 0,
+                      ],
                       backgroundColor: ['#28a745', '#dc3545'],
                     },
                   ],
+                }}
+                options={{
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      suggestedMax:
+                        Math.max(
+                          report?.totaleEntrate ?? 0,
+                          report?.totaleUscite ?? 0
+                        ) + 100,
+                    },
+                  },
                 }}
               />
             </div>
@@ -165,7 +192,7 @@ const Report = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(report.speseRegistrate).map(
+                  {Object.entries(report.speseRegistrate ?? {}).map(
                     ([categoria, importo]) => (
                       <tr key={categoria}>
                         <td>{categoria}</td>
@@ -175,7 +202,7 @@ const Report = () => {
                       </tr>
                     )
                   )}
-                  {Object.entries(report.pagamentiRicevuti).map(
+                  {Object.entries(report.pagamentiRicevuti ?? {}).map(
                     ([metodo, importo]) => (
                       <tr key={metodo}>
                         <td>{metodo}</td>

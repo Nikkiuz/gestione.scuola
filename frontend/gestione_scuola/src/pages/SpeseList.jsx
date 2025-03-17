@@ -6,12 +6,13 @@ import AdminNavbar from '../components/AdminNavbar'
 
 const SpeseList = () => {
   const [spese, setSpese] = useState([])
-  const [categoria, setCategoria] = useState('') // 🔹 Ora vengono usati nei filtri
+  const [categoria, setCategoria] = useState('')
   const [mese, setMese] = useState('')
-  const [loading, setLoading] = useState(true) // 🔹 Viene ora utilizzato
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showModal, setShowModal] = useState(false)
-  const navigate = useNavigate() // 🔹 Modale per aggiungere spesa
+  const navigate = useNavigate()
+
   const [formData, setFormData] = useState({
     categoria: '',
     importo: '',
@@ -24,15 +25,31 @@ const SpeseList = () => {
   }, [])
 
   const fetchSpese = async () => {
-    setLoading(true) // 🔄 Attiva il caricamento
+    setLoading(true)
     try {
       const response = await apiClient.get('/spese')
       setSpese(response.data)
+      console.log('📋 Spese aggiornate:', response.data)
+      await fetchReportMensile() // 🔄 Aggiorna il report dopo l'aggiornamento delle spese
     } catch (error) {
       console.error('Errore nel recupero delle spese', error)
       setError('Errore nel caricamento delle spese.')
     } finally {
-      setLoading(false) // 🔄 Disattiva il caricamento
+      setLoading(false)
+    }
+  }
+
+  const fetchReportMensile = async () => {
+    try {
+      const response = await apiClient.get('/report/mensile', {
+        params: {
+          anno: new Date().getFullYear(),
+          mese: new Date().getMonth() + 1,
+        },
+      })
+      console.log('📊 Report aggiornato:', response.data)
+    } catch (error) {
+      console.error('❌ Errore nel recupero del report:', error)
     }
   }
 
@@ -40,51 +57,47 @@ const SpeseList = () => {
     if (window.confirm('Vuoi eliminare questa spesa?')) {
       try {
         await apiClient.delete(`/spese/${id}`)
-        fetchSpese()
+        await fetchSpese()
       } catch (error) {
         console.error('Errore nella cancellazione della spesa', error)
       }
     }
   }
 
-  // 🔹 Gestisce il cambiamento degli input nel form
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  // 🔹 Invia il form per creare una nuova spesa
- const handleSubmit = async (e) => {
-   e.preventDefault()
-   setError('')
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    console.log('📤 Dati inviati al backend:', formData)
 
-   console.log('📤 Dati inviati al backend:', formData) // 🔍 Debug
+    try {
+      await apiClient.post('/spese', formData)
+      console.log('✅ Spesa aggiunta con successo')
+      setShowModal(false)
 
-   try {
-     const response = await apiClient.post('/spese', formData)
-     console.log('✅ Spesa aggiunta con successo:', response.data)
-
-     setShowModal(false) // Chiudi il modale
-     fetchSpese() // Aggiorna la lista
-     alert('✅ Spesa aggiunta con successo!')
-   } catch (error) {
-     console.error('❌ Errore nella creazione della spesa', error)
-     if (error.response) {
-       console.error('📩 Risposta dal server:', error.response.data) // 🔍 Debug della risposta
-     }
-     setError(
-       error.response
-         ? JSON.stringify(error.response.data, null, 2)
-         : 'Errore generico.'
-     )
-   }
- }
-
+      await fetchSpese() // 🔄 Aggiorna la lista delle spese e poi il report
+      alert('✅ Spesa aggiunta con successo!')
+    } catch (error) {
+      console.error('❌ Errore nella creazione della spesa', error)
+      if (error.response) {
+        console.error('📩 Risposta dal server:', error.response.data)
+      }
+      setError(
+        error.response
+          ? JSON.stringify(error.response.data, null, 2)
+          : 'Errore generico.'
+      )
+    }
+  }
 
   // 🔹 Filtra le spese per categoria e mese
   const speseFiltrate = spese.filter(
     (spesa) =>
       (!categoria || spesa.categoria === categoria) &&
-      (!mese || spesa.dataSpesa.startsWith(mese))
+      (!mese || spesa.dataSpesa.startsWith(`${mese}-`))
   )
 
   return (
@@ -93,13 +106,9 @@ const SpeseList = () => {
       <div className="container mt-4">
         <h2 className="text-center mb-4">💰 Lista Spese</h2>
 
-        {/* 🔄 Mostra messaggio di caricamento */}
         {loading && <p className="text-center">⏳ Caricamento in corso...</p>}
-
-        {/* ❌ Mostra eventuale errore */}
         {error && <div className="alert alert-danger">{error}</div>}
 
-        {/* Pulsante per aprire il Modale di Aggiunta */}
         <button
           className="btn btn-success mb-3"
           onClick={() => setShowModal(true)}
@@ -236,21 +245,18 @@ const SpeseList = () => {
                 <td>{spesa.categoria}</td>
                 <td>{spesa.descrizione}</td>
                 <td>
-                {/* 🔹 Pulsante per modificare */}
-                <button
-                  className="btn btn-primary btn-sm me-2"
-                  onClick={() => navigate(`/spese/${spesa.id}`)}
-                >
-                  ✏️ Modifica
-                </button>
-
-                {/* 🔹 Pulsante per eliminare */}
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => eliminaSpesa(spesa.id)}
-                >
-                  🗑 Elimina
-                </button>
+                  <button
+                    className="btn btn-primary btn-sm me-2"
+                    onClick={() => navigate(`/spese/${spesa.id}`)}
+                  >
+                    ✏️ Modifica
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => eliminaSpesa(spesa.id)}
+                  >
+                    🗑 Elimina
+                  </button>
                 </td>
               </tr>
             ))}
