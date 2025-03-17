@@ -2,14 +2,17 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
+import { Form, Button } from 'react-bootstrap'
 
 const SpeseDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+
   const [spesa, setSpesa] = useState(null)
+  const [tempSpesa, setTempSpesa] = useState(null) // 🔹 Stato temporaneo per la modifica
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [modifica, setModifica] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
     fetchSpesa()
@@ -19,41 +22,65 @@ const SpeseDetail = () => {
     try {
       const response = await apiClient.get(`/spese/${id}`)
       setSpesa(response.data)
+      setTempSpesa(response.data) // 🔹 Inizializza lo stato temporaneo
     } catch (error) {
-      console.error('Errore nel recupero della spesa', error)
+      console.error('❌ Errore nel recupero della spesa', error)
       setError('Errore nel caricamento della spesa.')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleChange = (e) => {
-    setSpesa({ ...spesa, [e.target.name]: e.target.value })
+  // ✅ Attiva la modalità modifica e clona i dati
+  const handleEdit = () => {
+    setTempSpesa({ ...spesa }) // Clona i dati per modifiche sicure
+    setIsEditing(true)
   }
 
+  // ✅ Modifica i valori dei campi
+  const handleChange = (e) => {
+    setTempSpesa((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }))
+  }
+
+  // ✅ Salva le modifiche e aggiorna lo stato originale
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      await apiClient.put(`/spese/${id}`, spesa)
-      setModifica(false)
+      await apiClient.put(`/spese/${id}`, tempSpesa)
+      alert('✅ Modifiche salvate con successo!')
+      setSpesa(tempSpesa) // 🔹 Aggiorna i dati originali con quelli modificati
+      setIsEditing(false) // 🔹 Disattiva la modalità modifica
     } catch (error) {
-      console.error('Errore nella modifica della spesa', error)
+      console.error('❌ Errore nella modifica della spesa', error)
     }
   }
 
+  // ✅ Annulla le modifiche
+  const handleCancel = () => {
+    setIsEditing(false)
+    setTempSpesa(null) // Resetta i dati temporanei
+  }
+
+  // ✅ Elimina la spesa
   const eliminaSpesa = async () => {
-    if (window.confirm('Sei sicuro di voler eliminare questa spesa?')) {
+    if (window.confirm('⚠️ Sei sicuro di voler eliminare questa spesa?')) {
       try {
         await apiClient.delete(`/spese/${id}`)
         navigate('/spese')
       } catch (error) {
-        console.error('Errore nell’eliminazione della spesa', error)
+        console.error('❌ Errore nell’eliminazione della spesa', error)
       }
     }
   }
 
-  if (loading) return <p>Caricamento in corso...</p>
+  if (loading) return <p>⏳ Caricamento in corso...</p>
   if (error) return <div className="alert alert-danger">{error}</div>
+  if (!spesa) return <p>⚠️ Nessuna spesa trovata.</p>
+
+  const dati = isEditing ? tempSpesa : spesa // 🔹 Usa i dati giusti
 
   return (
     <>
@@ -61,27 +88,25 @@ const SpeseDetail = () => {
       <div className="container mt-4">
         <h2 className="text-center mb-4">💰 Dettagli Spesa</h2>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label">Importo</label>
-            <input
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Label>Importo</Form.Label>
+            <Form.Control
               type="number"
               name="importo"
-              className="form-control"
-              value={spesa.importo}
+              value={dati?.importo || ''}
               onChange={handleChange}
-              disabled={!modifica}
+              disabled={!isEditing}
             />
-          </div>
+          </Form.Group>
 
-          <div className="mb-3">
-            <label className="form-label">Categoria</label>
-            <select
+          <Form.Group className="mb-3">
+            <Form.Label>Categoria</Form.Label>
+            <Form.Select
               name="categoria"
-              className="form-control"
-              value={spesa.categoria}
+              value={dati?.categoria || ''}
               onChange={handleChange}
-              disabled={!modifica}
+              disabled={!isEditing}
             >
               <option value="BOLLETTE">Bollette</option>
               <option value="PULIZIA">Pulizia</option>
@@ -92,27 +117,64 @@ const SpeseDetail = () => {
               <option value="CANCELLERIA">Cancelleria</option>
               <option value="COMMERCIALISTA">Commercialista</option>
               <option value="ALTRO">Altro</option>
-            </select>
+            </Form.Select>
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Descrizione</Form.Label>
+            <Form.Control
+              type="text"
+              name="descrizione"
+              value={dati?.descrizione || ''}
+              onChange={handleChange}
+              disabled={!isEditing}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Data</Form.Label>
+            <Form.Control
+              type="date"
+              name="dataSpesa"
+              value={dati?.dataSpesa || ''}
+              onChange={handleChange}
+              disabled={!isEditing}
+            />
+          </Form.Group>
+
+          {/* Pulsanti di Azione */}
+          <div className="d-flex justify-content-between">
+            {!isEditing ? (
+              <Button variant="primary" type="button" onClick={handleEdit}>
+                ✏️ Modifica
+              </Button>
+            ) : (
+              <>
+                <Button type="submit" variant="success">
+                  💾 Salva Modifiche
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="ms-2"
+                  onClick={handleCancel}
+                >
+                  ❌ Annulla
+                </Button>
+              </>
+            )}
+
+            <Button variant="danger" onClick={eliminaSpesa}>
+              🗑 Elimina
+            </Button>
           </div>
+        </Form>
 
-          {modifica ? (
-            <button type="submit" className="btn btn-success">
-              💾 Salva Modifiche
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => setModifica(true)}
-            >
-              ✏️ Modifica
-            </button>
-          )}
-        </form>
-
-        <button className="btn btn-danger mt-3" onClick={eliminaSpesa}>
-          🗑 Elimina Spesa
-        </button>
+        <Button
+          className="btn btn-secondary mt-3"
+          onClick={() => navigate('/spese')}
+        >
+          🔙 Torna alla lista
+        </Button>
       </div>
     </>
   )

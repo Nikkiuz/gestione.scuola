@@ -9,6 +9,6 @@ public class SpesaResponseDTO {
 	private Long id;
 	private CategoriaSpesa categoria;
 	private double importo;
-	private LocalDate data;
+	private LocalDate dataSpesa;
 	private String descrizione;
 }
