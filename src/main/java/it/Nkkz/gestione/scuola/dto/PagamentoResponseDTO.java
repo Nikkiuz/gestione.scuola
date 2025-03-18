@@ -12,7 +12,7 @@ public class PagamentoResponseDTO {
 	private String studenteNome; // Nome e cognome dello studente
 	private LocalDate dataPagamento; // Data del pagamento
 	private BigDecimal importo; // Importo pagato
-	private String mensilitàSaldata; // Esempio: "Gennaio 2025"
+	private String mensilitaSaldata; // Esempio: "Gennaio 2025"
 	private MetodoPagamento metodoPagamento; // Bonifico / Carta
 	private String numeroRicevuta; // Numero univoco di ricevuta/fattura
 }
