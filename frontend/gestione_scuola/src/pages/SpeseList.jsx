@@ -115,14 +115,16 @@ const SpeseList = () => {
         <div className="row mb-3">
           <div className="col-md-6">
             <label className="form-label">📆 Filtra per Data</label>
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date) => setSelectedDate(date)}
-              dateFormat="MMMM yyyy"
-              showMonthYearPicker
-              locale="it"
-              className="form-control text-center fw-bold"
-            />
+            <div>
+              <DatePicker
+                selected={selectedDate}
+                onChange={(date) => setSelectedDate(date)}
+                dateFormat="MMMM yyyy"
+                showMonthYearPicker
+                locale="it"
+                className="form-control text-start fw-bold"
+              />
+            </div>
           </div>
 
           <div className="col-md-6">
@@ -241,7 +243,7 @@ const SpeseList = () => {
                   onChange={handleDateChange}
                   dateFormat="dd/MM/yyyy"
                   locale="it"
-                  className="form-control"
+                  className="form-control ms-3 text-center"
                   required
                 />
               </Form.Group>
