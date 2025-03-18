@@ -1,16 +1,35 @@
 import { useEffect, useState } from 'react'
 import apiClient from '../api/apiClient'
-import { Bar } from 'react-chartjs-2'
-import 'chart.js/auto'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from 'recharts'
 import AdminNavbar from '../components/AdminNavbar'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import { registerLocale } from 'react-datepicker'
+import it from 'date-fns/locale/it' // Localizzazione italiana
+
+registerLocale('it', it)
 
 const Report = () => {
-  const [anno, setAnno] = useState(new Date().getFullYear())
-  const [mese, setMese] = useState(new Date().getMonth() + 1) // Mesi in JS vanno da 0 a 11
+  const [selectedDate, setSelectedDate] = useState(new Date())
   const [report, setReport] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [insegnante, setInsegnante] = useState('')
+  const [listaInsegnanti, setListaInsegnanti] = useState([])
 
+  // Estrai mese e anno dalla data selezionata
+  const anno = selectedDate.getFullYear()
+  const mese = selectedDate.getMonth() + 1 // I mesi in JavaScript partono da 0
+
+  // Fetch Report Mensile
   const fetchReportMensile = async () => {
     setLoading(true)
     setError('')
@@ -18,7 +37,7 @@ const Report = () => {
       const response = await apiClient.get(
         `/report/mensile?anno=${anno}&mese=${mese}`
       )
-      console.log('📊 Report ricevuto:', response.data) // 🔍 Debug
+      console.log('📊 Report ricevuto:', response.data)
       setReport(response.data)
     } catch (error) {
       console.error('Errore nel recupero del report', error)
@@ -28,14 +47,17 @@ const Report = () => {
     }
   }
 
-  useEffect(() => {
-    fetchReportMensile()
-  }, [anno, mese])
+  // Fetch lista insegnanti
+  const fetchInsegnanti = async () => {
+    try {
+      const response = await apiClient.get('/insegnanti')
+      setListaInsegnanti(response.data)
+    } catch (error) {
+      console.error('Errore nel recupero degli insegnanti', error)
+    }
+  }
 
-  useEffect(() => {
-    console.log('📊 Report Aggiornato:', report) // 🔍 Debug
-  }, [report])
-
+  // Scarica il report PDF mensile
   const scaricaReportPdf = async () => {
     try {
       const response = await apiClient.get(
@@ -44,7 +66,6 @@ const Report = () => {
           responseType: 'blob',
         }
       )
-
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
@@ -57,163 +78,145 @@ const Report = () => {
     }
   }
 
-  // ✅ Debug per verificare che i dati siano corretti prima di passarli al grafico
-  console.log(
-    '📊 Dati passati al grafico:',
-    report?.totaleEntrate,
-    report?.totaleUscite
-  )
+  // Scarica il report PDF per un singolo insegnante
+  const scaricaOreInsegnante = async () => {
+    if (!insegnante) {
+      alert('Seleziona un insegnante prima di scaricare il report.')
+      return
+    }
+    try {
+      const response = await apiClient.get(
+        `/report/insegnante/pdf?anno=${anno}&mese=${mese}&insegnanteId=${insegnante}`,
+        { responseType: 'blob' }
+      )
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `Report_Insegnante_${mese}_${anno}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+    } catch (error) {
+      console.error('Errore nel download del report insegnante', error)
+      setError('Errore nel download del report insegnante.')
+    }
+  }
+
+  useEffect(() => {
+    fetchReportMensile()
+    fetchInsegnanti()
+  }, [anno, mese])
 
   return (
     <>
       <AdminNavbar />
-
       <div className="container mt-5">
         <h2 className="text-center mb-4">📊 Report Mensile</h2>
 
-        {/* Sezione Filtri */}
-        <div className="row mb-3">
-          <div className="col-md-4">
-            <label className="form-label">📆 Seleziona Mese:</label>
-            <select
-              className="form-select"
-              value={mese}
-              onChange={(e) => setMese(Number(e.target.value))}
-            >
-              {Array.from({ length: 12 }, (_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  {new Date(0, i).toLocaleString('it', { month: 'long' })}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="col-md-4">
-            <label className="form-label">📅 Seleziona Anno:</label>
-            <select
-              className="form-select"
-              value={anno}
-              onChange={(e) => setAnno(Number(e.target.value))}
-            >
-              {Array.from({ length: 5 }, (_, i) => (
-                <option key={anno - i} value={anno - i}>
-                  {anno - i}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="col-md-4 d-flex align-items-end">
-            <button
-              className="btn btn-primary w-100"
-              onClick={scaricaReportPdf}
-            >
-              📥 Scarica PDF
-            </button>
-          </div>
+        {/* DatePicker per selezionare mese e anno */}
+        <div className="d-flex justify-content-center mb-3">
+          <DatePicker
+            selected={selectedDate}
+            onChange={(date) => setSelectedDate(date)}
+            dateFormat="MMMM yyyy"
+            showMonthYearPicker
+            locale="it"
+            className="form-control text-center fw-bold"
+          />
         </div>
 
-        {/* Sezione Contenuti Report */}
+        {/* Bottone per scaricare il PDF */}
+        <div className="d-flex justify-content-center mb-4">
+          <button className="btn btn-primary" onClick={scaricaReportPdf}>
+            📥 Scarica PDF
+          </button>
+        </div>
+
         {loading ? (
           <p>Caricamento in corso...</p>
         ) : error ? (
           <div className="alert alert-danger">{error}</div>
         ) : report ? (
           <>
-            {/* Statistiche Generali */}
+            {/* Box delle statistiche */}
             <div className="row mb-4">
-              <div className="col-md-4">
+              <div className="col-md-3">
                 <div className="card p-4 text-center shadow">
                   <h5>💰 Totale Entrate</h5>
                   <h2>€ {(report.totaleEntrate ?? 0).toFixed(2)}</h2>
                 </div>
               </div>
-              <div className="col-md-4">
+              <div className="col-md-3">
                 <div className="card p-4 text-center shadow">
                   <h5>📉 Totale Uscite</h5>
                   <h2>€ {(report.totaleUscite ?? 0).toFixed(2)}</h2>
                 </div>
               </div>
-              <div className="col-md-4">
-                <div
-                  className={`card p-4 text-center shadow ${
-                    report.bilancio >= 0
-                      ? 'bg-success text-white'
-                      : 'bg-danger text-white'
-                  }`}
-                >
-                  <h5>📊 Bilancio</h5>
-                  <h2>€ {(report.bilancio ?? 0).toFixed(2)}</h2>
+
+              <div className="col-md-3">
+                <div className="card p-4 text-center shadow">
+                  <h5>🕒 Ore Insegnate</h5>
+                  <h2>{report.totaleOreInsegnate ?? 0} ore</h2>
                 </div>
               </div>
+
+            <div className="col-md-3">
+              <div
+                className={`card p-4 text-center shadow ${
+                  report.bilancio >= 0
+                    ? 'bg-success text-white'
+                    : 'bg-danger text-white'
+                }`}
+              >
+                <h5>📊 Bilancio</h5>
+                <h2>€ {(report.bilancio ?? 0).toFixed(2)}</h2>
+              </div>
+            </div>
             </div>
 
-            {/* Grafico Pagamenti vs Spese */}
+            {/* Grafico con Recharts */}
             <div className="mt-5">
-              <h4>📈 Entrate vs Uscite</h4>
-              <Bar
-                key={`${report?.totaleEntrate}-${report?.totaleUscite}`} // 👈 Forza il re-render se cambiano i dati
-                data={{
-                  labels: ['Entrate', 'Uscite'],
-                  datasets: [
+              <h4>📈 Entrate, Uscite e Ore Insegnate</h4>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart
+                  data={[
+                    { name: 'Entrate', valore: report?.totaleEntrate ?? 0 },
+                    { name: 'Uscite', valore: report?.totaleUscite ?? 0 },
                     {
-                      label: '€',
-                      data: [
-                        report?.totaleEntrate ?? 0,
-                        report?.totaleUscite ?? 0,
-                      ],
-                      backgroundColor: ['#28a745', '#dc3545'],
+                      name: 'Ore Insegnate',
+                      valore: report?.totaleOreInsegnate ?? 0,
                     },
-                  ],
-                }}
-                options={{
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      suggestedMax:
-                        Math.max(
-                          report?.totaleEntrate ?? 0,
-                          report?.totaleUscite ?? 0
-                        ) + 100,
-                    },
-                  },
-                }}
-              />
+                  ]}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip formatter={(value) => `${value}`} />
+                  <Bar dataKey="valore" fill="#28a745" barSize={50} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
 
-            {/* Tabella Dettagliata */}
+            {/* Selettore per report insegnante */}
             <div className="mt-4">
-              <h4>📋 Dettaglio Entrate e Uscite</h4>
-              <table className="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Categoria</th>
-                    <th>Importo (€)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(report.speseRegistrate ?? {}).map(
-                    ([categoria, importo]) => (
-                      <tr key={categoria}>
-                        <td>{categoria}</td>
-                        <td className="text-danger">
-                          -€ {(importo ?? 0).toFixed(2)}
-                        </td>
-                      </tr>
-                    )
-                  )}
-                  {Object.entries(report.pagamentiRicevuti ?? {}).map(
-                    ([metodo, importo]) => (
-                      <tr key={metodo}>
-                        <td>{metodo}</td>
-                        <td className="text-success">
-                          € {(importo ?? 0).toFixed(2)}
-                        </td>
-                      </tr>
-                    )
-                  )}
-                </tbody>
-              </table>
+              <h5>📘 Report per Insegnante</h5>
+              <select
+                className="form-select mb-2"
+                value={insegnante}
+                onChange={(e) => setInsegnante(e.target.value)}
+              >
+                <option value="">Seleziona Insegnante</option>
+                {listaInsegnanti.map((ins) => (
+                  <option key={ins.id} value={ins.id}>
+                    {ins.nome} {ins.cognome}
+                  </option>
+                ))}
+              </select>
+              <button
+                className="btn btn-primary mb-3"
+                onClick={scaricaOreInsegnante}
+              >
+                📥 Scarica Report Insegnante
+              </button>
             </div>
           </>
         ) : (
