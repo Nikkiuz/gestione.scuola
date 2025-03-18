@@ -60,6 +60,11 @@ const AdminNavbar = () => {
               </Link>
             </li>
             <li className="nav-item">
+              <Link className="nav-link" to="/pagamenti">
+                💳 Pagamenti
+              </Link>
+            </li>
+            <li className="nav-item">
               <Link className="nav-link" to="/calendario">
                 📅 Calendario
               </Link>

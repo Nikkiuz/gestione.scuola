@@ -21,6 +21,8 @@ import Report from '../pages/Report'
 import ProtectedRoute from './ProtectedRoute'
 import TeacherList from '../pages/TeacherList'
 import TeacherDetail from '../pages/TeacherDetail'
+import PagamentiList from '../pages/PagamentiList' // 🔹 Importata nuova pagina
+import PagamentiDetail from '../pages/PagamentiDetail' // 🔹 Importata nuova pagina
 
 const AppRouter = () => {
   const { token } = useSelector((state) => state.auth)
@@ -124,7 +126,7 @@ const AppRouter = () => {
           }
         />
         <Route
-          path='/insegnanti'
+          path="/insegnanti"
           element={
             <ProtectedRoute>
               <TeacherList />
@@ -132,10 +134,28 @@ const AppRouter = () => {
           }
         />
         <Route
-          path='/insegnanti/:id'
+          path="/insegnanti/:id"
           element={
             <ProtectedRoute>
               <TeacherDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 🔹 Nuove rotte per Pagamenti */}
+        <Route
+          path="/pagamenti"
+          element={
+            <ProtectedRoute>
+              <PagamentiList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pagamenti/:id"
+          element={
+            <ProtectedRoute>
+              <PagamentiDetail />
             </ProtectedRoute>
           }
         />
