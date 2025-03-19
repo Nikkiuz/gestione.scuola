@@ -1,26 +1,26 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importa useNavigate
-import { Modal, Button, Form } from 'react-bootstrap';
-import apiClient from '../api/apiClient';
-import AdminNavbar from '../components/AdminNavbar';
-import DatePicker from 'react-datepicker';
-import ModalePagamento from '../components/ModalePagamento';
-import 'react-datepicker/dist/react-datepicker.css';
-import { registerLocale } from 'react-datepicker';
-import it from 'date-fns/locale/it';
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Modal, Button, Form } from 'react-bootstrap'
+import apiClient from '../api/apiClient'
+import AdminNavbar from '../components/AdminNavbar'
+import DatePicker from 'react-datepicker'
+import ModalePagamento from '../components/ModalePagamento'
+import 'react-datepicker/dist/react-datepicker.css'
+import { registerLocale } from 'react-datepicker'
+import it from 'date-fns/locale/it'
 
-registerLocale('it', it);
+registerLocale('it', it)
 
 const PagamentiList = () => {
-  const [pagamenti, setPagamenti] = useState([]);
-  const [studenti, setStudenti] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [studenteId, setStudenteId] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const navigate = useNavigate(); // Usa useNavigate per la navigazione
+  const [pagamenti, setPagamenti] = useState([])
+  const [studenti, setStudenti] = useState([])
+  const [selectedDate, setSelectedDate] = useState(new Date())
+  const [studenteId, setStudenteId] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
     id: '',
@@ -31,90 +31,82 @@ const PagamentiList = () => {
     metodoPagamento: 'CARTA',
     numeroRicevuta: '',
     note: '',
-  });
+  })
 
-  const anno = selectedDate.getFullYear();
-  const mese = String(selectedDate.getMonth() + 1).padStart(2, '0');
+  const anno = selectedDate.getFullYear()
+  const mese = String(selectedDate.getMonth() + 1).padStart(2, '0')
 
   useEffect(() => {
-    fetchPagamenti();
-    fetchStudenti();
-  }, [anno, mese, studenteId]);
+    fetchPagamenti()
+    fetchStudenti()
+  }, [anno, mese, studenteId])
 
   const fetchPagamenti = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
       const response = await apiClient.get('/pagamenti', {
         params: { anno, mese, studenteId },
-      });
-      setPagamenti(response.data);
+      })
+      setPagamenti(response.data)
     } catch (error) {
-      setError('Errore nel caricamento dei pagamenti.', error);
+      setError('Errore nel caricamento dei pagamenti.', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const fetchStudenti = async () => {
     try {
-      const response = await apiClient.get('/studenti');
-      setStudenti(response.data);
+      const response = await apiClient.get('/studenti')
+      setStudenti(response.data)
     } catch (error) {
-      console.error('❌ Errore nel recupero degli studenti:', error);
+      console.error('❌ Errore nel recupero degli studenti:', error)
+      setError(
+        "Errore nel recupero degli studenti. Controlla la connessione o l'endpoint."
+      )
     }
-  };
+  }
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    const { name, value } = e.target
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }))
+  }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+    e.preventDefault()
+    setError('')
     try {
       if (isEditing) {
         await apiClient.put(`/pagamenti/${formData.id}`, {
           ...formData,
           dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
-        });
+        })
       } else {
         await apiClient.post('/pagamenti', {
           ...formData,
           dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
-        });
+        })
       }
-      setShowModal(false);
-      await fetchPagamenti();
+      setShowModal(false)
+      await fetchPagamenti()
     } catch (error) {
-      setError(error.response?.data?.message || 'Errore generico.');
+      setError(error.response?.data?.message || 'Errore generico.')
     }
-  };
+  }
 
   const eliminaPagamento = async (id) => {
     if (window.confirm('Vuoi eliminare questo pagamento?')) {
       try {
-        await apiClient.delete(`/pagamenti/${id}`);
-        fetchPagamenti();
+        await apiClient.delete(`/pagamenti/${id}`)
+        fetchPagamenti()
       } catch (error) {
-        setError('Errore nella cancellazione del pagamento.', error);
+        setError('Errore nella cancellazione del pagamento.', error)
       }
     }
-  };
-
-  const handleEdit = (pagamento) => {
-    setFormData({
-      id: pagamento.id,
-      studenteId: pagamento.studenteId,
-      dataPagamento: new Date(pagamento.dataPagamento),
-      importo: pagamento.importo,
-      mensilitaSaldata: pagamento.mensilitaSaldata,
-      metodoPagamento: pagamento.metodoPagamento,
-      numeroRicevuta: pagamento.numeroRicevuta,
-      note: pagamento.note,
-    });
-    setIsEditing(true);
-    setShowModal(true);
-  };
+  }
 
   const resetFormData = () => {
     setFormData({
@@ -126,9 +118,9 @@ const PagamentiList = () => {
       metodoPagamento: 'CARTA',
       numeroRicevuta: '',
       note: '',
-    });
-    setIsEditing(false);
-  };
+    })
+    setIsEditing(false)
+  }
 
   return (
     <>
@@ -174,8 +166,8 @@ const PagamentiList = () => {
           <button
             className="btn btn-success"
             onClick={() => {
-              resetFormData();
-              setShowModal(true);
+              resetFormData()
+              setShowModal(true)
             }}
           >
             ➕ Aggiungi Pagamento
@@ -210,12 +202,6 @@ const PagamentiList = () => {
                     👁️ Dettagli
                   </button>
                   <button
-                    className="btn btn-primary btn-sm me-2"
-                    onClick={() => handleEdit(pagamento)}
-                  >
-                    ✏️ Modifica
-                  </button>
-                  <button
                     className="btn btn-danger btn-sm"
                     onClick={() => eliminaPagamento(pagamento.id)}
                   >
@@ -230,18 +216,19 @@ const PagamentiList = () => {
         <ModalePagamento
           show={showModal}
           onHide={() => {
-            setShowModal(false);
-            resetFormData();
+            setShowModal(false)
+            resetFormData()
           }}
           pagamentoSelezionato={formData}
           setPagamentoSelezionato={setFormData}
           isEditing={isEditing}
           handleSubmit={handleSubmit}
-          studenti={studenti} // Passa la lista degli studenti
+          studenti={studenti}
+          handleChange={handleChange} // Passa handleChange come prop
         />
       </div>
     </>
-  );
-};
+  )
+}
 
-export default PagamentiList;
+export default PagamentiList

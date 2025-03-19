@@ -33,6 +33,14 @@ public class PagamentoController {
 		return pagamentoService.getTuttiIPagamenti();
 	}
 
+	// ✅ Recupera un singolo pagamento tramite ID (Solo Admin)
+	@GetMapping("/{id}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@ResponseStatus(HttpStatus.OK)
+	public PagamentoResponseDTO getPagamentoById(@PathVariable Long id) {
+		return pagamentoService.getPagamentoById(id);
+	}
+
 	// ✅ Recupera i pagamenti di uno studente specifico (Solo Admin)
 	@GetMapping("/studente/{studenteId}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")

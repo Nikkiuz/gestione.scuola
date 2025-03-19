@@ -48,6 +48,16 @@ public class PagamentoService {
 			.collect(Collectors.toList());
 	}
 
+	// ✅ Recupera un singolo pagamento
+	public PagamentoResponseDTO getPagamentoById(Long id) {
+		// Recupera il pagamento dal repository o lancia un'eccezione se non trovato
+		Pagamento pagamento = pagamentoRepository.findById(id)
+			.orElseThrow(() -> new EntityNotFoundException("Pagamento non trovato con ID: " + id));
+
+		// Converti l'entità Pagamento in PagamentoResponseDTO
+		return convertToResponseDTO(pagamento);
+	}
+
 	// ✅ Recupera i pagamenti di un singolo studente
 	public List<PagamentoResponseDTO> getPagamentiByStudente(Long studenteId) {
 		return pagamentoRepository.findByStudenteId(studenteId).stream()
@@ -94,6 +104,7 @@ public class PagamentoService {
 		// Restituisci il DTO aggiornato
 		return convertToResponseDTO(pagamentoAggiornato);
 	}
+
 
 	// 🔹 Converte da Pagamento a PagamentoResponseDTO
 	private PagamentoResponseDTO convertToResponseDTO(Pagamento pagamento) {

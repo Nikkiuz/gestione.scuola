@@ -27,8 +27,8 @@ apiClient.interceptors.response.use(
     }
     if (error.response && error.response.status === 401) {
       console.warn('❌ Token scaduto o non valido. Disconnessione forzata.')
-      //localStorage.removeItem('token')
-      // window.location.href = '/login';
+      localStorage.removeItem('token')
+      window.location.href = '/login';
     }
     return Promise.reject(error)
   }
