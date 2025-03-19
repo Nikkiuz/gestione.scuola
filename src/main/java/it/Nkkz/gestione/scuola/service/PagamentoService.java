@@ -26,14 +26,17 @@ public class PagamentoService {
 	// ✅ Registra un nuovo pagamento
 	@Transactional
 	public PagamentoResponseDTO registraPagamento(PagamentoRequestDTO requestDTO) {
+		// Verifica che lo studente esista
 		Studente studente = studenteRepository.findById(requestDTO.getStudenteId())
-			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato"));
+			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato con ID: " + requestDTO.getStudenteId()));
 
+		// Crea un nuovo pagamento
 		Pagamento pagamento = new Pagamento();
 		BeanUtils.copyProperties(requestDTO, pagamento);
 		pagamento.setStudente(studente);
 		pagamento.setNumeroRicevuta(UUID.randomUUID().toString()); // Genera un numero di ricevuta unico
 
+		// Salva il pagamento
 		pagamentoRepository.save(pagamento);
 		return convertToResponseDTO(pagamento);
 	}
@@ -62,9 +65,34 @@ public class PagamentoService {
 	// ✅ Elimina un pagamento
 	@Transactional
 	public void eliminaPagamento(Long pagamentoId) {
+		// Verifica che il pagamento esista
 		Pagamento pagamento = pagamentoRepository.findById(pagamentoId)
-			.orElseThrow(() -> new EntityNotFoundException("Pagamento non trovato"));
+			.orElseThrow(() -> new EntityNotFoundException("Pagamento non trovato con ID: " + pagamentoId));
+
+		// Elimina il pagamento
 		pagamentoRepository.delete(pagamento);
+	}
+
+	// ✅ Aggiorna un pagamento esistente
+	@Transactional
+	public PagamentoResponseDTO aggiornaPagamento(Long pagamentoId, PagamentoRequestDTO requestDTO) {
+		// Verifica che il pagamento esista
+		Pagamento pagamento = pagamentoRepository.findById(pagamentoId)
+			.orElseThrow(() -> new EntityNotFoundException("Pagamento non trovato con ID: " + pagamentoId));
+
+		// Aggiorna i campi del pagamento
+		pagamento.setDataPagamento(requestDTO.getDataPagamento());
+		pagamento.setImporto(requestDTO.getImporto());
+		pagamento.setMensilitaSaldata(requestDTO.getMensilitaSaldata());
+		pagamento.setMetodoPagamento(requestDTO.getMetodoPagamento());
+		pagamento.setNumeroRicevuta(requestDTO.getNumeroRicevuta());
+		pagamento.setNote(requestDTO.getNote());
+
+		// Salva il pagamento aggiornato
+		Pagamento pagamentoAggiornato = pagamentoRepository.save(pagamento);
+
+		// Restituisci il DTO aggiornato
+		return convertToResponseDTO(pagamentoAggiornato);
 	}
 
 	// 🔹 Converte da Pagamento a PagamentoResponseDTO

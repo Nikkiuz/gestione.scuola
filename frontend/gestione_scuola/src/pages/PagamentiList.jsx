@@ -1,26 +1,29 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Modal, Button, Form } from 'react-bootstrap'
-import apiClient from '../api/apiClient'
-import AdminNavbar from '../components/AdminNavbar'
-import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
-import { registerLocale } from 'react-datepicker'
-import it from 'date-fns/locale/it'
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate
+import { Modal, Button, Form } from 'react-bootstrap';
+import apiClient from '../api/apiClient';
+import AdminNavbar from '../components/AdminNavbar';
+import DatePicker from 'react-datepicker';
+import ModalePagamento from '../components/ModalePagamento';
+import 'react-datepicker/dist/react-datepicker.css';
+import { registerLocale } from 'react-datepicker';
+import it from 'date-fns/locale/it';
 
-registerLocale('it', it)
+registerLocale('it', it);
 
 const PagamentiList = () => {
-  const [pagamenti, setPagamenti] = useState([])
-  const [studenti, setStudenti] = useState([])
-  const [selectedDate, setSelectedDate] = useState(new Date())
-  const [studenteId, setStudenteId] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [showModal, setShowModal] = useState(false)
-  const navigate = useNavigate()
+  const [pagamenti, setPagamenti] = useState([]);
+  const [studenti, setStudenti] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [studenteId, setStudenteId] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate(); // Usa useNavigate per la navigazione
 
   const [formData, setFormData] = useState({
+    id: '',
     studenteId: '',
     dataPagamento: new Date(),
     importo: '',
@@ -28,68 +31,104 @@ const PagamentiList = () => {
     metodoPagamento: 'CARTA',
     numeroRicevuta: '',
     note: '',
-  })
+  });
 
-  const anno = selectedDate.getFullYear()
-  const mese = String(selectedDate.getMonth() + 1).padStart(2, '0')
+  const anno = selectedDate.getFullYear();
+  const mese = String(selectedDate.getMonth() + 1).padStart(2, '0');
 
   useEffect(() => {
-    fetchPagamenti()
-    fetchStudenti()
-  }, [anno, mese, studenteId])
+    fetchPagamenti();
+    fetchStudenti();
+  }, [anno, mese, studenteId]);
 
   const fetchPagamenti = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await apiClient.get('/pagamenti', {
         params: { anno, mese, studenteId },
-      })
-      setPagamenti(response.data)
+      });
+      setPagamenti(response.data);
     } catch (error) {
-      setError('Errore nel caricamento dei pagamenti.', error)
+      setError('Errore nel caricamento dei pagamenti.', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const fetchStudenti = async () => {
     try {
-      const response = await apiClient.get('/studenti')
-      setStudenti(response.data)
+      const response = await apiClient.get('/studenti');
+      setStudenti(response.data);
     } catch (error) {
-      console.error('❌ Errore nel recupero degli studenti:', error)
+      console.error('❌ Errore nel recupero degli studenti:', error);
     }
-  }
+  };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError('');
     try {
-      await apiClient.post('/pagamenti', {
-        ...formData,
-        dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
-      })
-      setShowModal(false)
-      await fetchPagamenti()
+      if (isEditing) {
+        await apiClient.put(`/pagamenti/${formData.id}`, {
+          ...formData,
+          dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
+        });
+      } else {
+        await apiClient.post('/pagamenti', {
+          ...formData,
+          dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
+        });
+      }
+      setShowModal(false);
+      await fetchPagamenti();
     } catch (error) {
-      setError(error.response?.data?.message || 'Errore generico.')
+      setError(error.response?.data?.message || 'Errore generico.');
     }
-  }
+  };
 
   const eliminaPagamento = async (id) => {
     if (window.confirm('Vuoi eliminare questo pagamento?')) {
       try {
-        await apiClient.delete(`/pagamenti/${id}`)
-        fetchPagamenti()
+        await apiClient.delete(`/pagamenti/${id}`);
+        fetchPagamenti();
       } catch (error) {
-        setError('Errore nella cancellazione del pagamento.', error)
+        setError('Errore nella cancellazione del pagamento.', error);
       }
     }
-  }
+  };
+
+  const handleEdit = (pagamento) => {
+    setFormData({
+      id: pagamento.id,
+      studenteId: pagamento.studenteId,
+      dataPagamento: new Date(pagamento.dataPagamento),
+      importo: pagamento.importo,
+      mensilitaSaldata: pagamento.mensilitaSaldata,
+      metodoPagamento: pagamento.metodoPagamento,
+      numeroRicevuta: pagamento.numeroRicevuta,
+      note: pagamento.note,
+    });
+    setIsEditing(true);
+    setShowModal(true);
+  };
+
+  const resetFormData = () => {
+    setFormData({
+      id: '',
+      studenteId: '',
+      dataPagamento: new Date(),
+      importo: '',
+      mensilitaSaldata: '',
+      metodoPagamento: 'CARTA',
+      numeroRicevuta: '',
+      note: '',
+    });
+    setIsEditing(false);
+  };
 
   return (
     <>
@@ -134,7 +173,10 @@ const PagamentiList = () => {
         <div className="mb-3 text-end">
           <button
             className="btn btn-success"
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              resetFormData();
+              setShowModal(true);
+            }}
           >
             ➕ Aggiungi Pagamento
           </button>
@@ -160,9 +202,16 @@ const PagamentiList = () => {
                 <td>{pagamento.mensilitaSaldata}</td>
                 <td>{pagamento.metodoPagamento}</td>
                 <td>
+                  {/* Pulsante per visualizzare i dettagli del pagamento */}
+                  <button
+                    className="btn btn-info btn-sm me-2"
+                    onClick={() => navigate(`/pagamenti/${pagamento.id}`)} // Reindirizza alla pagina dei dettagli
+                  >
+                    👁️ Dettagli
+                  </button>
                   <button
                     className="btn btn-primary btn-sm me-2"
-                    onClick={() => navigate(`/pagamenti/${pagamento.id}`)}
+                    onClick={() => handleEdit(pagamento)}
                   >
                     ✏️ Modifica
                   </button>
@@ -178,127 +227,21 @@ const PagamentiList = () => {
           </tbody>
         </table>
 
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
-          <Modal.Header closeButton>
-            <Modal.Title>Aggiungi Pagamento</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Label>🎓 Studente</Form.Label>
-                <Form.Select
-                  name="studenteId"
-                  value={formData.studenteId}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Seleziona Studente</option>
-                  {studenti.map((studente) => (
-                    <option key={studente.id} value={studente.id}>
-                      {studente.nome} {studente.cognome}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-
-              {/* 📆 Mensilità Saldata */}
-              <Form.Group className="mb-3">
-                <Form.Label>✅ Mensilità Saldata</Form.Label>
-                <Form.Select
-                  name="mensilitaSaldata"
-                  value={formData.mensilitaSaldata}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Seleziona Mensilità</option>
-                  {Array.from({ length: 12 }, (_, i) => {
-                    const mese = new Date(0, i).toLocaleString('it', {
-                      month: 'long',
-                    })
-                    return (
-                      <option
-                        key={mese}
-                        value={`${mese} ${new Date().getFullYear()}`}
-                      >
-                        {mese} {new Date().getFullYear()}
-                      </option>
-                    )
-                  })}
-                </Form.Select>
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>📆 Data Pagamento</Form.Label>
-                <DatePicker
-                  selected={formData.dataPagamento}
-                  onChange={(date) =>
-                    setFormData({ ...formData, dataPagamento: date })
-                  }
-                  dateFormat="yyyy-MM-dd"
-                  locale="it"
-                  className="form-control ms-2 text-center"
-                  required
-                />
-              </Form.Group>
-
-              {/* 💰 Importo */}
-              <Form.Group className="mb-3">
-                <Form.Label>💰 Importo (€)</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="importo"
-                  value={formData.importo}
-                  onChange={handleChange}
-                  min="0.01"
-                  step="0.01"
-                  required
-                />
-              </Form.Group>
-
-              {/* 💳 Metodo di Pagamento */}
-              <Form.Group className="mb-3">
-                <Form.Label>💳 Metodo di Pagamento</Form.Label>
-                <Form.Select
-                  name="metodoPagamento"
-                  value={formData.metodoPagamento}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="CARTA">Carta</option>
-                  <option value="BONIFICO">Bonifico</option>
-                </Form.Select>
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Numero Ricevuta</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="numeroRicevuta"
-                  value={formData.numeroRicevuta}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Note</Form.Label>
-                <Form.Control
-                  as="textarea"
-                  name="note"
-                  value={formData.note}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-
-              <Button type="submit" variant="success">
-                ✅ Aggiungi Pagamento
-              </Button>
-            </Form>
-          </Modal.Body>
-        </Modal>
+        <ModalePagamento
+          show={showModal}
+          onHide={() => {
+            setShowModal(false);
+            resetFormData();
+          }}
+          pagamentoSelezionato={formData}
+          setPagamentoSelezionato={setFormData}
+          isEditing={isEditing}
+          handleSubmit={handleSubmit}
+          studenti={studenti} // Passa la lista degli studenti
+        />
       </div>
     </>
-  )
-}
+  );
+};
 
-export default PagamentiList
+export default PagamentiList;

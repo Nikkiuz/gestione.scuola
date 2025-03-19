@@ -1,0 +1,197 @@
+import React from 'react'
+import { Modal, Form, Button } from 'react-bootstrap'
+
+const ModaleStudente = ({
+  show,
+  onHide,
+  formStudente,
+  setFormStudente,
+  handleSalvaModificheStudente,
+  insegnanti,
+}) => {
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setFormStudente({
+      ...formStudente,
+      [name]: type === 'checkbox' ? checked : value,
+    })
+  }
+
+  const handleCheckboxChange = (e, field) => {
+    const { value, checked } = e.target
+    setFormStudente((prev) => ({
+      ...prev,
+      [field]: checked
+        ? [...prev[field], value]
+        : prev[field].filter((item) => item !== value),
+    }))
+  }
+
+  return (
+    <Modal show={show} onHide={onHide}>
+      <Modal.Header closeButton>
+        <Modal.Title>✏️ Aggiungi Studente</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form onSubmit={handleSalvaModificheStudente}>
+          <Form.Group className="mb-3">
+            <Form.Label>Nome</Form.Label>
+            <Form.Control
+              type="text"
+              name="nome"
+              value={formStudente.nome}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Cognome</Form.Label>
+            <Form.Control
+              type="text"
+              name="cognome"
+              value={formStudente.cognome}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Età</Form.Label>
+            <Form.Control
+              type="number"
+              name="eta"
+              value={formStudente.eta}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Lingua da imparare</Form.Label>
+            <Form.Control
+              type="text"
+              name="linguaDaImparare"
+              value={formStudente.linguaDaImparare}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Livello Iniziale</Form.Label>
+            <Form.Control
+              type="text"
+              name="livello"
+              value={formStudente.livello}
+              onChange={handleChange}
+              placeholder="Lascia vuoto se non disponibile"
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Tipologia di Iscrizione</Form.Label>
+            <Form.Control
+              type="text"
+              name="tipologiaIscrizione"
+              value={formStudente.tipologiaIscrizione}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Giorni Preferiti</Form.Label>
+            <div className="d-flex flex-wrap">
+              {['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'].map(
+                (giorno) => (
+                  <Form.Check
+                    key={giorno}
+                    type="checkbox"
+                    label={giorno}
+                    value={giorno}
+                    checked={formStudente.giorniPreferiti.includes(giorno)}
+                    onChange={(e) => handleCheckboxChange(e, 'giorniPreferiti')}
+                    className="me-3"
+                  />
+                )
+              )}
+            </div>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Fasce Orarie Preferite</Form.Label>
+            <div className="d-flex flex-wrap">
+              {[
+                '08:00-10:00',
+                '10:00-12:00',
+                '12:00-14:00',
+                '14:00-16:00',
+                '16:00-18:00',
+                '18:00-20:00',
+              ].map((fascia) => (
+                <Form.Check
+                  key={fascia}
+                  type="checkbox"
+                  label={fascia}
+                  value={fascia}
+                  checked={formStudente.fasceOrariePreferite.includes(fascia)}
+                  onChange={(e) =>
+                    handleCheckboxChange(e, 'fasceOrariePreferite')
+                  }
+                  className="me-3"
+                />
+              ))}
+            </div>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Corso Privato</Form.Label>
+            <Form.Check
+              type="checkbox"
+              name="corsoPrivato"
+              checked={formStudente.corsoPrivato}
+              onChange={handleChange}
+            />
+          </Form.Group>
+          {formStudente.corsoPrivato && (
+            <Form.Group className="mb-3">
+              <Form.Label>Ore Settimanali</Form.Label>
+              <Form.Control
+                type="number"
+                name="frequenzaCorsoPrivato"
+                value={formStudente.frequenzaCorsoPrivato}
+                onChange={handleChange}
+                min="1"
+                required
+              />
+            </Form.Group>
+          )}
+          <Form.Group className="mb-3">
+            <Form.Label>Tipo di Corso di Gruppo</Form.Label>
+            <Form.Select
+              name="tipoCorsoGruppo"
+              value={formStudente.tipoCorsoGruppo}
+              onChange={handleChange}
+            >
+              <option value="1 volta a settimana">1 volta a settimana</option>
+              <option value="2 volte a settimana">2 volte a settimana</option>
+            </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Insegnante Preferito</Form.Label>
+            <Form.Select
+              name="insegnanteId"
+              value={formStudente.insegnanteId}
+              onChange={handleChange}
+            >
+              <option value="">Nessuna preferenza</option>
+              {insegnanti.map((insegnante) => (
+                <option key={insegnante.id} value={insegnante.id}>
+                  {insegnante.nome} {insegnante.cognome}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+          <Button type="submit" variant="success">
+            💾 Salva Modifiche
+          </Button>
+        </Form>
+      </Modal.Body>
+    </Modal>
+  )
+}
+
+export default ModaleStudente

@@ -56,4 +56,15 @@ public class PagamentoController {
 	public void eliminaPagamento(@PathVariable Long pagamentoId) {
 		pagamentoService.eliminaPagamento(pagamentoId);
 	}
+
+	// ✅ Aggiorna un pagamento esistente (Solo Admin)
+	@PutMapping("/{pagamentoId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@ResponseStatus(HttpStatus.OK)
+	public PagamentoResponseDTO aggiornaPagamento(
+		@PathVariable Long pagamentoId,
+		@RequestBody PagamentoRequestDTO requestDTO
+	) {
+		return pagamentoService.aggiornaPagamento(pagamentoId, requestDTO);
+	}
 }
