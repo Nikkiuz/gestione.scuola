@@ -10,7 +10,9 @@ import java.time.LocalDate;
 public class PagamentoRequestDTO {
 	private Long studenteId;  // ID dello studente che effettua il pagamento
 	private LocalDate dataPagamento; // Data del pagamento
-	private BigDecimal importo; // Importo pagato
+	private double importo; // Importo pagato
 	private String mensilitaSaldata; // Esempio: "Gennaio 2025"
 	private MetodoPagamento metodoPagamento; // Bonifico / Carta
+	private String numeroRicevuta;
+	private String note;
 }

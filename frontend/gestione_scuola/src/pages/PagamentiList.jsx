@@ -185,6 +185,49 @@ const PagamentiList = () => {
           <Modal.Body>
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3">
+                <Form.Label>🎓 Studente</Form.Label>
+                <Form.Select
+                  name="studenteId"
+                  value={formData.studenteId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleziona Studente</option>
+                  {studenti.map((studente) => (
+                    <option key={studente.id} value={studente.id}>
+                      {studente.nome} {studente.cognome}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+
+              {/* 📆 Mensilità Saldata */}
+              <Form.Group className="mb-3">
+                <Form.Label>✅ Mensilità Saldata</Form.Label>
+                <Form.Select
+                  name="mensilitaSaldata"
+                  value={formData.mensilitaSaldata}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleziona Mensilità</option>
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const mese = new Date(0, i).toLocaleString('it', {
+                      month: 'long',
+                    })
+                    return (
+                      <option
+                        key={mese}
+                        value={`${mese} ${new Date().getFullYear()}`}
+                      >
+                        {mese} {new Date().getFullYear()}
+                      </option>
+                    )
+                  })}
+                </Form.Select>
+              </Form.Group>
+
+              <Form.Group className="mb-3">
                 <Form.Label>📆 Data Pagamento</Form.Label>
                 <DatePicker
                   selected={formData.dataPagamento}
@@ -193,9 +236,37 @@ const PagamentiList = () => {
                   }
                   dateFormat="yyyy-MM-dd"
                   locale="it"
-                  className="form-control"
+                  className="form-control ms-2 text-center"
                   required
                 />
+              </Form.Group>
+
+              {/* 💰 Importo */}
+              <Form.Group className="mb-3">
+                <Form.Label>💰 Importo (€)</Form.Label>
+                <Form.Control
+                  type="number"
+                  name="importo"
+                  value={formData.importo}
+                  onChange={handleChange}
+                  min="0.01"
+                  step="0.01"
+                  required
+                />
+              </Form.Group>
+
+              {/* 💳 Metodo di Pagamento */}
+              <Form.Group className="mb-3">
+                <Form.Label>💳 Metodo di Pagamento</Form.Label>
+                <Form.Select
+                  name="metodoPagamento"
+                  value={formData.metodoPagamento}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="CARTA">Carta</option>
+                  <option value="BONIFICO">Bonifico</option>
+                </Form.Select>
               </Form.Group>
 
               <Form.Group className="mb-3">

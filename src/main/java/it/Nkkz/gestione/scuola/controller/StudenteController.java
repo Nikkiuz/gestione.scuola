@@ -1,5 +1,6 @@
 package it.Nkkz.gestione.scuola.controller;
 
+import it.Nkkz.gestione.scuola.dto.PagamentoRequestDTO;
 import it.Nkkz.gestione.scuola.dto.StudenteRequestDTO;
 import it.Nkkz.gestione.scuola.dto.StudenteResponseDTO;
 import it.Nkkz.gestione.scuola.entity.Corso;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -91,8 +93,13 @@ public class StudenteController {
 	public ResponseEntity<StudenteResponseDTO> updateStudente(
 		@PathVariable Long id,
 		@RequestBody StudenteRequestDTO studenteRequestDTO) {
+
+		System.out.println("📌 updateStudente CHIAMATO con ID: " + id);
+		System.out.println("📌 Dati ricevuti: " + studenteRequestDTO);
+
 		return ResponseEntity.ok(studenteService.updateStudente(id, studenteRequestDTO));
 	}
+
 
 	// ✅ SOLO ADMIN - Elimina uno studente
 	@DeleteMapping("/{id}")
@@ -148,14 +155,25 @@ public class StudenteController {
 	// ✅ Aggiungi un pagamento a uno studente
 	@PostMapping("/{id}/pagamenti")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public ResponseEntity<Pagamento> aggiungiPagamento(@PathVariable Long id, @RequestBody Pagamento nuovoPagamento) {
-		Studente studente = studenteRepository.findById(id)
-			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato"));
+	public ResponseEntity<?> aggiungiPagamento(
+		@PathVariable Long id,
+		@RequestBody PagamentoRequestDTO pagamentoRequestDTO) {
 
-		nuovoPagamento.setStudente(studente);
+		// Recuperiamo lo studente dall'ID
+		Studente studente = studenteRepository.findById(id)
+			.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Studente non trovato"));
+
+		// Creiamo il nuovo pagamento
+		Pagamento nuovoPagamento = new Pagamento();
+		nuovoPagamento.setStudente(studente); // ✅ Assegna lo studente dal database
+		nuovoPagamento.setImporto(pagamentoRequestDTO.getImporto());
+		nuovoPagamento.setDataPagamento(pagamentoRequestDTO.getDataPagamento());
+		nuovoPagamento.setMensilitaSaldata(pagamentoRequestDTO.getMensilitaSaldata());
+		nuovoPagamento.setNumeroRicevuta(pagamentoRequestDTO.getNumeroRicevuta());
+		nuovoPagamento.setMetodoPagamento(pagamentoRequestDTO.getMetodoPagamento());
+		nuovoPagamento.setNote(pagamentoRequestDTO.getNote());
+
 		pagamentoRepository.save(nuovoPagamento);
 		return ResponseEntity.ok(nuovoPagamento);
 	}
-
-
 }

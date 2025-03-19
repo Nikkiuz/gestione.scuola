@@ -408,7 +408,7 @@ const handleSubmit = async (e) => {
                 <td>{studente.nome}</td>
                 <td>{studente.cognome}</td>
                 <td>{studente.livello}</td>
-
+                <td>
                 <button
                   className="btn btn-primary btn-sm me-2"
                   onClick={() => navigate(`/studenti/${studente.id}`)}
@@ -421,6 +421,7 @@ const handleSubmit = async (e) => {
                 >
                   🗑 Elimina
                 </button>
+                </td>
               </tr>
             ))}
           </tbody>

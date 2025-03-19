@@ -227,6 +227,7 @@ const TeacherList = () => {
 
       {/* 📌 Tabella Insegnanti */}
       {!loading && !error && (
+        
         <table className="table table-striped">
           <thead>
             <tr>

@@ -5,8 +5,8 @@ const ProtectedRoute = ({ children }) => {
   const { token } = useSelector((state) => state.auth)
 
   if (!token) {
-    console.log('🔴 Utente non autenticato, reindirizzamento a /login')
-    return <Navigate to="/login" replace />
+    console.log('🔴 Utente non autenticato, MA NON REINDIRIZZO PER DEBUG')
+    return <div>⚠️ ERRORE: Utente non autenticato!</div> // 🔥 Mostra un messaggio invece di reindirizzare
   }
 
   return children

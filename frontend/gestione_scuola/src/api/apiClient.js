@@ -8,15 +8,28 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token') // ✅ Recupera il token salvato
-    console.log('🔍 Token JWT inviato:', token) // 🔍 Debug: Stampiamo il token
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}` // ✅ Aggiunge il token nell'header
     }
-
     return config
   },
   (error) => {
+    return Promise.reject(error)
+  }
+)
+
+// 🚨 Intercettore per gestire errori di autenticazione
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      console.log('📌 Errore in risposta:', error.response)
+    }
+    if (error.response && error.response.status === 401) {
+      console.warn('❌ Token scaduto o non valido. Disconnessione forzata.')
+      localStorage.removeItem('token')
+      // window.location.href = '/login';
+    }
     return Promise.reject(error)
   }
 )
