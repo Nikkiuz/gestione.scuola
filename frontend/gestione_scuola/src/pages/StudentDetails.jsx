@@ -49,37 +49,42 @@ const StudentDetail = () => {
 
 const fetchDatiStudente = async () => {
   try {
-    console.log(
-      '📌 Token prima della richiesta:',
-      localStorage.getItem('token')
-    )
     const [studenteRes, pagamentiRes] = await Promise.all([
       apiClient.get(`/studenti/${id}`),
       apiClient.get(`/studenti/${id}/pagamenti`),
     ])
     setStudente((prev) => prev || studenteRes.data)
     setPagamenti(pagamentiRes.data)
-    setError(null)
+    setError(null) // Reset error
   } catch (error) {
     console.error('Errore nel recupero dei dati dello studente', error)
+    setError('Errore nel recupero dei dati dello studente') // Aggiungi messaggio di errore
   } finally {
     setLoading(false)
   }
 }
 
-   const fetchInsegnanti = async () => {
-     try {
-       const response = await apiClient.get('/insegnanti')
-       setInsegnanti(response.data)
-       setError(null)
-     } catch (error) {
-       console.error('Errore nel recupero degli insegnanti', error)
-     }
-   }
+const fetchInsegnanti = async () => {
+  try {
+    const response = await apiClient.get('/insegnanti')
+    setInsegnanti(response.data)
+    setError(null) // Reset error
+  } catch (error) {
+    console.error('Errore nel recupero degli insegnanti', error)
+    setError('Errore nel recupero degli insegnanti') // Aggiungi messaggio di errore
+  }
+}
 
 const handleSalvaModificheStudente = async () => {
   console.log('📤 Tentativo di salvare le modifiche...')
   console.log('📌 Token PRIMA della richiesta:', localStorage.getItem('token'))
+
+  // Verifica che il token sia ancora presente prima della richiesta
+  if (!localStorage.getItem('token')) {
+    console.warn('❌ Token non trovato prima della richiesta!')
+    alert('⚠️ Token mancante, non puoi salvare le modifiche!')
+    return
+  }
 
   try {
     const response = await apiClient.put(`/studenti/${id}`, formStudente)
@@ -99,15 +104,23 @@ const handleSalvaModificheStudente = async () => {
 
       if (error.response.status === 401) {
         alert('⚠️ Sessione scaduta. Effettua nuovamente il login.')
-        localStorage.removeItem('token') // ✅ Se è un 401, rimuoviamo il token
+        console.log(
+          '📌 Rimuovendo il token dal localStorage',
+          localStorage.getItem('token')
+        )
+        localStorage.removeItem('token') // ✅ Solo in caso di errore 401
+        console.warn("📌 Token RIMOSSO dopo l'errore 401")
         window.location.href = '/login' // ✅ Reindirizziamo alla login
       } else {
+        // Se l'errore non è 401, mostriamo l'errore generico
         alert(
           `Errore: ${error.response.data?.message || 'Errore sconosciuto.'}`
         )
+        console.error("📌 Dettagli dell'errore:", error.response.data)
       }
     } else {
       alert('Errore nel salvataggio dello studente.')
+      console.error("❌ Dettagli dell'errore:", error)
     }
   }
 }

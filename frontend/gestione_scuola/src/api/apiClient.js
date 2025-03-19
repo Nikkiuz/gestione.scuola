@@ -27,11 +27,25 @@ apiClient.interceptors.response.use(
     }
     if (error.response && error.response.status === 401) {
       console.warn('❌ Token scaduto o non valido. Disconnessione forzata.')
-      localStorage.removeItem('token')
+      //localStorage.removeItem('token')
       // window.location.href = '/login';
     }
     return Promise.reject(error)
   }
 )
+
+// Monitorare i cambiamenti in localStorage
+const originalSetItem = localStorage.setItem;
+localStorage.setItem = function (key, value) {
+  console.log(`📌 Modifica su localStorage: ${key} = ${value}`);
+  originalSetItem.apply(this, arguments);  // Continua con la funzione originale
+};
+
+// Monitorare quando viene rimosso un elemento
+const originalRemoveItem = localStorage.removeItem;
+localStorage.removeItem = function (key) {
+  console.log(`📌 Rimosso da localStorage: ${key}`);
+  originalRemoveItem.apply(this, arguments);  // Continua con la funzione originale
+};
 
 export default apiClient
