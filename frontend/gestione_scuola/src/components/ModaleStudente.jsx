@@ -1,5 +1,6 @@
 import React from 'react'
 import { Modal, Form, Button } from 'react-bootstrap'
+import { useEffect } from 'react'
 
 const LIVELLI = ['BASE', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'] // 🔥 Enum livelli validi
 
@@ -13,9 +14,19 @@ const ModaleStudente = ({
 }) => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
+
+    const newValue =
+      name === 'insegnanteId'
+        ? Number(value) || null
+        : type === 'checkbox'
+        ? checked
+        : value
+
+    console.log(`📌 Campo: ${name} - Nuovo Valore:`, newValue) // 🔥 Debug
+
     setFormStudente({
       ...formStudente,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: newValue,
     })
   }
 
@@ -28,6 +39,20 @@ const ModaleStudente = ({
         : prev[field].filter((item) => item !== value),
     }))
   }
+
+  useEffect(() => {
+    if (show && formStudente) {
+      console.log(
+        '📌 Modale aperto. Stato attuale di formStudente:',
+        formStudente
+      )
+
+      setFormStudente((prev) => ({
+        ...prev,
+        insegnanteId: prev.insegnanteId ? String(prev.insegnanteId) : '', // 🔥 Forza il valore come stringa per il Select
+      }))
+    }
+  }, [show]) // 🔥 Attiva il reset solo quando il modale si apre
 
   return (
     <Modal show={show} onHide={onHide}>
@@ -160,30 +185,23 @@ const ModaleStudente = ({
               onChange={handleChange}
             />
           </Form.Group>
+
+          {/* 🔥 Mostra il campo solo se il corso è privato */}
           {formStudente.corsoPrivato && (
             <Form.Group className="mb-3">
               <Form.Label>Ore Settimanali</Form.Label>
               <Form.Control
                 type="number"
                 name="frequenzaCorsoPrivato"
-                value={formStudente.frequenzaCorsoPrivato}
+                value={formStudente.frequenzaCorsoPrivato || ''}
                 onChange={handleChange}
                 min="1"
                 required
               />
             </Form.Group>
           )}
-          <Form.Group className="mb-3">
-            <Form.Label>Tipo di Corso di Gruppo</Form.Label>
-            <Form.Select
-              name="tipoCorsoGruppo"
-              value={formStudente.tipoCorsoGruppo}
-              onChange={handleChange}
-            >
-              <option value="1 volta a settimana">1 volta a settimana</option>
-              <option value="2 volte a settimana">2 volte a settimana</option>
-            </Form.Select>
-          </Form.Group>
+
+          {/* 🔥 Campo insegnante preferito (sempre visibile) */}
           <Form.Group className="mb-3">
             <Form.Label>Insegnante Preferito</Form.Label>
             <Form.Select
@@ -193,12 +211,30 @@ const ModaleStudente = ({
             >
               <option value="">Nessuna preferenza</option>
               {insegnanti.map((insegnante) => (
-                <option key={insegnante.id} value={insegnante.id}>
+                <option key={insegnante.id} value={String(insegnante.id)}>
+                  {' '}
+                  {/* 🔥 Forza `value` come stringa */}
                   {insegnante.nome} {insegnante.cognome}
                 </option>
               ))}
             </Form.Select>
           </Form.Group>
+
+          {/* 🔥 Nascondi questi campi se corsoPrivato è attivo */}
+          {!formStudente.corsoPrivato && (
+            <Form.Group className="mb-3">
+              <Form.Label>Tipo di Corso di Gruppo</Form.Label>
+              <Form.Select
+                name="tipoCorsoGruppo"
+                value={formStudente.tipoCorsoGruppo || ''}
+                onChange={handleChange}
+              >
+                <option value="1 volta a settimana">1 volta a settimana</option>
+                <option value="2 volte a settimana">2 volte a settimana</option>
+              </Form.Select>
+            </Form.Group>
+          )}
+
           <Button type="submit" variant="success">
             💾 Salva Modifiche
           </Button>

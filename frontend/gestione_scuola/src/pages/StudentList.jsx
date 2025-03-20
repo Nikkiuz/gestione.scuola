@@ -53,26 +53,21 @@ const StudentList = () => {
     fetchInsegnanti()
   }, [])
 
-  const fetchStudenti = async () => {
-    try {
-      const response = await apiClient.get('/studenti')
+ const fetchStudenti = async () => {
+   try {
+     const response = await apiClient.get('/studenti')
 
-      if (!response.data || !Array.isArray(response.data)) {
-        console.error(
-          '❌ Errore: response.data non è un array valido',
-          response.data
-        )
-        return
-      }
+     console.log('📌 Studenti ricevuti dal backend:', response.data) // 🔥 Debug
 
-      setStudenti(response.data.filter((s) => s.corsi?.length > 0))
-      setStudentiSenzaCorso(
-        response.data.filter((s) => !s.corsi || s.corsi.length === 0)
-      )
-    } catch (error) {
-      console.error('❌ Errore nel recupero degli studenti:', error)
-    }
-  }
+     setStudenti(response.data.filter((s) => s.corsi?.length > 0))
+     setStudentiSenzaCorso(
+       response.data.filter((s) => !s.corsi || s.corsi.length === 0)
+     )
+   } catch (error) {
+     console.error('❌ Errore nel recupero degli studenti:', error)
+   }
+ }
+
 
   const fetchInsegnanti = async () => {
     try {

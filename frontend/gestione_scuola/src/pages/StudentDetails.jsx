@@ -12,7 +12,7 @@ import ModaleStudente from '../components/ModaleStudente'
 
 registerLocale('it', it)
 
-const LIVELLI = ['BASE', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'] 
+const LIVELLI = ['BASE', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 
 const StudentDetail = () => {
   const { id } = useParams()
@@ -50,23 +50,26 @@ const StudentDetail = () => {
     fetchInsegnanti()
   }, [])
 
-  const fetchDatiStudente = async () => {
-    setLoading(true)
-    try {
-      const [studenteRes, pagamentiRes] = await Promise.all([
-        apiClient.get(`/studenti/${id}`),
-        apiClient.get(`/studenti/${id}/pagamenti`),
-      ])
-      setStudente(studenteRes.data)
-      setPagamenti(pagamentiRes.data)
-      setError(null)
-    } catch (error) {
-      console.error('❌ Errore nel recupero dei dati dello studente:', error)
-      setError('Errore nel recupero dei dati dello studente.')
-    } finally {
-      setLoading(false)
-    }
+const fetchDatiStudente = async () => {
+  setLoading(true)
+  try {
+    const [studenteRes, pagamentiRes] = await Promise.all([
+      apiClient.get(`/studenti/${id}`),
+      apiClient.get(`/studenti/${id}/pagamenti`),
+    ])
+
+    console.log('📌 Studente ricevuto dal backend:', studenteRes.data) // 🔥 Debug
+    setStudente(studenteRes.data)
+    setPagamenti(pagamentiRes.data)
+    setError(null)
+  } catch (error) {
+    console.error('❌ Errore nel recupero dei dati dello studente:', error)
+    setError('Errore nel recupero dei dati dello studente.')
+  } finally {
+    setLoading(false)
   }
+}
+
 
   const fetchInsegnanti = async () => {
     try {
@@ -79,23 +82,162 @@ const StudentDetail = () => {
     }
   }
 
-  const handleSalvaModificheStudente = async (e) => {
-    e.preventDefault()
-    if (!token) {
-      alert('⚠️ Token mancante, non puoi salvare le modifiche!')
+ const handleSalvaModificheStudente = async (e) => {
+  e.preventDefault()
+  if (!token) {
+    alert('⚠️ Token mancante, non puoi salvare le modifiche!')
+    return
+  }
+
+  try {
+    console.log('Dati da inviare:', formStudente) // 🔍 Debug: verifica i dati
+
+    await apiClient.put(`/studenti/${id}`, formStudente, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+
+    alert('✅ Studente modificato correttamente!')
+    setShowEditModal(false)
+    fetchDatiStudente()
+  } catch (error) {
+    console.error('❌ Errore nel salvataggio dello studente:', error)
+
+    if (error.response?.status === 401) {
+      alert('⚠️ Sessione scaduta. Effettua nuovamente il login.')
+      dispatch(logout())
+      window.location.href = '/login'
+    } else {
+      alert(
+        `Errore: ${error.response?.data?.message || 'Errore sconosciuto.'}`
+      )
+    }
+  }
+}
+const handleChangeStudente = () => {
+  if (!studente) {
+    alert('❌ Errore: nessuno studente selezionato.')
+    return
+  }
+
+  console.log('📌 Precarico i dati dello studente nel form:', studente)
+
+  setFormStudente({
+    nome: studente.nome || '',
+    cognome: studente.cognome || '',
+    eta: studente.eta || '',
+    linguaDaImparare: studente.linguaDaImparare || '',
+    livello: LIVELLI.includes(studente.livello) ? studente.livello : 'BASE',
+    tipologiaIscrizione: studente.tipologiaIscrizione || '',
+    giorniPreferiti: studente.giorniPreferiti || [],
+    fasceOrariePreferite: studente.fasceOrariePreferite || [],
+    corsoPrivato: studente.corsoPrivato || false,
+    frequenzaCorsoPrivato: studente.frequenzaCorsoPrivato || 1,
+    tipoCorsoGruppo: studente.tipoCorsoGruppo || '1 volta a settimana',
+    insegnanteId: studente.insegnanteId
+      ? String(studente.insegnanteId)
+      : studente.insegnante
+      ? String(studente.insegnante.id)
+      : '', // 🔥 Ora prende `insegnante.id` se `insegnanteId` è undefined
+  })
+
+  setShowEditModal(true)
+}
+
+
+  const handleAggiungiPagamento = () => {
+    setPagamentoSelezionato({
+      studenteId: id,
+      dataPagamento: new Date(),
+      importo: '',
+      mensilitaSaldata: '',
+      metodoPagamento: 'CARTA',
+      numeroRicevuta: '',
+      note: '',
+    })
+    setIsEditing(false)
+    setShowModal(true)
+  }
+
+  const handleModificaPagamento = (pagamento) => {
+    setPagamentoSelezionato({
+      ...pagamento,
+      dataPagamento: pagamento.dataPagamento
+        ? new Date(pagamento.dataPagamento)
+        : new Date(),
+    })
+    setIsEditing(true)
+    setShowModal(true)
+  }
+
+  const handleEliminaPagamento = async (pagamentoId) => {
+    if (window.confirm('Sei sicuro di voler eliminare questo pagamento?')) {
+      try {
+        await apiClient.delete(`/pagamenti/${pagamentoId}`)
+        fetchDatiStudente()
+      } catch (error) {
+        console.error('❌ Errore nell’eliminazione del pagamento:', error)
+        alert('Errore nell’eliminazione del pagamento.')
+      }
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault()
+
+    if (!pagamentoSelezionato) {
+      alert('❌ Errore: nessun pagamento selezionato.')
       return
     }
 
-    try {
-      await apiClient.put(`/studenti/${id}`, formStudente, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    const {
+      dataPagamento,
+      importo,
+      mensilitaSaldata,
+      metodoPagamento,
+      numeroRicevuta,
+      note,
+    } = pagamentoSelezionato
 
-      alert('✅ Studente modificato correttamente!')
-      setShowEditModal(false)
+    if (!importo || parseFloat(importo) <= 0) {
+      alert('❌ Inserisci un importo valido.')
+      return
+    }
+    if (!mensilitaSaldata) {
+      alert('❌ Seleziona la mensilità saldata.')
+      return
+    }
+    if (!numeroRicevuta) {
+      alert('❌ Inserisci un numero ricevuta valido.')
+      return
+    }
+
+    const pagamentoData = {
+      studente: { id: id },
+      dataPagamento: dataPagamento
+        ? new Date(dataPagamento).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
+      importo: Math.max(1, parseFloat(importo)),
+      mensilitaSaldata,
+      numeroRicevuta: numeroRicevuta || `REC-${Date.now()}`,
+      metodoPagamento,
+      note: note || '',
+    }
+
+    try {
+      if (isEditing) {
+        await apiClient.put(
+          `/pagamenti/${pagamentoSelezionato.id}`,
+          pagamentoData
+        )
+      } else {
+        await apiClient.post(`/studenti/${id}/pagamenti`, pagamentoData)
+      }
+
+      alert('✅ Pagamento salvato con successo!')
+      setShowModal(false)
       fetchDatiStudente()
     } catch (error) {
-      console.error('❌ Errore nel salvataggio dello studente:', error)
+      console.error('❌ Errore nel salvataggio del pagamento:', error)
 
       if (error.response?.status === 401) {
         alert('⚠️ Sessione scaduta. Effettua nuovamente il login.')
@@ -109,137 +251,8 @@ const StudentDetail = () => {
     }
   }
 
-  const handleChangeStudente = () => {
-    if (!studente) {
-      alert('❌ Errore: nessuno studente selezionato.')
-      return
-    }
-
-    setFormStudente({
-      nome: studente.nome || '',
-      cognome: studente.cognome || '',
-      eta: studente.eta || '',
-      linguaDaImparare: studente.linguaDaImparare || '',
-      livello: LIVELLI.includes(studente.livello) ? studente.livello : 'BASE',
-      tipologiaIscrizione: studente.tipologiaIscrizione || '',
-      giorniPreferiti: studente.giorniPreferiti || [],
-      fasceOrariePreferite: studente.fasceOrariePreferite || [],
-      corsoPrivato: studente.corsoPrivato || false,
-      frequenzaCorsoPrivato: studente.frequenzaCorsoPrivato || 1,
-      tipoCorsoGruppo: studente.tipoCorsoGruppo || '1 volta a settimana',
-      insegnanteId: studente.insegnante?.id || '',
-    })
-
-    setShowEditModal(true)
-  }
-
-const handleAggiungiPagamento = () => {
-  setPagamentoSelezionato({
-    studenteId: id,
-    dataPagamento: new Date(),
-    importo: '',
-    mensilitaSaldata: '',
-    metodoPagamento: 'CARTA',
-    numeroRicevuta: `REC-${Date.now()}`, // 🔥 Ora assegna un valore predefinito
-    note: '',
-  })
-  setIsEditing(false)
-  setShowModal(true)
-}
-
-const handleModificaPagamento = (pagamento) => {
-  setPagamentoSelezionato({
-    ...pagamento,
-    dataPagamento: pagamento.dataPagamento
-      ? new Date(pagamento.dataPagamento)
-      : new Date(), // 🔥 Fix null check
-  })
-  setIsEditing(true)
-  setShowModal(true)
-}
-
-const handleEliminaPagamento = async (pagamentoId) => {
-  if (window.confirm('Sei sicuro di voler eliminare questo pagamento?')) {
-    try {
-      await apiClient.delete(`/pagamenti/${pagamentoId}`)
-      fetchDatiStudente()
-    } catch (error) {
-      console.error('❌ Errore nell’eliminazione del pagamento:', error)
-      alert('Errore nell’eliminazione del pagamento.')
-    }
-  }
-}
-
-const handleSubmit = async (e) => {
-  if (e) e.preventDefault()
-
-  if (!pagamentoSelezionato) {
-    alert('❌ Errore: nessun pagamento selezionato.')
-    return
-  }
-
-  const {
-    dataPagamento,
-    importo,
-    mensilitaSaldata,
-    metodoPagamento,
-    numeroRicevuta,
-    note,
-  } = pagamentoSelezionato
-
-  if (!importo || parseFloat(importo) <= 0) {
-    alert('❌ Inserisci un importo valido.')
-    return
-  }
-  if (!mensilitaSaldata) {
-    alert('❌ Seleziona la mensilità saldata.')
-    return
-  }
-  if (!numeroRicevuta) {
-    alert('❌ Inserisci un numero ricevuta valido.')
-    return
-  }
-
-  const pagamentoData = {
-    studente: { id: id },
-    dataPagamento: dataPagamento
-      ? new Date(dataPagamento).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0],
-    importo: Math.max(1, parseFloat(importo)), // 🔥 Fix validazione importo
-    mensilitaSaldata,
-    numeroRicevuta: numeroRicevuta || `REC-${Date.now()}`,
-    metodoPagamento,
-    note: note || '',
-  }
-
-  try {
-    if (isEditing) {
-      await apiClient.put(
-        `/pagamenti/${pagamentoSelezionato.id}`,
-        pagamentoData
-      )
-    } else {
-      await apiClient.post(`/studenti/${id}/pagamenti`, pagamentoData)
-    }
-
-    alert('✅ Pagamento salvato con successo!')
-    setShowModal(false)
-    fetchDatiStudente()
-  } catch (error) {
-    console.error('❌ Errore nel salvataggio del pagamento:', error)
-
-    if (error.response?.status === 401) {
-      alert('⚠️ Sessione scaduta. Effettua nuovamente il login.')
-      dispatch(logout())
-      window.location.href = '/login'
-    } else {
-      alert(`Errore: ${error.response?.data?.message || 'Errore sconosciuto.'}`)
-    }
-  }
-}
-
-if (loading) return <p>⏳ Caricamento in corso...</p>
-if (error) return <div className="alert alert-danger">{error}</div>
+  if (loading) return <p>⏳ Caricamento in corso...</p>
+  if (error) return <div className="alert alert-danger">{error}</div>
 
   return (
     <>
@@ -269,13 +282,46 @@ if (error) return <div className="alert alert-danger">{error}</div>
               <strong>Lingua da imparare:</strong> {studente.linguaDaImparare}
             </p>
             <p>
-              <strong>Livello:</strong>{' '}
-              <strong>{studente.livello || 'BASE'}</strong>
+              <strong>Livello:</strong> {studente.livello || 'BASE'}
             </p>
             <p>
               <strong>Tipologia Iscrizione:</strong>{' '}
               {studente.tipologiaIscrizione}
             </p>
+            <p>
+              <strong>Giorni Preferiti:</strong>{' '}
+              {studente.giorniPreferiti?.join(', ') ||
+                'Nessun giorno selezionato'}
+            </p>
+            <p>
+              <strong>Fasce Orarie Preferite:</strong>{' '}
+              {studente.fasceOrariePreferite?.join(', ') ||
+                'Nessuna fascia selezionata'}
+            </p>
+            <p>
+              <strong>Tipo di Corso:</strong>{' '}
+              {studente.corsoPrivato ? 'Privato' : 'Gruppo'}
+            </p>
+            {studente.corsoPrivato && (
+              <p>
+                <strong>Frequenza Corso Privato:</strong>{' '}
+                {studente.frequenzaCorsoPrivato} ore
+              </p>
+            )}
+            {!studente.corsoPrivato && (
+              <p>
+                <strong>Tipo Corso Gruppo:</strong> {studente.tipoCorsoGruppo}
+              </p>
+            )}
+            <p>
+              <strong>Insegnante:</strong>{' '}
+              {studente.insegnanteNome && studente.insegnanteCognome
+                ? `${studente.insegnanteNome} ${studente.insegnanteCognome}`
+                : studente.insegnanteId
+                ? `ID: ${studente.insegnanteId} (dettagli non disponibili)`
+                : 'Nessun insegnante assegnato'}
+            </p>
+
             <button
               className="btn btn-warning mt-2"
               onClick={handleChangeStudente}
@@ -320,7 +366,7 @@ if (error) return <div className="alert alert-danger">{error}</div>
             </ul>
           )}
           <button
-            className="btn btn-success mt-3"
+            className="btn btn-success mt-3 mb-4"
             onClick={handleAggiungiPagamento}
           >
             ➕ Aggiungi Pagamento
@@ -336,7 +382,7 @@ if (error) return <div className="alert alert-danger">{error}</div>
         setPagamentoSelezionato={setPagamentoSelezionato}
         isEditing={isEditing}
         handleSubmit={handleSubmit}
-        disableStudentSelect={true} // Disabilita la selezione dello studente
+        disableStudentSelect={true}
       />
 
       {/* Modale Studente */}

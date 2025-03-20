@@ -9,7 +9,7 @@ const TeacherDetail = () => {
   const navigate = useNavigate()
 
   const [insegnante, setInsegnante] = useState(null)
-  const [tempInsegnante, setTempInsegnante] = useState(null) // 🔹 Stato temporaneo per la modifica
+  const [tempInsegnante, setTempInsegnante] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isEditing, setIsEditing] = useState(false)
@@ -41,13 +41,11 @@ const TeacherDetail = () => {
     }
   }
 
-  // ✅ Attiva la modalità modifica e clona i dati
   const handleEdit = () => {
-    setTempInsegnante({ ...insegnante }) // Clona i dati per modifiche sicure
+    setTempInsegnante({ ...insegnante })
     setIsEditing(true)
   }
 
-  // ✅ Aggiorna il valore nello stato temporaneo
   const handleChange = (e) => {
     setTempInsegnante((prev) => ({
       ...prev,
@@ -55,37 +53,33 @@ const TeacherDetail = () => {
     }))
   }
 
-  // ✅ Gestisce i checkbox multipli
   const handleCheckboxChange = (e, key) => {
     const { value, checked } = e.target
     setTempInsegnante((prev) => ({
       ...prev,
       [key]: checked
-        ? [...(prev[key] || []), value] // Seleziona valore
-        : (prev[key] || []).filter((item) => item !== value), // Rimuove valore
+        ? [...(prev[key] || []), value]
+        : (prev[key] || []).filter((item) => item !== value),
     }))
   }
 
-  // ✅ Salva le modifiche e aggiorna lo stato originale
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
       await apiClient.put(`/insegnanti/${id}`, tempInsegnante)
       alert('✅ Modifiche salvate con successo!')
-      setInsegnante(tempInsegnante) // 🔹 Aggiorna i dati originali con quelli modificati
-      setIsEditing(false) // 🔹 Disattiva la modalità modifica
+      setInsegnante(tempInsegnante)
+      setIsEditing(false)
     } catch (error) {
       console.error('Errore nella modifica dell’insegnante', error)
     }
   }
 
-  // ✅ Annulla le modifiche
   const handleCancel = () => {
     setIsEditing(false)
-    setTempInsegnante(null) // Resetta i dati temporanei
+    setTempInsegnante(null)
   }
 
-  // ✅ Elimina l’insegnante (solo se non ha corsi attivi)
   const handleDelete = async () => {
     if (corsiAssegnati.length > 0) {
       alert(
@@ -97,7 +91,7 @@ const TeacherDetail = () => {
     if (window.confirm('⚠️ Sei sicuro di voler eliminare questo insegnante?')) {
       try {
         await apiClient.delete(`/insegnanti/${id}`)
-        navigate('/insegnanti') // 🔹 Ritorna alla lista dopo la cancellazione
+        navigate('/insegnanti')
       } catch (error) {
         console.error('Errore nella cancellazione dell’insegnante', error)
       }
@@ -108,7 +102,7 @@ const TeacherDetail = () => {
   if (error) return <div className="alert alert-danger">{error}</div>
   if (!insegnante) return <p>⚠️ Nessun insegnante trovato.</p>
 
-  const dati = isEditing ? tempInsegnante : insegnante // 🔹 Usa i dati giusti
+  const dati = isEditing ? tempInsegnante : insegnante
 
   return (
     <>
@@ -116,7 +110,17 @@ const TeacherDetail = () => {
       <div className="container mt-4">
         <h2 className="text-center mb-4">👨‍🏫 Dettagli Insegnante</h2>
 
-        <Form onSubmit={handleSubmit}>
+        {/* Bottone per tornare alla lista */}
+        <Button
+          variant="secondary"
+          onClick={() => navigate('/insegnanti')}
+          className="mb-4"
+        >
+          🔙 Torna alla lista
+        </Button>
+
+        <Form onSubmit={handleSubmit}
+        className='mb-5'>
           <Form.Group className="mb-3">
             <Form.Label>Nome</Form.Label>
             <Form.Control
