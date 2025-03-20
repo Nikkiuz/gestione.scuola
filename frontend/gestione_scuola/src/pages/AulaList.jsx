@@ -62,7 +62,7 @@ const handleSubmit = async (e) => {
   const formattedData = {
     ...formData,
     disponibilita: formData.disponibilita.reduce((acc, giorno) => {
-      acc[giorno] = "" // Il backend si aspetta un valore stringa, lascia vuoto per ora
+      acc[giorno] = '' // Il backend si aspetta un valore stringa, lascia vuoto per ora
       return acc
     }, {}),
   }
@@ -75,13 +75,24 @@ const handleSubmit = async (e) => {
 
     setShowModal(false)
     fetchAule()
+
+    // Resetta il formData dopo l'invio
+    setFormData({
+      nome: '',
+      capienzaMax: '',
+      disponibilita: [],
+    })
+
     alert('✅ Aula creata con successo!')
   } catch (error) {
     console.error('❌ Errore nella creazione dell’aula', error)
-    setError(error.response ? JSON.stringify(error.response.data, null, 2) : 'Errore generico.')
+    setError(
+      error.response
+        ? JSON.stringify(error.response.data, null, 2)
+        : 'Errore generico.'
+    )
   }
 }
-
 
   return (
     <>
