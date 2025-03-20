@@ -28,6 +28,16 @@ public class CalendarioController {
 		return calendarioService.getCorsiProgrammati(giorno);
 	}
 
+	// 🔹 Ottieni tutti i corsi per una determinata settimana
+	@GetMapping
+	public List<CalendarioDTO> getCalendario(
+		@RequestParam String settimana,
+		@RequestParam(required = false) Long insegnante,
+		@RequestParam(required = false) String livello) {
+
+		return calendarioService.getCorsiPerSettimana(settimana, insegnante, livello);
+	}
+
 
 	// 🔹 Segna un corso come interrotto
 	@PostMapping("/interrompi-corso/{corsoId}")

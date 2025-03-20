@@ -35,7 +35,7 @@ const PagamentiDetail = () => {
 
   const fetchPagamento = async () => {
     try {
-      const response = await apiClient.get(`/api/pagamenti/${id}`)
+      const response = await apiClient.get(`/pagamenti/${id}`)
       setPagamento(response.data)
 
       // Imposta i dati nel form per la modifica
@@ -79,7 +79,7 @@ const PagamentiDetail = () => {
     e.preventDefault()
     setError('')
     try {
-      await apiClient.put(`/api/pagamenti/${id}`, {
+      await apiClient.put(`/pagamenti/${id}`, {
         ...formData,
         dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
       })
@@ -94,7 +94,7 @@ const PagamentiDetail = () => {
   const eliminaPagamento = async () => {
     if (window.confirm('Vuoi eliminare questo pagamento?')) {
       try {
-        await apiClient.delete(`/api/pagamenti/${id}`)
+        await apiClient.delete(`/pagamenti/${id}`)
         navigate('/pagamenti')
       } catch (error) {
         setError('Errore nella cancellazione del pagamento.', error)

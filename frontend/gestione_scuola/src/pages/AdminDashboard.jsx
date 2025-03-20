@@ -21,7 +21,6 @@ const AdminDashboard = () => {
       try {
         setLoading(true)
 
-        // Eseguiamo tutte le chiamate API in parallelo
         const [statsRes, avvisiRes, pagamentiRes] = await Promise.all([
           apiClient.get('/dashboard/stats'),
           apiClient.get('/dashboard/avvisi'),
@@ -41,21 +40,45 @@ const AdminDashboard = () => {
         setLoading(false)
       }
     }
-
     fetchData()
   }, [])
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: {
+        display: true,
+        text: '📊 Pagamenti Mensili (€)',
+        font: { size: 16 },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => `€ ${context.raw.toLocaleString('it-IT')}`,
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value) => `€ ${value.toLocaleString('it-IT')}`,
+        },
+      },
+      x: {
+        ticks: { font: { size: 14 } },
+      },
+    },
+  }
 
   return (
     <>
       <AdminNavbar />
       <div className="container mt-5">
         <h2 className="text-center mb-4">Dashboard Admin</h2>
-
-        {/* Stato di caricamento o errore */}
         {loading && <p className="text-center">⏳ Caricamento dati...</p>}
         {error && <div className="alert alert-danger">{error}</div>}
 
-        {/* Sezione Avvisi */}
         {!loading && !error && (
           <div className="mb-4">
             {avvisi.length > 0 ? (
@@ -74,7 +97,6 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Sezione Statistiche */}
         {!loading && !error && (
           <div className="row">
             <div className="col-md-4">
@@ -98,7 +120,6 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Sezione Grafici */}
         {!loading && !error && pagamentiMensili.labels.length > 0 && (
           <div className="mt-5">
             <h4>📈 Andamento Pagamenti Mensili</h4>
@@ -110,9 +131,14 @@ const AdminDashboard = () => {
                     label: 'Pagamenti Mensili (€)',
                     data: pagamentiMensili.data,
                     backgroundColor: '#007bff',
+                    borderColor: '#0056b3',
+                    borderWidth: 2,
+                    barThickness: 40,
+                    borderRadius: 5,
                   },
                 ],
               }}
+              options={chartOptions}
             />
           </div>
         )}
