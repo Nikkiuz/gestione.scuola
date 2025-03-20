@@ -13,9 +13,8 @@ const ModalePagamento = ({
   studenti = [], // Default a un array vuoto
   disableStudentSelect = false, // Prop per disabilitare la selezione dello studente
 }) => {
-  // Controllo per evitare errori se pagamentoSelezionato è null o undefined
   if (!pagamentoSelezionato) {
-    return null // Oppure puoi restituire un messaggio di errore
+    return null // Evita errori se il pagamento è null o undefined
   }
 
   return (
@@ -27,7 +26,7 @@ const ModalePagamento = ({
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
-          {/* Campo Studente (mostrato solo se non disabilitato) */}
+          {/* Campo Studente */}
           {!disableStudentSelect && (
             <Form.Group className="mb-3">
               <Form.Label>🎓 Studente</Form.Label>
@@ -41,7 +40,7 @@ const ModalePagamento = ({
                   })
                 }
                 required
-                disabled={isEditing} // Disabilita il campo se è in modalità modifica
+                disabled={isEditing}
               >
                 <option value="">Seleziona Studente</option>
                 {studenti.map((studente) => (
@@ -91,7 +90,7 @@ const ModalePagamento = ({
               selected={
                 pagamentoSelezionato.dataPagamento
                   ? new Date(pagamentoSelezionato.dataPagamento)
-                  : null
+                  : new Date()
               }
               onChange={(date) =>
                 setPagamentoSelezionato({
@@ -140,6 +139,7 @@ const ModalePagamento = ({
             >
               <option value="CARTA">Carta</option>
               <option value="BONIFICO">Bonifico</option>
+              <option value="CONTANTI">Contanti</option>
             </Form.Select>
           </Form.Group>
 
@@ -149,7 +149,7 @@ const ModalePagamento = ({
             <Form.Control
               type="text"
               name="numeroRicevuta"
-              value={pagamentoSelezionato.numeroRicevuta || ''}
+              value={pagamentoSelezionato.numeroRicevuta}
               onChange={(e) =>
                 setPagamentoSelezionato({
                   ...pagamentoSelezionato,

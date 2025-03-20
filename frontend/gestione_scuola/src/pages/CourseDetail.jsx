@@ -19,11 +19,12 @@ const CourseDetails = () => {
   }, [])
 
   const fetchCorso = async () => {
+    setLoading(true)
     try {
       const response = await apiClient.get(`/corsi/${id}`)
-      setCorso(response.data)
+      setCorso(response.data || {}) // 🔥 Fix per evitare crash se API non restituisce dati
     } catch (error) {
-      console.error('Errore nel recupero del corso', error)
+      console.error('❌ Errore nel recupero del corso:', error)
       setError('Errore nel caricamento del corso.')
     } finally {
       setLoading(false)
@@ -33,33 +34,32 @@ const CourseDetails = () => {
   const fetchStudentiDisponibili = async () => {
     try {
       const response = await apiClient.get('/studenti/senza-corso')
-      setStudentiDisponibili(response.data)
+      setStudentiDisponibili(response.data || [])
     } catch (error) {
-      console.error('Errore nel recupero degli studenti disponibili', error)
+      console.error('❌ Errore nel recupero degli studenti disponibili:', error)
     }
   }
 
   const assegnaStudente = async (studenteId) => {
     try {
-      await apiClient.post(`/corsi/${corso.id}/aggiungi-studente`, {
-        studenteId,
-      })
-      setSuccessMessage('Studente assegnato con successo!')
+      await apiClient.post(`/corsi/${id}/aggiungi-studente`, { studenteId })
+      setSuccessMessage('✅ Studente assegnato con successo!')
       fetchCorso()
       fetchStudentiDisponibili()
     } catch (error) {
-      console.error('Errore nell’assegnare lo studente', error)
-      setError('Errore nell’assegnazione dello studente.')
+      console.error('❌ Errore nell’assegnazione dello studente:', error)
+      setError('Errore durante l’assegnazione dello studente.')
     }
   }
 
   const disattivaCorso = async () => {
     if (window.confirm('Vuoi disattivare questo corso?')) {
       try {
-        await apiClient.put(`/corsi/${id}/disattiva`)
+        await apiClient.put(`/corsi/${id}/interrompi`)
         fetchCorso()
       } catch (error) {
-        console.error('Errore nella disattivazione del corso', error)
+        console.error('❌ Errore nella disattivazione del corso:', error)
+        setError('Errore durante la disattivazione del corso.')
       }
     }
   }
@@ -70,12 +70,13 @@ const CourseDetails = () => {
         await apiClient.delete(`/corsi/${id}`)
         navigate('/corsi')
       } catch (error) {
-        console.error('Errore nell’eliminazione del corso', error)
+        console.error('❌ Errore nell’eliminazione del corso:', error)
+        setError('Errore durante l’eliminazione del corso.')
       }
     }
   }
 
-  if (loading) return <p>Caricamento in corso...</p>
+  if (loading) return <p>⏳ Caricamento in corso...</p>
   if (error) return <div className="alert alert-danger">{error}</div>
 
   return (
@@ -90,29 +91,29 @@ const CourseDetails = () => {
 
         <div className="card shadow p-4">
           <h5>
-            {corso.lingua} - Livello {corso.livello}
+            {corso?.lingua} - Livello <strong>{corso?.livello || 'N/A'}</strong>
           </h5>
           <p>
-            <strong>🗓 Giorno:</strong> {corso.giorno}
+            <strong>🗓 Giorno:</strong> {corso?.giorno || 'N/A'}
           </p>
           <p>
-            <strong>⏰ Orario:</strong> {corso.orario}
+            <strong>⏰ Orario:</strong> {corso?.orario || 'N/A'}
           </p>
           <p>
-            <strong>🏫 Aula:</strong> {corso.aula?.nome || 'Non assegnata'}
+            <strong>🏫 Aula:</strong> {corso?.aula?.nome || 'Non assegnata'}
           </p>
           <p>
-            <strong>👨‍🏫 Insegnante:</strong> {corso.insegnante?.nome}{' '}
-            {corso.insegnante?.cognome}
+            <strong>👨‍🏫 Insegnante:</strong> {corso?.insegnante?.nome}{' '}
+            {corso?.insegnante?.cognome}
           </p>
 
           <button
             className={`btn ${
-              corso.attivo ? 'btn-warning' : 'btn-success'
+              corso?.attivo ? 'btn-warning' : 'btn-success'
             } me-2`}
             onClick={disattivaCorso}
           >
-            {corso.attivo ? '🚫 Disattiva Corso' : '✅ Riattiva Corso'}
+            {corso?.attivo ? '🚫 Disattiva Corso' : '✅ Riattiva Corso'}
           </button>
           <button className="btn btn-danger" onClick={eliminaCorso}>
             🗑 Elimina Corso
@@ -121,11 +122,11 @@ const CourseDetails = () => {
 
         <div className="mt-4">
           <h5>🎓 Studenti Iscritti</h5>
-          {corso.studenti.length === 0 ? (
-            <p>Nessuno studente iscritto</p>
+          {corso?.studenti?.length === 0 ? (
+            <p className="text-muted">Nessuno studente iscritto</p>
           ) : (
             <ul className="list-group">
-              {corso.studenti.map((studente) => (
+              {corso?.studenti?.map((studente) => (
                 <li key={studente.id} className="list-group-item">
                   {studente.nome} {studente.cognome}
                 </li>
@@ -137,7 +138,7 @@ const CourseDetails = () => {
         <div className="mt-4">
           <h5>🎓 Studenti disponibili</h5>
           {studentiDisponibili.length === 0 ? (
-            <p>Nessun studente disponibile</p>
+            <p className="text-muted">Nessuno studente disponibile</p>
           ) : (
             <ul className="list-group">
               {studentiDisponibili.map((studente) => (

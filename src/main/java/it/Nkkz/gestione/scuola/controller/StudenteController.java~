@@ -43,47 +43,54 @@ public class StudenteController {
 		this.pagamentoRepository = pagamentoRepository;
 	}
 
-	// ✅ Recupera tutti gli studenti
+	// ✅ SOLO ADMIN - Recupera tutti gli studenti
 	@GetMapping
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<StudenteResponseDTO>> getAllStudenti() {
 		return ResponseEntity.ok(studenteService.getAllStudenti());
 	}
 
-	// ✅ Recupera uno studente per ID
+	// ✅ SOLO ADMIN - Recupera uno studente per ID
 	@GetMapping("/{id}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<StudenteResponseDTO> getStudenteById(@PathVariable Long id) {
 		return ResponseEntity.ok(studenteService.getStudenteById(id));
 	}
 
-	// ✅ Recupera studenti per lingua e livello iniziale (ORA SENZA STRINGHE)
+	// ✅ SOLO ADMIN - Recupera studenti per lingua e livello iniziale
 	@GetMapping("/filtra")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByLinguaELivello(
 		@RequestParam String lingua,
-		@RequestParam Livello livello) { // ✅ Ora Livello è direttamente un ENUM
+		@RequestParam Livello livello) {
 		return ResponseEntity.ok(studenteService.getStudentiByLinguaELivello(lingua, livello));
 	}
 
-	// ✅ Recupera gli studenti di un insegnante specifico
+	// ✅ SOLO ADMIN - Recupera gli studenti di un insegnante specifico
 	@GetMapping("/insegnante/{id}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByInsegnante(@PathVariable Long id) {
 		return ResponseEntity.ok(studenteService.getStudentiByInsegnante(id));
 	}
 
-	// ✅ Recupera studenti per tipo di corso (privato o di gruppo)
+	// ✅ SOLO ADMIN - Recupera studenti per tipo di corso (privato o di gruppo)
 	@GetMapping("/tipo-corso")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByTipoCorso(@RequestParam boolean corsoPrivato) {
 		return ResponseEntity.ok(studenteService.getStudentiByTipoCorso(corsoPrivato));
 	}
 
-	// ✅ Crea un nuovo studente
+	// ✅ SOLO ADMIN - Crea un nuovo studente
 	@PostMapping
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public StudenteResponseDTO createStudente(@RequestBody StudenteRequestDTO studenteRequestDTO) {
 		return studenteService.createStudente(studenteRequestDTO);
 	}
 
-	// ✅ Modifica uno studente
+	// ✅ SOLO ADMIN - Modifica uno studente
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<StudenteResponseDTO> updateStudente(
 		@PathVariable Long id,
 		@RequestBody StudenteRequestDTO studenteRequestDTO) {
@@ -94,8 +101,10 @@ public class StudenteController {
 		return ResponseEntity.ok(studenteService.updateStudente(id, studenteRequestDTO));
 	}
 
-	// ✅ Elimina uno studente
+
+	// ✅ SOLO ADMIN - Elimina uno studente
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteStudente(@PathVariable Long id) {
 		studenteService.deleteStudente(id);
@@ -110,6 +119,7 @@ public class StudenteController {
 
 	// ✅ Recupera i corsi di uno studente
 	@GetMapping("/{id}/corsi")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<Corso>> getCorsiStudente(@PathVariable Long id) {
 		Studente studente = studenteRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato"));
@@ -119,6 +129,7 @@ public class StudenteController {
 
 	// ✅ Recupera i pagamenti di uno studente
 	@GetMapping("/{id}/pagamenti")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<Pagamento>> getPagamentiStudente(@PathVariable Long id) {
 		List<Pagamento> pagamenti = pagamentoRepository.findByStudenteId(id);
 		return ResponseEntity.ok(pagamenti);
@@ -126,6 +137,7 @@ public class StudenteController {
 
 	// ✅ Rimuove uno studente da un corso
 	@DeleteMapping("/{studenteId}/rimuovi-da-corso/{corsoId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<?> rimuoviStudenteDaCorso(@PathVariable Long studenteId, @PathVariable Long corsoId) {
 		Studente studente = studenteRepository.findById(studenteId)
 			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato"));
@@ -143,6 +155,7 @@ public class StudenteController {
 
 	// ✅ Aggiungi un pagamento a uno studente
 	@PostMapping("/{id}/pagamenti")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<?> aggiungiPagamento(
 		@PathVariable Long id,
 		@RequestBody PagamentoRequestDTO pagamentoRequestDTO) {

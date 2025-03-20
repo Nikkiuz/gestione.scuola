@@ -1,6 +1,8 @@
 import React from 'react'
 import { Modal, Form, Button } from 'react-bootstrap'
 
+const LIVELLI = ['BASE', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'] // 🔥 Enum livelli validi
+
 const ModaleStudente = ({
   show,
   onHide,
@@ -39,7 +41,7 @@ const ModaleStudente = ({
             <Form.Control
               type="text"
               name="nome"
-              value={formStudente.nome}
+              value={formStudente.nome || ''}
               onChange={handleChange}
               required
             />
@@ -49,7 +51,7 @@ const ModaleStudente = ({
             <Form.Control
               type="text"
               name="cognome"
-              value={formStudente.cognome}
+              value={formStudente.cognome || ''}
               onChange={handleChange}
               required
             />
@@ -59,7 +61,7 @@ const ModaleStudente = ({
             <Form.Control
               type="number"
               name="eta"
-              value={formStudente.eta}
+              value={formStudente.eta || ''}
               onChange={handleChange}
               required
             />
@@ -69,27 +71,35 @@ const ModaleStudente = ({
             <Form.Control
               type="text"
               name="linguaDaImparare"
-              value={formStudente.linguaDaImparare}
+              value={formStudente.linguaDaImparare || ''}
               onChange={handleChange}
               required
             />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Livello Iniziale</Form.Label>
-            <Form.Control
-              type="text"
+            <Form.Select
               name="livello"
-              value={formStudente.livello}
+              value={
+                LIVELLI.includes(formStudente.livello)
+                  ? formStudente.livello
+                  : 'BASE'
+              }
               onChange={handleChange}
-              placeholder="Lascia vuoto se non disponibile"
-            />
+            >
+              {LIVELLI.map((livello) => (
+                <option key={livello} value={livello}>
+                  {livello}
+                </option>
+              ))}
+            </Form.Select>
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Tipologia di Iscrizione</Form.Label>
             <Form.Control
               type="text"
               name="tipologiaIscrizione"
-              value={formStudente.tipologiaIscrizione}
+              value={formStudente.tipologiaIscrizione || ''}
               onChange={handleChange}
               required
             />
@@ -104,7 +114,9 @@ const ModaleStudente = ({
                     type="checkbox"
                     label={giorno}
                     value={giorno}
-                    checked={formStudente.giorniPreferiti.includes(giorno)}
+                    checked={
+                      formStudente.giorniPreferiti?.includes(giorno) || false
+                    }
                     onChange={(e) => handleCheckboxChange(e, 'giorniPreferiti')}
                     className="me-3"
                   />
@@ -128,7 +140,9 @@ const ModaleStudente = ({
                   type="checkbox"
                   label={fascia}
                   value={fascia}
-                  checked={formStudente.fasceOrariePreferite.includes(fascia)}
+                  checked={
+                    formStudente.fasceOrariePreferite?.includes(fascia) || false
+                  }
                   onChange={(e) =>
                     handleCheckboxChange(e, 'fasceOrariePreferite')
                   }
@@ -142,7 +156,7 @@ const ModaleStudente = ({
             <Form.Check
               type="checkbox"
               name="corsoPrivato"
-              checked={formStudente.corsoPrivato}
+              checked={formStudente.corsoPrivato || false}
               onChange={handleChange}
             />
           </Form.Group>
@@ -174,7 +188,7 @@ const ModaleStudente = ({
             <Form.Label>Insegnante Preferito</Form.Label>
             <Form.Select
               name="insegnanteId"
-              value={formStudente.insegnanteId}
+              value={formStudente.insegnanteId || ''}
               onChange={handleChange}
             >
               <option value="">Nessuna preferenza</option>

@@ -1,0 +1,48 @@
+/* 🔥 ANIMAZIONE FLUIDA MENU MOBILE */
+.animated-dropdown {
+  transition: max-height 0.4s ease-in-out, opacity 0.3s ease-in-out;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+
+/* 🔥 QUANDO IL MENU È APERTO */
+.animated-dropdown.show {
+  max-height: 500px; /* Altezza sufficiente */
+  opacity: 1;
+}
+
+/* ✅ NAVBAR DESKTOP: Voci allineate a destra, come era prima */
+@media (min-width: 992px) {
+  .navbar-nav {
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* 🔥 Sposta tutto a destra */
+    gap: 15px; /* 🔥 Aggiunge spazio tra le voci */
+  }
+
+  .navbar-nav .nav-item {
+    text-align: left; /* 🔥 Mantiene allineamento normale */
+  }
+}
+
+/* ✅ NAVBAR MOBILE: Menu leggibile, allineato a destra */
+@media (max-width: 991px) {
+  .navbar-nav {
+    text-align: left;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .navbar-nav .nav-item {
+    display: block;
+  }
+
+  /* 🔥 Logout ben visibile su mobile */
+  .navbar-nav .btn-outline-danger {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+  }
+}

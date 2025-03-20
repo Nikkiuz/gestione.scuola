@@ -1,10 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { logout } from '../redux/slices/authSlice'
+import { useState } from 'react'
 
 const AdminNavbar = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const [menuAperto, setMenuAperto] = useState(false)
 
   const handleLogout = () => {
     dispatch(logout())
@@ -14,21 +16,33 @@ const AdminNavbar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow">
       <div className="container">
+        {/* Logo e Nome */}
         <Link className="navbar-brand fw-bold" to="/dashboard">
           🏫 Gestione Scuola
         </Link>
 
+        {/* Bottone Hamburger */}
         <button
           className="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded={menuAperto ? 'true' : 'false'}
+          aria-label="Toggle navigation"
+          onClick={() => setMenuAperto(!menuAperto)}
         >
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
+        {/* Menu Desktop */}
+        <div
+          className={`collapse navbar-collapse ${menuAperto ? 'show' : ''}`}
+          id="navbarNav"
+        >
+          <ul className="navbar-nav ms-auto text-center text-lg-start">
+            {' '}
+            {/* Centra su mobile, allinea a sinistra su desktop */}
             <li className="nav-item">
               <Link className="nav-link" to="/dashboard">
                 📊 Dashboard
@@ -76,7 +90,7 @@ const AdminNavbar = () => {
             </li>
             <li className="nav-item">
               <button
-                className="btn btn-outline-danger ms-3"
+                className="btn btn-outline-danger ms-lg-3 w-100 w-lg-auto"
                 onClick={handleLogout}
               >
                 🔴 Logout

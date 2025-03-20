@@ -21,43 +21,44 @@ const Calendario = () => {
     fetchLivelli()
   }, [settimana, filtroInsegnante, filtroLivello])
 
-const fetchCorsi = async () => {
-  try {
-    const response = await apiClient.get(
-      `/calendario/corsi-programmati?giorno=${settimana
-        .startOf('isoWeek')
-        .format('dddd')}`
-    )
-    setCorsi(response.data || [])
-  } catch (error) {
-    console.error('❌ Errore nel recupero del calendario:', error)
-    setError('⚠️ Nessun corso disponibile per questa settimana.')
-    setCorsi([])
-  } finally {
-    setLoading(false)
+  const fetchCorsi = async () => {
+    setLoading(true)
+    try {
+      const response = await apiClient.get(`/calendario/corsi-programmati`, {
+        params: {
+          giorno: settimana.startOf('isoWeek').format('YYYY-MM-DD'),
+          insegnante: filtroInsegnante,
+          livello: filtroLivello,
+        },
+      })
+      setCorsi(response.data || [])
+    } catch (error) {
+      console.error('❌ Errore nel recupero del calendario:', error)
+      setError('⚠️ Nessun corso disponibile per questa settimana.')
+      setCorsi([])
+    } finally {
+      setLoading(false)
+    }
   }
-}
-
-
 
   const fetchInsegnanti = async () => {
     try {
       const response = await apiClient.get('/insegnanti')
-      setInsegnanti(response.data)
+      setInsegnanti(response.data || [])
     } catch (error) {
-      console.error('Errore nel recupero degli insegnanti', error)
+      console.error('❌ Errore nel recupero degli insegnanti:', error)
     }
   }
 
-const fetchLivelli = async () => {
-  try {
-    const response = await apiClient.get('/livelli')
-    setLivelli(response.data || []) // 👈 Evita errori se il backend non restituisce dati
-  } catch (error) {
-    console.error('❌ Errore nel recupero dei livelli:', error)
-    setLivelli([]) // 👈 Imposta un array vuoto invece di bloccare la UI
+  const fetchLivelli = async () => {
+    try {
+      const response = await apiClient.get('/livelli') // ✅ Ora chiama l'endpoint giusto
+      setLivelli(response.data || [])
+    } catch (error) {
+      console.error('❌ Errore nel recupero dei livelli:', error)
+      setLivelli([])
+    }
   }
-}
 
   // Naviga avanti o indietro nelle settimane
   const cambiaSettimana = (direzione) => {
@@ -148,7 +149,7 @@ const fetchLivelli = async () => {
         </div>
 
         {loading ? (
-          <p>Caricamento in corso...</p>
+          <p>⏳ Caricamento in corso...</p>
         ) : error ? (
           <div className="alert alert-danger">{error}</div>
         ) : (
@@ -184,13 +185,13 @@ const fetchLivelli = async () => {
                         {corso ? (
                           <>
                             <strong>
-                              {corso.lingua} ({corso.livello})
+                              {corso.lingua} ({corso.livello || 'N/A'})
                             </strong>
                             <br />
-                            🏫 {corso.aula.nome}
+                            🏫 {corso.aula?.nome || 'N/A'}
                             <br />
-                            👨‍🏫 {corso.insegnante.nome}{' '}
-                            {corso.insegnante.cognome}
+                            👨‍🏫 {corso.insegnante?.nome}{' '}
+                            {corso.insegnante?.cognome}
                           </>
                         ) : (
                           <span>-</span>

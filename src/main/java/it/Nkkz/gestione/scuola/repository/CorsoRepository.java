@@ -1,6 +1,7 @@
 package it.Nkkz.gestione.scuola.repository;
 
 import it.Nkkz.gestione.scuola.entity.Corso;
+import it.Nkkz.gestione.scuola.entity.Livello;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -14,7 +15,7 @@ public interface CorsoRepository extends JpaRepository<Corso, Long> {
 	List<Corso> findByAttivoTrue();
 
 	// ✅ Trova tutti i corsi per lingua e livello
-	List<Corso> findByLinguaAndLivelloAndAttivoTrue(String lingua, String livello);
+	List<Corso> findByLinguaAndLivelloAndAttivoTrue(String lingua, Livello livello);
 
 	// ✅ Trova i corsi di un insegnante
 	List<Corso> findByInsegnanteIdAndAttivoTrue(Long insegnanteId);

@@ -27,7 +27,7 @@ const Report = () => {
 
   // Estrai mese e anno dalla data selezionata
   const anno = selectedDate.getFullYear()
-  const mese = selectedDate.getMonth() + 1 // I mesi in JavaScript partono da 0
+  const mese = selectedDate.getMonth() + 1 
 
   // Fetch Report Mensile
   const fetchReportMensile = async () => {
@@ -159,18 +159,18 @@ const Report = () => {
                 </div>
               </div>
 
-            <div className="col-md-3">
-              <div
-                className={`card p-4 text-center shadow ${
-                  report.bilancio >= 0
-                    ? 'bg-success text-white'
-                    : 'bg-danger text-white'
-                }`}
-              >
-                <h5>📊 Bilancio</h5>
-                <h2>€ {(report.bilancio ?? 0).toFixed(2)}</h2>
+              <div className="col-md-3">
+                <div
+                  className={`card p-4 text-center shadow ${
+                    report.bilancio >= 0
+                      ? 'bg-success text-white'
+                      : 'bg-danger text-white'
+                  }`}
+                >
+                  <h5>📊 Bilancio</h5>
+                  <h2>€ {(report.bilancio ?? 0).toFixed(2)}</h2>
+                </div>
               </div>
-            </div>
             </div>
 
             {/* Grafico con Recharts */}
@@ -179,19 +179,34 @@ const Report = () => {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart
                   data={[
-                    { name: 'Entrate', valore: report?.totaleEntrate ?? 0 },
-                    { name: 'Uscite', valore: report?.totaleUscite ?? 0 },
+                    {
+                      name: 'Entrate',
+                      valore: report?.totaleEntrate ?? 0,
+                      fill: '#28a745',
+                    }, // Verde
+                    {
+                      name: 'Uscite',
+                      valore: report?.totaleUscite ?? 0,
+                      fill: '#dc3545',
+                    }, // Rosso
                     {
                       name: 'Ore Insegnate',
                       valore: report?.totaleOreInsegnate ?? 0,
-                    },
+                      fill: '#007bff',
+                    }, // Blu
                   ]}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
+                  <XAxis dataKey="name" />{' '}
+                  {/* Mostra i nomi delle categorie sull'asse X */}
                   <YAxis allowDecimals={false} />
                   <Tooltip formatter={(value) => `${value}`} />
-                  <Bar dataKey="valore" fill="#28a745" barSize={50} />
+                  {/* Un solo componente Bar con fill dinamico */}
+                  <Bar
+                    dataKey="valore"
+                    fill={(entry) => entry.fill}
+                    barSize={50}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>

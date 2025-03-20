@@ -105,12 +105,14 @@ const TeacherList = () => {
         <h2 className="text-center mb-4">👨‍🏫 Gestione Insegnanti</h2>
 
         {/* Pulsante per aprire il modale */}
-        <button
-          className="btn btn-success mb-3"
-          onClick={() => setShowModal(true)}
-        >
-          ➕ Aggiungi Insegnante
-        </button>
+        <div className="text-end mb-3">
+          <button
+            className="btn btn-success"
+            onClick={() => setShowModal(true)}
+          >
+            ➕ Aggiungi Insegnante
+          </button>
+        </div>
 
         {/* 🔹 MODALE PER AGGIUNGERE INSEGNANTE */}
         <Modal show={showModal} onHide={() => setShowModal(false)}>
@@ -219,55 +221,50 @@ const TeacherList = () => {
             </Form>
           </Modal.Body>
         </Modal>
-      </div>
 
-      {/* 🔎 Mostra messaggio di caricamento o errore */}
-      {loading && <p>⏳ Caricamento in corso...</p>}
-      {error && <div className="alert alert-danger">{error}</div>}
+        {/* 🔎 Mostra messaggio di caricamento o errore */}
+        {loading && <p>⏳ Caricamento in corso...</p>}
+        {error && <div className="alert alert-danger">{error}</div>}
 
-      {/* 📌 Tabella Insegnanti */}
-      {!loading && !error && (
-        
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Email</th>
-              <th>Lingua</th>
-              <th>Giorni Disponibili</th>
-              <th>Orari Disponibili</th>
-              <th>Azioni</th>
-            </tr>
-          </thead>
-          <tbody>
-            {insegnanti.map((insegnante) => (
-              <tr key={insegnante.id}>
-                <td>
-                  {insegnante.nome} {insegnante.cognome}
-                </td>
-                <td>{insegnante.email}</td>
-                <td>{insegnante.lingua}</td>
-                <td>{insegnante.giorniDisponibili.join(', ')}</td>
-                <td>{insegnante.fasceOrarieDisponibili.join(', ')}</td>
-                <td>
-                  <button
-                    className="btn btn-primary btn-sm me-2"
-                    onClick={() => navigate(`/insegnanti/${insegnante.id}`)}
-                  >
-                    📄 Dettagli
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => eliminaInsegnante(insegnante.id)}
-                  >
-                    🗑 Elimina
-                  </button>
-                </td>
+        {/* 📌 Tabella Insegnanti */}
+        {!loading && !error && (
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Cognome</th>
+                <th>Email</th>
+                <th>Lingua</th>
+                <th>Azioni</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {insegnanti.map((insegnante) => (
+                <tr key={insegnante.id}>
+                  <td>{insegnante.nome}</td>
+                  <td>{insegnante.cognome}</td>
+                  <td>{insegnante.email}</td>
+                  <td>{insegnante.lingua}</td>
+                  <td>
+                    <button
+                      className="btn btn-primary btn-sm me-2"
+                      onClick={() => navigate(`/insegnanti/${insegnante.id}`)}
+                    >
+                      📄 Dettagli
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => eliminaInsegnante(insegnante.id)}
+                    >
+                      🗑 Elimina
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </>
   )
 }

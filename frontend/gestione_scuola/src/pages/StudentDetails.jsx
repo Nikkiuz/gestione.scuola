@@ -12,11 +12,13 @@ import ModaleStudente from '../components/ModaleStudente'
 
 registerLocale('it', it)
 
+const LIVELLI = ['BASE', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'] 
+
 const StudentDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const { token } = useSelector((state) => state.auth) // Recupera il token dallo stato di Redux
+  const { token } = useSelector((state) => state.auth)
 
   const [studente, setStudente] = useState(null)
   const [pagamenti, setPagamenti] = useState([])
@@ -33,7 +35,7 @@ const StudentDetail = () => {
     cognome: '',
     eta: '',
     linguaDaImparare: '',
-    livello: '',
+    livello: 'BASE',
     tipologiaIscrizione: '',
     giorniPreferiti: [],
     fasceOrariePreferite: [],
@@ -49,6 +51,7 @@ const StudentDetail = () => {
   }, [])
 
   const fetchDatiStudente = async () => {
+    setLoading(true)
     try {
       const [studenteRes, pagamentiRes] = await Promise.all([
         apiClient.get(`/studenti/${id}`),
@@ -58,8 +61,8 @@ const StudentDetail = () => {
       setPagamenti(pagamentiRes.data)
       setError(null)
     } catch (error) {
-      console.error('Errore nel recupero dei dati dello studente', error)
-      setError('Errore nel recupero dei dati dello studente')
+      console.error('❌ Errore nel recupero dei dati dello studente:', error)
+      setError('Errore nel recupero dei dati dello studente.')
     } finally {
       setLoading(false)
     }
@@ -71,8 +74,8 @@ const StudentDetail = () => {
       setInsegnanti(response.data)
       setError(null)
     } catch (error) {
-      console.error('Errore nel recupero degli insegnanti', error)
-      setError('Errore nel recupero degli insegnanti')
+      console.error('❌ Errore nel recupero degli insegnanti:', error)
+      setError('Errore nel recupero degli insegnanti.')
     }
   }
 
@@ -84,20 +87,17 @@ const StudentDetail = () => {
     }
 
     try {
-      const response = await apiClient.put(`/studenti/${id}`, formStudente, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      await apiClient.put(`/studenti/${id}`, formStudente, {
+        headers: { Authorization: `Bearer ${token}` },
       })
 
-      console.log('✅ Risposta del server:', response.data) // Log della risposta
       alert('✅ Studente modificato correttamente!')
       setShowEditModal(false)
       fetchDatiStudente()
     } catch (error) {
       console.error('❌ Errore nel salvataggio dello studente:', error)
 
-      if (error.response && error.response.status === 401) {
+      if (error.response?.status === 401) {
         alert('⚠️ Sessione scaduta. Effettua nuovamente il login.')
         dispatch(logout())
         window.location.href = '/login'
@@ -120,127 +120,126 @@ const StudentDetail = () => {
       cognome: studente.cognome || '',
       eta: studente.eta || '',
       linguaDaImparare: studente.linguaDaImparare || '',
-      livello: studente.livello || '',
+      livello: LIVELLI.includes(studente.livello) ? studente.livello : 'BASE',
       tipologiaIscrizione: studente.tipologiaIscrizione || '',
       giorniPreferiti: studente.giorniPreferiti || [],
       fasceOrariePreferite: studente.fasceOrariePreferite || [],
       corsoPrivato: studente.corsoPrivato || false,
       frequenzaCorsoPrivato: studente.frequenzaCorsoPrivato || 1,
       tipoCorsoGruppo: studente.tipoCorsoGruppo || '1 volta a settimana',
-      insegnanteId: studente.insegnante ? studente.insegnante.id : '',
+      insegnanteId: studente.insegnante?.id || '',
     })
 
     setShowEditModal(true)
   }
 
- const handleAggiungiPagamento = () => {
-   setPagamentoSelezionato({
-     studenteId: id,
-     dataPagamento: new Date(),
-     importo: '',
-     mensilitaSaldata: '',
-     metodoPagamento: 'CARTA',
-     note: '',
-   })
-   setIsEditing(false)
-   setShowModal(true)
- }
+const handleAggiungiPagamento = () => {
+  setPagamentoSelezionato({
+    studenteId: id,
+    dataPagamento: new Date(),
+    importo: '',
+    mensilitaSaldata: '',
+    metodoPagamento: 'CARTA',
+    numeroRicevuta: `REC-${Date.now()}`, // 🔥 Ora assegna un valore predefinito
+    note: '',
+  })
+  setIsEditing(false)
+  setShowModal(true)
+}
 
-  const handleModificaPagamento = (pagamento) => {
-    setPagamentoSelezionato({
-      ...pagamento,
-      dataPagamento: new Date(pagamento.dataPagamento),
-    })
-    setIsEditing(true)
-    setShowModal(true)
-  }
+const handleModificaPagamento = (pagamento) => {
+  setPagamentoSelezionato({
+    ...pagamento,
+    dataPagamento: pagamento.dataPagamento
+      ? new Date(pagamento.dataPagamento)
+      : new Date(), // 🔥 Fix null check
+  })
+  setIsEditing(true)
+  setShowModal(true)
+}
 
-  const handleEliminaPagamento = async (pagamentoId) => {
-    if (window.confirm('Sei sicuro di voler eliminare questo pagamento?')) {
-      try {
-        await apiClient.delete(`/pagamenti/${pagamentoId}`)
-        fetchDatiStudente()
-      } catch (error) {
-        console.error('Errore nell’eliminazione del pagamento', error)
-        alert('Errore nell’eliminazione del pagamento.')
-      }
-    }
-  }
-
-  const handleSubmit = async (e) => {
-    if (e) e.preventDefault()
-
-    if (!pagamentoSelezionato) {
-      alert('❌ Errore: nessun pagamento selezionato.')
-      return
-    }
-
-    const {
-      dataPagamento,
-      importo,
-      mensilitaSaldata,
-      metodoPagamento,
-      numeroRicevuta,
-      note,
-    } = pagamentoSelezionato
-
-    if (!importo || parseFloat(importo) <= 0) {
-      alert('❌ Inserisci un importo valido.')
-      return
-    }
-    if (!mensilitaSaldata) {
-      alert('❌ Seleziona la mensilità saldata.')
-      return
-    }
-    if (!numeroRicevuta) {
-      alert('❌ Inserisci un numero ricevuta valido.')
-      return
-    }
-
-    const pagamentoData = {
-      studente: {
-        id: id || pagamentoSelezionato.studente?.id,
-      },
-      dataPagamento: dataPagamento
-        ? new Date(dataPagamento).toISOString().split('T')[0]
-        : new Date().toISOString().split('T')[0],
-      importo: Math.max(1, parseFloat(importo)),
-      mensilitaSaldata,
-      numeroRicevuta: numeroRicevuta || `REC-${Date.now()}`,
-      metodoPagamento,
-      note: note || '',
-    }
-
+const handleEliminaPagamento = async (pagamentoId) => {
+  if (window.confirm('Sei sicuro di voler eliminare questo pagamento?')) {
     try {
-      if (isEditing) {
-        await apiClient.put(
-          `/pagamenti/${pagamentoSelezionato.id}`,
-          pagamentoData
-        )
-      } else {
-        await apiClient.post(`/studenti/${id}/pagamenti`, pagamentoData)
-      }
-
-      alert('✅ Pagamento aggiunto correttamente!')
-      setShowModal(false)
+      await apiClient.delete(`/pagamenti/${pagamentoId}`)
       fetchDatiStudente()
     } catch (error) {
-      console.error('❌ Errore nel salvataggio del pagamento:', error)
-
-      if (error.response && error.response.status === 401) {
-        alert('⚠️ Sessione scaduta. Effettua nuovamente il login.')
-        dispatch(logout())
-        window.location.href = '/login'
-      } else {
-        alert(
-          `Errore: ${error.response?.data?.message || 'Errore sconosciuto.'}`
-        )
-      }
+      console.error('❌ Errore nell’eliminazione del pagamento:', error)
+      alert('Errore nell’eliminazione del pagamento.')
     }
   }
+}
 
-  if (loading) return <p>Caricamento in corso...</p>
-  if (error) return <div className="alert alert-danger">{error}</div>
+const handleSubmit = async (e) => {
+  if (e) e.preventDefault()
+
+  if (!pagamentoSelezionato) {
+    alert('❌ Errore: nessun pagamento selezionato.')
+    return
+  }
+
+  const {
+    dataPagamento,
+    importo,
+    mensilitaSaldata,
+    metodoPagamento,
+    numeroRicevuta,
+    note,
+  } = pagamentoSelezionato
+
+  if (!importo || parseFloat(importo) <= 0) {
+    alert('❌ Inserisci un importo valido.')
+    return
+  }
+  if (!mensilitaSaldata) {
+    alert('❌ Seleziona la mensilità saldata.')
+    return
+  }
+  if (!numeroRicevuta) {
+    alert('❌ Inserisci un numero ricevuta valido.')
+    return
+  }
+
+  const pagamentoData = {
+    studente: { id: id },
+    dataPagamento: dataPagamento
+      ? new Date(dataPagamento).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0],
+    importo: Math.max(1, parseFloat(importo)), // 🔥 Fix validazione importo
+    mensilitaSaldata,
+    numeroRicevuta: numeroRicevuta || `REC-${Date.now()}`,
+    metodoPagamento,
+    note: note || '',
+  }
+
+  try {
+    if (isEditing) {
+      await apiClient.put(
+        `/pagamenti/${pagamentoSelezionato.id}`,
+        pagamentoData
+      )
+    } else {
+      await apiClient.post(`/studenti/${id}/pagamenti`, pagamentoData)
+    }
+
+    alert('✅ Pagamento salvato con successo!')
+    setShowModal(false)
+    fetchDatiStudente()
+  } catch (error) {
+    console.error('❌ Errore nel salvataggio del pagamento:', error)
+
+    if (error.response?.status === 401) {
+      alert('⚠️ Sessione scaduta. Effettua nuovamente il login.')
+      dispatch(logout())
+      window.location.href = '/login'
+    } else {
+      alert(`Errore: ${error.response?.data?.message || 'Errore sconosciuto.'}`)
+    }
+  }
+}
+
+if (loading) return <p>⏳ Caricamento in corso...</p>
+if (error) return <div className="alert alert-danger">{error}</div>
 
   return (
     <>
@@ -270,7 +269,8 @@ const StudentDetail = () => {
               <strong>Lingua da imparare:</strong> {studente.linguaDaImparare}
             </p>
             <p>
-              <strong>Livello:</strong> {studente.livello}
+              <strong>Livello:</strong>{' '}
+              <strong>{studente.livello || 'BASE'}</strong>
             </p>
             <p>
               <strong>Tipologia Iscrizione:</strong>{' '}
@@ -298,21 +298,23 @@ const StudentDetail = () => {
                 >
                   <span>
                     📅 {pagamento.mensilitaSaldata} - 💵 €
-                    {pagamento.importo.toFixed(2)} - 🏦{' '}
-                    {pagamento.metodoPagamento}
+                    {pagamento.importo ? pagamento.importo.toFixed(2) : '0.00'}{' '}
+                    - 🏦 {pagamento.metodoPagamento}
                   </span>
-                  <button
-                    className="btn btn-warning btn-sm me-2"
-                    onClick={() => handleModificaPagamento(pagamento)}
-                  >
-                    ✏️ Modifica
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => handleEliminaPagamento(pagamento.id)}
-                  >
-                    🗑 Elimina
-                  </button>
+                  <div>
+                    <button
+                      className="btn btn-warning btn-sm me-2"
+                      onClick={() => handleModificaPagamento(pagamento)}
+                    >
+                      ✏️ Modifica
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleEliminaPagamento(pagamento.id)}
+                    >
+                      🗑 Elimina
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -325,6 +327,8 @@ const StudentDetail = () => {
           </button>
         </div>
       </div>
+
+      {/* Modale Pagamento */}
       <ModalePagamento
         show={showModal}
         onHide={() => setShowModal(false)}
@@ -335,6 +339,7 @@ const StudentDetail = () => {
         disableStudentSelect={true} // Disabilita la selezione dello studente
       />
 
+      {/* Modale Studente */}
       <ModaleStudente
         show={showEditModal}
         onHide={() => setShowEditModal(false)}

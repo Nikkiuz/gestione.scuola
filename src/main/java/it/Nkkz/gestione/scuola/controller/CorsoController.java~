@@ -98,10 +98,4 @@ public class CorsoController {
 		return ResponseEntity.ok("Corsi generati automaticamente.");
 	}
 
-	@DeleteMapping("/{id}")
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public ResponseEntity<String> eliminaCorso(@PathVariable Long id) {
-		corsoService.eliminaCorsoDefinitivamente(id);
-		return ResponseEntity.ok("Corso eliminato con successo.");
-	}
 }

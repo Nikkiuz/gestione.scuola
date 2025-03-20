@@ -2,6 +2,7 @@ package it.Nkkz.gestione.scuola.service;
 
 import it.Nkkz.gestione.scuola.dto.StudenteRequestDTO;
 import it.Nkkz.gestione.scuola.dto.StudenteResponseDTO;
+import it.Nkkz.gestione.scuola.entity.Livello;
 import it.Nkkz.gestione.scuola.entity.Studente;
 import it.Nkkz.gestione.scuola.repository.StudenteRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,12 +33,20 @@ public class StudenteService {
 		return convertToResponseDTO(studente);
 	}
 
-	// ✅ Recupera studenti per lingua e livello iniziale
+	// ✅ Recupera studenti per lingua e livello iniziale (ora usa direttamente `Livello`)
 	public List<StudenteResponseDTO> getStudentiByLinguaELivello(String lingua, String livello) {
-		return studenteRepository.findByLinguaDaImparareAndLivello(lingua, livello).stream()
+		Livello livelloConvertito;
+		try {
+			livelloConvertito = Livello.valueOf(livello); // ✅ Usa direttamente `Livello` senza nomi inutili
+		} catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("Livello non valido: " + livello);
+		}
+
+		return studenteRepository.findByLinguaDaImparareAndLivello(lingua, livelloConvertito).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
+
 
 	// ✅ Recupera gli studenti di un insegnante specifico
 	public List<StudenteResponseDTO> getStudentiByInsegnante(Long insegnanteId) {
@@ -53,19 +62,32 @@ public class StudenteService {
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Crea uno studente
+	// ✅ Crea uno studente (ora gestisce Livello come `enum`)
 	public StudenteResponseDTO createStudente(StudenteRequestDTO studenteRequestDTO) {
 		Studente studente = new Studente();
 		BeanUtils.copyProperties(studenteRequestDTO, studente);
+
+		// ✅ Assegna direttamente il livello senza `.toUpperCase()`
+		if (studenteRequestDTO.getLivello() != null) {
+			studente.setLivello(studenteRequestDTO.getLivello());
+		}
+
 		studenteRepository.save(studente);
 		return convertToResponseDTO(studente);
 	}
 
-	// ✅ Modifica uno studente
+	// ✅ Modifica uno studente (ora gestisce Livello come `enum`)
 	public StudenteResponseDTO updateStudente(Long id, StudenteRequestDTO studenteRequestDTO) {
 		Studente studente = studenteRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato con ID: " + id));
-		BeanUtils.copyProperties(studenteRequestDTO, studente);
+
+		BeanUtils.copyProperties(studenteRequestDTO, studente, "livello");
+
+		// ✅ Assegna direttamente l'`enum`, senza conversioni errate
+		if (studenteRequestDTO.getLivello() != null) {
+			studente.setLivello(studenteRequestDTO.getLivello());
+		}
+
 		studenteRepository.save(studente);
 		return convertToResponseDTO(studente);
 	}
@@ -75,6 +97,11 @@ public class StudenteService {
 		studenteRepository.deleteById(id);
 	}
 
+	// ✅ Recupera gli studenti senza corso
+	public List<Studente> getStudentiSenzaCorso() {
+		return studenteRepository.findStudentiSenzaCorso();
+	}
+
 	// ✅ Converte un'entità Studente in DTO
 	private StudenteResponseDTO convertToResponseDTO(Studente studente) {
 		StudenteResponseDTO dto = new StudenteResponseDTO();
@@ -82,3 +109,4 @@ public class StudenteService {
 		return dto;
 	}
 }
+

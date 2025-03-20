@@ -14,12 +14,14 @@ const StudentList = () => {
   const [showModal, setShowModal] = useState(false)
   const navigate = useNavigate()
 
+  const LIVELLI = ['BASE', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'] // 🔥 Enum dei livelli
+
   const [formData, setFormData] = useState({
     nome: '',
     cognome: '',
     eta: '',
     linguaDaImparare: '',
-    livello: '',
+    livello: 'BASE', // 🔥 Ora parte con un valore valido dell'enum
     tipologiaIscrizione: '',
     giorniPreferiti: [],
     fasceOrariePreferite: [],
@@ -35,7 +37,7 @@ const StudentList = () => {
       cognome: '',
       eta: '',
       linguaDaImparare: '',
-      livello: '',
+      livello: 'BASE',
       tipologiaIscrizione: '',
       giorniPreferiti: [],
       fasceOrariePreferite: [],
@@ -77,7 +79,7 @@ const StudentList = () => {
       const response = await apiClient.get('/insegnanti')
       setInsegnanti(response.data)
     } catch (error) {
-      console.error('Errore nel recupero degli insegnanti', error)
+      console.error('❌ Errore nel recupero degli insegnanti:', error)
     }
   }
 
@@ -86,35 +88,34 @@ const StudentList = () => {
       (s) =>
         s.nome.toLowerCase().includes(filtroNome.toLowerCase()) &&
         s.cognome.toLowerCase().includes(filtroCognome.toLowerCase()) &&
-        s.livello.toLowerCase().includes(filtroLivello.toLowerCase())
+        (filtroLivello ? s.livello === filtroLivello : true) // 🔥 Fix filtro livello
     )
   }
 
   const eliminaStudente = async (id) => {
-    if (window.confirm('Sei sicuro di voler eliminare questo studente?')) {
+    if (window.confirm('❌ Sei sicuro di voler eliminare questo studente?')) {
       try {
         await apiClient.delete(`/studenti/${id}`)
         fetchStudenti()
       } catch (error) {
-        console.error('Errore nell’eliminazione dello studente', error)
+        console.error('❌ Errore nell’eliminazione dello studente:', error)
       }
     }
   }
-const handleSubmit = async (e) => {
-  e.preventDefault()
-  try {
-    const response = await apiClient.post('/studenti', formData)
-    console.log('✅ Studente aggiunto con successo:', response.data)
 
-    alert('✅ Studente aggiunto correttamente!')
-    setShowModal(false) // Chiudi il modale
-    resetFormData() // Resetta il form
-    fetchStudenti() // Aggiorna la lista degli studenti
-  } catch (error) {
-    console.error('❌ Errore nella creazione dello studente', error)
-    alert(`Errore: ${error.response?.data?.message || 'Errore sconosciuto.'}`)
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      await apiClient.post('/studenti', formData)
+      alert('✅ Studente aggiunto correttamente!')
+      setShowModal(false)
+      resetFormData()
+      fetchStudenti()
+    } catch (error) {
+      console.error('❌ Errore nella creazione dello studente:', error)
+      alert(`Errore: ${error.response?.data?.message || 'Errore sconosciuto.'}`)
+    }
   }
-}
 
   return (
     <>
@@ -159,13 +160,18 @@ const handleSubmit = async (e) => {
             />
           </div>
           <div className="col-md-4">
-            <input
-              type="text"
+            <select
               className="form-control"
-              placeholder="Filtra per livello"
               value={filtroLivello}
               onChange={(e) => setFiltroLivello(e.target.value)}
-            />
+            >
+              <option value="">Tutti i livelli</option>
+              {LIVELLI.map((liv) => (
+                <option key={liv} value={liv}>
+                  {liv}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -185,7 +191,9 @@ const handleSubmit = async (e) => {
               <tr key={studente.id}>
                 <td>{studente.nome}</td>
                 <td>{studente.cognome}</td>
-                <td>{studente.livello}</td>
+                <td>
+                  <strong>{studente.livello}</strong>
+                </td>
                 <td>
                   <button
                     className="btn btn-primary btn-sm me-2"
@@ -221,7 +229,9 @@ const handleSubmit = async (e) => {
               <tr key={studente.id}>
                 <td>{studente.nome}</td>
                 <td>{studente.cognome}</td>
-                <td>{studente.livello}</td>
+                <td>
+                  <strong>{studente.livello}</strong>
+                </td>
                 <td>
                   <button
                     className="btn btn-primary btn-sm me-2"

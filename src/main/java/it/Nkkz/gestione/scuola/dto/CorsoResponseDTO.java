@@ -1,5 +1,6 @@
 package it.Nkkz.gestione.scuola.dto;
 
+import it.Nkkz.gestione.scuola.entity.Livello;
 import lombok.Data;
 import java.util.List;
 
@@ -7,6 +8,8 @@ import java.util.List;
 public class CorsoResponseDTO {
 	private Long id;
 	private String lingua;
+	private Livello livello;
+	private String tipoCorsoGruppo;
 	private String tipoCorso;
 	private String frequenza;
 	private String giorno;

@@ -30,8 +30,9 @@ public class Studente {
 	@Column(nullable = false)
 	private String linguaDaImparare;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private String livello;  // Inserito manualmente dall'admin
+	private Livello livello;
 
 	@ElementCollection
 	private Set<String> giorniPreferiti;  // Es. ["Lunedì", "Mercoledì"]
