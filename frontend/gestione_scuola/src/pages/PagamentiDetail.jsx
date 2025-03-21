@@ -7,6 +7,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { registerLocale } from 'react-datepicker'
 import it from 'date-fns/locale/it'
+import ModalePagamento from '../components/ModalePagamento'
 
 registerLocale('it', it)
 
@@ -67,35 +68,13 @@ const PagamentiDetail = () => {
     }
   }
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }))
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    try {
-      await apiClient.put(`/pagamenti/${id}`, {
-        ...formData,
-        dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
-      })
-      alert('✅ Modifiche salvate con successo!')
-      setIsEditing(false)
-      fetchPagamento()
-    } catch (error) {
-      setError(error.response?.data?.message || 'Errore generico.')
-    }
-  }
-
   const eliminaPagamento = async () => {
     if (window.confirm('Vuoi eliminare questo pagamento?')) {
       try {
-        await apiClient.delete(`/pagamenti/${id}`)
-        navigate('/pagamenti')
+       await apiClient.delete(`/pagamenti/${id}`)
+       alert('✅ Pagamento eliminato con successo!')
+       navigate('/report?refresh=' + Date.now())
+
       } catch (error) {
         setError('Errore nella cancellazione del pagamento.', error)
       }
@@ -106,142 +85,86 @@ const PagamentiDetail = () => {
   if (error) return <div className="alert alert-danger">{error}</div>
   if (!pagamento) return <p>⚠️ Nessun pagamento trovato.</p>
 
-  return (
-    <>
-      <AdminNavbar />
-      <div className="container mt-4">
-        <h2 className="text-center mb-4">💰 Dettaglio Pagamento</h2>
+ return (
+   <>
+     <AdminNavbar />
+     <div className="container mt-4">
+       <h2 className="text-center mb-4">💳 Dettaglio Pagamento</h2>
 
-        <Form onSubmit={handleSubmit}>
-          {/* Campo Data Pagamento */}
-          <Form.Group className="mb-3">
-            <Form.Label>📆 Data Pagamento</Form.Label>
-            <DatePicker
-              selected={formData.dataPagamento}
-              onChange={(date) =>
-                setFormData({ ...formData, dataPagamento: date })
-              }
-              dateFormat="yyyy-MM-dd"
-              locale="it"
-              className="form-control"
-              disabled={!isEditing}
-              required
-            />
-          </Form.Group>
+       <div className="card p-4 shadow">
+         <p>
+           <strong>📅 Data:</strong>{' '}
+           {new Date(formData.dataPagamento).toLocaleDateString('it-IT')}
+         </p>
+         <p>
+           <strong>🎓 Studente:</strong>{' '}
+           {studenti.find((s) => s.id === formData.studenteId)?.nome}{' '}
+           {studenti.find((s) => s.id === formData.studenteId)?.cognome}
+         </p>
+         <p>
+           <strong>💰 Importo:</strong> € {formData.importo}
+         </p>
+         <p>
+           <strong>📆 Mensilità:</strong> {formData.mensilitaSaldata}
+         </p>
+         <p>
+           <strong>🏦 Metodo:</strong> {formData.metodoPagamento}
+         </p>
+         <p>
+           <strong>🧾 Numero Ricevuta:</strong> {formData.numeroRicevuta}
+         </p>
+         <p>
+           <strong>📝 Note:</strong> {formData.note || '—'}
+         </p>
 
-          {/* Campo Studente */}
-          <Form.Group className="mb-3">
-            <Form.Label>🎓 Studente</Form.Label>
-            <Form.Select
-              name="studenteId"
-              value={formData.studenteId}
-              onChange={handleChange}
-              disabled={!isEditing}
-              required
-            >
-              {studenti.map((studente) => (
-                <option key={studente.id} value={studente.id}>
-                  {studente.nome} {studente.cognome}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
+         <div className="d-flex flex-wrap gap-2 mt-3">
+           <Button variant="primary" onClick={() => setIsEditing(true)}>
+             ✏️ Modifica Pagamento
+           </Button>
 
-          {/* Campo Importo */}
-          <Form.Group className="mb-3">
-            <Form.Label>💰 Importo (€)</Form.Label>
-            <Form.Control
-              type="number"
-              name="importo"
-              value={formData.importo}
-              onChange={handleChange}
-              disabled={!isEditing}
-              required
-            />
-          </Form.Group>
+           <Button variant="danger" onClick={eliminaPagamento}>
+             🗑 Elimina Pagamento
+           </Button>
 
-          {/* Campo Mensilità */}
-          <Form.Group className="mb-3">
-            <Form.Label>📅 Mensilità</Form.Label>
-            <Form.Control
-              type="text"
-              name="mensilitaSaldata"
-              value={formData.mensilitaSaldata}
-              onChange={handleChange}
-              disabled={!isEditing}
-              required
-            />
-          </Form.Group>
+           <Button
+             className="btn btn-secondary"
+             onClick={() => navigate('/pagamenti')}
+           >
+             🔙 Torna alla lista pagamenti
+           </Button>
+         </div>
+       </div>
+     </div>
 
-          {/* Campo Metodo di Pagamento */}
-          <Form.Group className="mb-3">
-            <Form.Label>🏦 Metodo di Pagamento</Form.Label>
-            <Form.Select
-              name="metodoPagamento"
-              value={formData.metodoPagamento}
-              onChange={handleChange}
-              disabled={!isEditing}
-            >
-              <option value="CARTA">Carta</option>
-              <option value="BONIFICO">Bonifico</option>
-              <option value="CONTANTI">Contanti</option>
-            </Form.Select>
-          </Form.Group>
+     {/* 🔹 Modale di Modifica */}
+     <ModalePagamento
+       show={isEditing}
+       onHide={() => setIsEditing(false)}
+       pagamentoSelezionato={formData}
+       setPagamentoSelezionato={setFormData}
+       isEditing={true}
+       studenti={studenti}
+       disableStudentSelect={true}
+       handleSubmit={async (e) => {
+         e.preventDefault()
+         try {
+           await apiClient.put(`/pagamenti/${id}`, {
+             ...formData,
+             dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
+           })
+           alert('✅ Modifica salvata con successo!')
+           setIsEditing(false)
+           fetchPagamento()
+           sessionStorage.setItem('refreshReport', 'true') // 🔥 Da aggiungere!
+         } catch (error) {
+           console.error('❌ Errore nel salvataggio:', error)
+           alert('Errore durante la modifica del pagamento.')
+         }
+       }}
+     />
+   </>
+ )
 
-          {/* Campo Numero Ricevuta */}
-          <Form.Group className="mb-3">
-            <Form.Label>📝 Numero Ricevuta</Form.Label>
-            <Form.Control
-              type="text"
-              name="numeroRicevuta"
-              value={formData.numeroRicevuta}
-              onChange={handleChange}
-              disabled={!isEditing}
-              required
-            />
-          </Form.Group>
-
-          {/* Campo Note */}
-          <Form.Group className="mb-3">
-            <Form.Label>🗒 Note</Form.Label>
-            <Form.Control
-              as="textarea"
-              name="note"
-              value={formData.note}
-              onChange={handleChange}
-              disabled={!isEditing}
-            />
-          </Form.Group>
-
-          {/* Pulsanti di Azione */}
-          <div className="d-flex justify-content-between">
-            {!isEditing ? (
-              <Button variant="primary" onClick={() => setIsEditing(true)}>
-                ✏️ Modifica
-              </Button>
-            ) : (
-              <>
-                <Button type="submit" variant="success">
-                  💾 Salva Modifiche
-                </Button>
-                <Button
-                  variant="secondary"
-                  className="ms-2"
-                  onClick={() => setIsEditing(false)}
-                >
-                  ❌ Annulla
-                </Button>
-              </>
-            )}
-
-            <Button variant="danger" onClick={eliminaPagamento}>
-              🗑 Elimina
-            </Button>
-          </div>
-        </Form>
-      </div>
-    </>
-  )
 }
 
 export default PagamentiDetail

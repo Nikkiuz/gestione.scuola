@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -66,7 +67,15 @@ public class ReportService {
 		report.setTotaleOreInsegnate(totaleOreInsegnate);
 
 		// 📌 Entrate
-		List<Pagamento> pagamenti = pagamentoRepository.findByDataPagamentoBetween(startDate, endDate);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("it"));
+		String targetMeseAnno = startDate.format(formatter).toLowerCase();
+
+		List<Pagamento> pagamenti = pagamentoRepository.findAll().stream()
+			.filter(p -> p.getMensilitaSaldata() != null &&
+				p.getMensilitaSaldata().toLowerCase().equals(targetMeseAnno))
+			.collect(Collectors.toList());
+
+
 		Map<String, Double> pagamentiRicevuti = pagamenti.stream()
 			.collect(Collectors.groupingBy(
 				p -> p.getMetodoPagamento().toString(),

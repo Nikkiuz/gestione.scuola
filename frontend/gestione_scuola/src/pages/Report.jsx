@@ -13,7 +13,7 @@ import AdminNavbar from '../components/AdminNavbar'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { registerLocale } from 'react-datepicker'
-import it from 'date-fns/locale/it' // Localizzazione italiana
+import it from 'date-fns/locale/it'
 
 registerLocale('it', it)
 
@@ -25,11 +25,9 @@ const Report = () => {
   const [insegnante, setInsegnante] = useState('')
   const [listaInsegnanti, setListaInsegnanti] = useState([])
 
-  // Estrai mese e anno dalla data selezionata
   const anno = selectedDate.getFullYear()
-  const mese = selectedDate.getMonth() + 1 
+  const mese = selectedDate.getMonth() + 1
 
-  // Fetch Report Mensile
   const fetchReportMensile = async () => {
     setLoading(true)
     setError('')
@@ -47,7 +45,6 @@ const Report = () => {
     }
   }
 
-  // Fetch lista insegnanti
   const fetchInsegnanti = async () => {
     try {
       const response = await apiClient.get('/insegnanti')
@@ -57,14 +54,11 @@ const Report = () => {
     }
   }
 
-  // Scarica il report PDF mensile
   const scaricaReportPdf = async () => {
     try {
       const response = await apiClient.get(
         `/report/mensile/pdf?anno=${anno}&mese=${mese}`,
-        {
-          responseType: 'blob',
-        }
+        { responseType: 'blob' }
       )
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
@@ -78,7 +72,6 @@ const Report = () => {
     }
   }
 
-  // Scarica il report PDF per un singolo insegnante
   const scaricaOreInsegnante = async () => {
     if (!insegnante) {
       alert('Seleziona un insegnante prima di scaricare il report.')
@@ -101,10 +94,20 @@ const Report = () => {
     }
   }
 
-  useEffect(() => {
+useEffect(() => {
+  const shouldRefresh = sessionStorage.getItem('refreshReport') === 'true'
+  console.log('🔁 shouldRefresh:', shouldRefresh)
+
+  if (shouldRefresh) {
+    sessionStorage.removeItem('refreshReport')
     fetchReportMensile()
-    fetchInsegnanti()
-  }, [anno, mese])
+  } else {
+    fetchReportMensile()
+  }
+
+  fetchInsegnanti()
+}, [anno, mese])
+
 
   return (
     <>
@@ -112,7 +115,6 @@ const Report = () => {
       <div className="container mt-5">
         <h2 className="text-center mb-4">📊 Report Mensile</h2>
 
-        {/* DatePicker per selezionare mese e anno */}
         <div className="d-flex justify-content-center mb-3">
           <DatePicker
             selected={selectedDate}
@@ -124,7 +126,6 @@ const Report = () => {
           />
         </div>
 
-        {/* Bottone per scaricare il PDF */}
         <div className="d-flex justify-content-center mb-4">
           <button className="btn btn-primary" onClick={scaricaReportPdf}>
             📥 Scarica PDF
@@ -137,7 +138,6 @@ const Report = () => {
           <div className="alert alert-danger">{error}</div>
         ) : report ? (
           <>
-            {/* Box delle statistiche */}
             <div className="row mb-4">
               <div className="col-md-3">
                 <div className="card p-4 text-center shadow">
@@ -151,14 +151,12 @@ const Report = () => {
                   <h2>€ {(report.totaleUscite ?? 0).toFixed(2)}</h2>
                 </div>
               </div>
-
               <div className="col-md-3">
                 <div className="card p-4 text-center shadow">
                   <h5>🕒 Ore Insegnate</h5>
                   <h2>{report.totaleOreInsegnate ?? 0} ore</h2>
                 </div>
               </div>
-
               <div className="col-md-3">
                 <div
                   className={`card p-4 text-center shadow ${
@@ -173,7 +171,6 @@ const Report = () => {
               </div>
             </div>
 
-            {/* Grafico con Recharts */}
             <div className="mt-5">
               <h4>📈 Entrate, Uscite e Ore Insegnate</h4>
               <ResponsiveContainer width="100%" height={300}>
@@ -183,25 +180,23 @@ const Report = () => {
                       name: 'Entrate',
                       valore: report?.totaleEntrate ?? 0,
                       fill: '#28a745',
-                    }, // Verde
+                    },
                     {
                       name: 'Uscite',
                       valore: report?.totaleUscite ?? 0,
                       fill: '#dc3545',
-                    }, // Rosso
+                    },
                     {
                       name: 'Ore Insegnate',
                       valore: report?.totaleOreInsegnate ?? 0,
                       fill: '#007bff',
-                    }, // Blu
+                    },
                   ]}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />{' '}
-                  {/* Mostra i nomi delle categorie sull'asse X */}
+                  <XAxis dataKey="name" />
                   <YAxis allowDecimals={false} />
                   <Tooltip formatter={(value) => `${value}`} />
-                  {/* Un solo componente Bar con fill dinamico */}
                   <Bar
                     dataKey="valore"
                     fill={(entry) => entry.fill}
@@ -211,7 +206,6 @@ const Report = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Selettore per report insegnante */}
             <div className="mt-4">
               <h5>📘 Report per Insegnante</h5>
               <select

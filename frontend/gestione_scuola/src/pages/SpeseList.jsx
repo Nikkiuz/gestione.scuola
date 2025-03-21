@@ -6,6 +6,7 @@ import AdminNavbar from '../components/AdminNavbar'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { registerLocale } from 'react-datepicker'
+import ModaleSpesa from '../components/ModaleSpesa'
 import it from 'date-fns/locale/it' // Localizzazione italiana
 
 registerLocale('it', it)
@@ -49,24 +50,20 @@ const SpeseList = () => {
     }
   }
 
-  const eliminaSpesa = async (id) => {
-    if (window.confirm('Vuoi eliminare questa spesa?')) {
-      try {
-        await apiClient.delete(`/spese/${id}`)
-        fetchSpese()
-      } catch (error) {
-        console.error('❌ Errore nella cancellazione della spesa', error)
-      }
+const eliminaSpesa = async (id) => {
+  if (window.confirm('Vuoi eliminare questa spesa?')) {
+    try {
+      await apiClient.delete(`/spese/${id}`)
+      alert('✅ Spesa eliminata con successo!')
+      fetchSpese()
+      sessionStorage.setItem('refreshReport', 'true')
+    } catch (error) {
+      console.error('❌ Errore nella cancellazione della spesa:', error)
+      setError('Errore nella cancellazione della spesa.')
     }
   }
+}
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  const handleDateChange = (date) => {
-    setFormData({ ...formData, dataSpesa: date })
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -78,10 +75,13 @@ const SpeseList = () => {
         ...formData,
         dataSpesa: formData.dataSpesa.toISOString().split('T')[0], // 👈 Formatta la data
       })
-      console.log('✅ Spesa aggiunta con successo')
       setShowModal(false)
       fetchSpese()
       alert('✅ Spesa aggiunta con successo!')
+      setShowModal(false)
+      fetchSpese()
+      sessionStorage.setItem('refreshReport', 'true')
+
     } catch (error) {
       console.error('❌ Errore nella creazione della spesa', error)
       if (error.response) {
@@ -102,7 +102,7 @@ const SpeseList = () => {
         <h2 className="text-center mb-4">💰 Lista Spese</h2>
 
         {/* Pulsante per aggiungere una nuova spesa */}
-        <div className="mb-3 text-end">
+        <div className="mb-3 text-start">
           <button
             className="btn btn-success"
             onClick={() => setShowModal(true)}
@@ -200,68 +200,14 @@ const SpeseList = () => {
         )}
 
         {/* 🔹 Modale di Aggiunta Spesa */}
-        <Modal show={showModal} onHide={() => setShowModal(false)}>
-          <Modal.Header closeButton>
-            <Modal.Title>Aggiungi Spesa</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Label>Categoria</Form.Label>
-                <Form.Select
-                  name="categoria"
-                  value={formData.categoria}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Seleziona una categoria</option>
-                  <option value="BOLLETTE">Bollette</option>
-                  <option value="PULIZIA">Pulizia</option>
-                  <option value="MUTUO">Mutuo</option>
-                  <option value="CONTRIBUTI_INSEGNANTI">
-                    Contributi Insegnanti
-                  </option>
-                  <option value="CANCELLERIA">Cancelleria</option>
-                  <option value="COMMERCIALISTA">Commercialista</option>
-                  <option value="ALTRO">Altro</option>
-                </Form.Select>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Importo (€)</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="importo"
-                  value={formData.importo}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>📆 Data Spesa</Form.Label>
-                <DatePicker
-                  selected={formData.dataSpesa}
-                  onChange={handleDateChange}
-                  dateFormat="dd/MM/yyyy"
-                  locale="it"
-                  className="form-control ms-3 text-center"
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Descrizione</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="descrizione"
-                  value={formData.descrizione}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-              <Button type="submit" variant="success">
-                ✅ Aggiungi Spesa
-              </Button>
-            </Form>
-          </Modal.Body>
-        </Modal>
+        <ModaleSpesa
+          show={showModal}
+          onHide={() => setShowModal(false)}
+          formData={formData}
+          setFormData={setFormData}
+          handleSubmit={handleSubmit}
+          isEditing={false}
+        />
       </div>
     </>
   )

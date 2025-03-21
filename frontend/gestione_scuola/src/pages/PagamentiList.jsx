@@ -75,38 +75,50 @@ const PagamentiList = () => {
     }))
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    try {
-      if (isEditing) {
-        await apiClient.put(`/pagamenti/${formData.id}`, {
-          ...formData,
-          dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
-        })
-      } else {
-        await apiClient.post('/pagamenti', {
-          ...formData,
-          dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
-        })
-      }
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  setError('')
+  try {
+    if (isEditing) {
+      await apiClient.put(`/pagamenti/${formData.id}`, {
+        ...formData,
+        dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
+      })
+      alert('✅ Pagamento modificato con successo!')
       setShowModal(false)
       await fetchPagamenti()
-    } catch (error) {
-      setError(error.response?.data?.message || 'Errore generico.')
-    }
-  }
+    } else {
+      await apiClient.post('/pagamenti', {
+        ...formData,
+        dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
+      })
+    alert('✅ Pagamento aggiunto con successo!')
+    setShowModal(false)
+    fetchPagamenti()
+    sessionStorage.setItem('refreshReport', 'true')
 
-  const eliminaPagamento = async (id) => {
-    if (window.confirm('Vuoi eliminare questo pagamento?')) {
-      try {
-        await apiClient.delete(`/pagamenti/${id}`)
-        fetchPagamenti()
-      } catch (error) {
-        setError('Errore nella cancellazione del pagamento.', error)
-      }
+    }
+  } catch (error) {
+    console.error('❌ Errore:', error)
+    alert('❌ Errore durante il salvataggio del pagamento.')
+    setError(error.response?.data?.message || 'Errore generico.')
+  }
+}
+
+
+const eliminaPagamento = async (id) => {
+  if (window.confirm('Vuoi eliminare questo pagamento?')) {
+    try {
+      await apiClient.delete(`/pagamenti/${id}`)
+      alert('✅ Pagamento eliminato con successo!')
+      fetchPagamenti()
+      sessionStorage.setItem('refreshReport', 'true') // 🔥 Flag per report
+    } catch (error) {
+      console.error('❌ Errore nella cancellazione del pagamento:', error)
+      setError('Errore nella cancellazione del pagamento.')
     }
   }
+}
 
   const resetFormData = () => {
     setFormData({
@@ -162,7 +174,7 @@ const PagamentiList = () => {
           </div>
         </div>
 
-        <div className="mb-3 text-end">
+        <div className="mb-3 text-start">
           <button
             className="btn btn-success"
             onClick={() => {
