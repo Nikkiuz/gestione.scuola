@@ -8,21 +8,26 @@ const CourseList = () => {
   const [corsiPrivati, setCorsiPrivati] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [generazioneInCorso, setGenerazioneInCorso] = useState(false) // Stato per generazione automatica corsi
+  const [generazioneInCorso, setGenerazioneInCorso] = useState(false)
+  const [corsiDisattivati, setCorsiDisattivati] = useState([])
+  const [listaAttesa, setListaAttesa] = useState([])
+  const [studentiInListaAttesa, setStudentiInListaAttesa] = useState([])
+
+
   const navigate = useNavigate()
 
-  useEffect(() => {
-    fetchCorsi()
-  }, [])
-
+  // Funzione per caricare i corsi
   const fetchCorsi = async () => {
     setLoading(true)
     try {
       const response = await apiClient.get('/corsi')
+      const disattivati = await apiClient.get('/corsi/disattivati')
+      const listaAttesaRes = await apiClient.get('/corsi/lista-attesa/studenti')
+      setStudentiInListaAttesa(listaAttesaRes.data || [])
       const corsi = response.data || []
-
       setCorsiGruppo(corsi.filter((c) => c.tipoCorso === 'GRUPPO'))
       setCorsiPrivati(corsi.filter((c) => c.tipoCorso === 'PRIVATO'))
+      setCorsiDisattivati(disattivati.data || [])
     } catch (error) {
       console.error('❌ Errore nel recupero dei corsi:', error)
       setError('Errore nel caricamento dei corsi.')
@@ -31,11 +36,22 @@ const CourseList = () => {
     }
   }
 
+
+  // Effetto per caricare i corsi al montaggio del componente
+ useEffect(() => {
+   fetchCorsi()
+   fetchCorsiDisattivati()
+    fetchListaAttesa()
+ }, [])
+
+
+  // Funzione per disattivare un corso
   const disattivaCorso = async (id) => {
     if (window.confirm('Sei sicuro di voler disattivare questo corso?')) {
       try {
         await apiClient.put(`/corsi/${id}/interrompi`)
-        fetchCorsi()
+        sessionStorage.setItem('refreshReport', 'true') // ✅ Aggiorna report
+        fetchCorsi() // Ricarica i corsi dopo la disattivazione
       } catch (error) {
         console.error('❌ Errore nella disattivazione del corso:', error)
         alert('Errore nella disattivazione del corso.')
@@ -43,11 +59,25 @@ const CourseList = () => {
     }
   }
 
+ const riattivaCorso = async (id) => {
+   if (window.confirm('Vuoi riattivare questo corso?')) {
+     try {
+       await apiClient.put(`/corsi/${id}/riattiva`)
+       fetchCorsi()
+     } catch (error) {
+       console.error('❌ Errore nella riattivazione del corso:', error)
+       alert('Errore durante la riattivazione del corso.')
+     }
+   }
+ }
+
+  // Funzione per eliminare un corso
   const eliminaCorso = async (id) => {
     if (window.confirm('Eliminare definitivamente il corso?')) {
       try {
         await apiClient.delete(`/corsi/${id}`)
-        fetchCorsi()
+        sessionStorage.setItem('refreshReport', 'true') // ✅ Aggiorna report
+        fetchCorsi() // Ricarica i corsi dopo l'eliminazione
       } catch (error) {
         console.error("❌ Errore nell'eliminazione del corso:", error)
         alert("Errore durante l'eliminazione del corso.")
@@ -55,17 +85,37 @@ const CourseList = () => {
     }
   }
 
+  // Funzione per generare corsi automaticamente
   const generaCorsiAutomaticamente = async () => {
     setGenerazioneInCorso(true)
     try {
-      await apiClient.post('/corsi/genera-automatico')
-      alert('✅ Corsi generati automaticamente con successo!')
-      fetchCorsi()
+      const response = await apiClient.post('/corsi/genera-automatico')
+      alert(response.data || '✅ Corsi generati automaticamente con successo!')
+      fetchCorsi() // Ricarica i corsi dopo la generazione
     } catch (error) {
       console.error('❌ Errore nella generazione automatica dei corsi:', error)
-      alert('Errore durante la generazione automatica dei corsi.')
+      alert('❌ Errore durante la generazione automatica dei corsi.')
     } finally {
       setGenerazioneInCorso(false)
+    }
+  }
+
+  // Funzione per caricare corsi disattivati
+  const fetchCorsiDisattivati = async () => {
+    try {
+      const response = await apiClient.get('/corsi/disattivati')
+      setCorsiDisattivati(response.data || [])
+    } catch (error) {
+      console.error('❌ Errore nel recupero dei corsi disattivati:', error)
+    }
+  }
+
+  const fetchListaAttesa = async () => {
+    try {
+      const response = await apiClient.get('/corsi/lista-attesa/studenti')
+      setListaAttesa(response.data || [])
+    } catch (error) {
+      console.error('❌ Errore nel recupero della lista di attesa:', error)
     }
   }
 
@@ -125,8 +175,7 @@ const CourseList = () => {
                       <td>{corso.lingua}</td>
                       <td>
                         <strong>{corso.livello || 'N/A'}</strong>
-                      </td>{' '}
-                      {/* Ora livello è sempre valido */}
+                      </td>
                       <td>{corso.giorno}</td>
                       <td>{corso.orario}</td>
                       <td>
@@ -179,8 +228,7 @@ const CourseList = () => {
                       <td>{corso.lingua}</td>
                       <td>
                         <strong>{corso.livello || 'N/A'}</strong>
-                      </td>{' '}
-                      {/* Ora livello è sempre valido */}
+                      </td>
                       <td>{corso.giorno}</td>
                       <td>{corso.orario}</td>
                       <td>
@@ -209,6 +257,81 @@ const CourseList = () => {
               </table>
             )}
           </>
+        )}
+
+        <h4>📌 Corsi Disattivati</h4>
+        {corsiDisattivati.length === 0 ? (
+          <p>Nessun corso disattivato.</p>
+        ) : (
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Insegnante</th>
+                <th>Lingua</th>
+                <th>Livello</th>
+                <th>Giorno</th>
+                <th>Orario</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {corsiDisattivati.map((corso) => (
+                <tr key={corso.id}>
+                  <td>
+                    {corso.insegnante?.nome} {corso.insegnante?.cognome}
+                  </td>
+                  <td>{corso.lingua}</td>
+                  <td>
+                    <strong>{corso.livello || 'N/A'}</strong>
+                  </td>
+                  <td>{corso.giorno}</td>
+                  <td>{corso.orario}</td>
+                  <td>
+                    <button
+                      className="btn btn-info btn-sm me-2"
+                      onClick={() => navigate(`/corsi/${corso.id}`)}
+                    >
+                      🔍 Dettagli
+                    </button>
+                    <button
+                      className="btn btn-success btn-sm"
+                      onClick={() => riattivaCorso(corso.id)}
+                    >
+                      ✅ Riattiva
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        <h4>📌 Lista di Attesa</h4>
+        {studentiInListaAttesa.length === 0 ? (
+          <p>Nessuno studente in lista di attesa.</p>
+        ) : (
+          <table className="table table-bordered">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Cognome</th>
+                <th>Lingua</th>
+                <th>Livello</th>
+                <th>Età</th>
+              </tr>
+            </thead>
+            <tbody>
+              {studentiInListaAttesa.map((studente) => (
+                <tr key={studente.id}>
+                  <td>{studente.nome}</td>
+                  <td>{studente.cognome}</td>
+                  <td>{studente.linguaDaImparare}</td>
+                  <td>{studente.livello}</td>
+                  <td>{studente.eta}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </>

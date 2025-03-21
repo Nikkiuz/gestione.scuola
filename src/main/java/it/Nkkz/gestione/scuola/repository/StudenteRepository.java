@@ -11,7 +11,12 @@ public interface StudenteRepository extends JpaRepository<Studente, Long> {
 	List<Studente> findByInsegnanteId(Long insegnanteId);
 	List<Studente> findByLinguaDaImparareAndLivello(String linguaDaImparare, Livello livello);
 	List<Studente> findByCorsoPrivato(boolean corsoPrivato);
-	@Query("SELECT s FROM Studente s WHERE s NOT IN (SELECT DISTINCT s FROM Studente s JOIN s.corsi c)")
+	@Query("""
+         SELECT s FROM Studente s
+        LEFT JOIN s.corsi c WITH c.attivo = true
+         WHERE c IS NULL
+		""")
 	List<Studente> findStudentiSenzaCorso();
+
 }
 

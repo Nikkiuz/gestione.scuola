@@ -178,6 +178,7 @@ const StudentList = () => {
               <th>Nome</th>
               <th>Cognome</th>
               <th>Livello</th>
+              <th>Età</th>
               <th>Azioni</th>
             </tr>
           </thead>
@@ -189,6 +190,7 @@ const StudentList = () => {
                 <td>
                   <strong>{studente.livello}</strong>
                 </td>
+                <td>{studente.eta}</td>
                 <td>
                   <button
                     className="btn btn-primary btn-sm me-2"
@@ -216,6 +218,7 @@ const StudentList = () => {
               <th>Nome</th>
               <th>Cognome</th>
               <th>Livello</th>
+              <th>Età</th>
               <th>Azioni</th>
             </tr>
           </thead>
@@ -227,6 +230,7 @@ const StudentList = () => {
                 <td>
                   <strong>{studente.livello}</strong>
                 </td>
+                <td>{studente.eta}</td>
                 <td>
                   <button
                     className="btn btn-primary btn-sm me-2"

@@ -73,7 +73,7 @@ const PagamentiDetail = () => {
       try {
        await apiClient.delete(`/pagamenti/${id}`)
        alert('✅ Pagamento eliminato con successo!')
-       navigate('/report?refresh=' + Date.now())
+       sessionStorage.setItem('refreshReport', 'true')
 
       } catch (error) {
         setError('Errore nella cancellazione del pagamento.', error)
@@ -125,16 +125,16 @@ const PagamentiDetail = () => {
            <Button variant="danger" onClick={eliminaPagamento}>
              🗑 Elimina Pagamento
            </Button>
-
-           <Button
-             className="btn btn-secondary"
-             onClick={() => navigate('/pagamenti')}
-           >
-             🔙 Torna alla lista pagamenti
-           </Button>
          </div>
        </div>
-     </div>
+     
+       <Button
+         className="btn btn-secondary mt-3"
+         onClick={() => navigate('/pagamenti')}
+       >
+         🔙 Torna alla lista pagamenti
+       </Button>
+     
 
      {/* 🔹 Modale di Modifica */}
      <ModalePagamento
@@ -155,13 +155,14 @@ const PagamentiDetail = () => {
            alert('✅ Modifica salvata con successo!')
            setIsEditing(false)
            fetchPagamento()
-           sessionStorage.setItem('refreshReport', 'true') // 🔥 Da aggiungere!
+           sessionStorage.setItem('refreshReport', 'true')
          } catch (error) {
            console.error('❌ Errore nel salvataggio:', error)
            alert('Errore durante la modifica del pagamento.')
          }
        }}
      />
+     </div>
    </>
  )
 

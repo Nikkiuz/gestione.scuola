@@ -44,7 +44,7 @@ const SpeseDetail = () => {
       try {
       await apiClient.delete(`/spese/${id}`)
       alert('✅ Spesa eliminata con successo!')
-      navigate('/report?refresh=' + Date.now())
+      sessionStorage.setItem('refreshReport', 'true')
 
       } catch (error) {
         console.error('❌ Errore nell’eliminazione della spesa', error)
@@ -112,9 +112,9 @@ return (
                 .split('T')[0],
             })
             alert('✅ Modifica salvata con successo!')
-            navigate('/report?refresh=' + Date.now())
             setSpesa(tempSpesa)
             setIsEditing(false)
+            sessionStorage.setItem('refreshReport', 'true')
           } catch (error) {
             console.error('❌ Errore nella modifica della spesa:', error)
             alert('Errore durante il salvataggio.')
