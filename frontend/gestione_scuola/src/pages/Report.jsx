@@ -8,6 +8,10 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from 'recharts'
 import AdminNavbar from '../components/AdminNavbar'
 import DatePicker from 'react-datepicker'
@@ -94,20 +98,12 @@ const Report = () => {
     }
   }
 
-useEffect(() => {
-  const shouldRefresh = sessionStorage.getItem('refreshReport') === 'true'
-  console.log('🔁 shouldRefresh:', shouldRefresh)
-
-  if (shouldRefresh) {
-    sessionStorage.removeItem('refreshReport')
+  useEffect(() => {
     fetchReportMensile()
-  } else {
-    fetchReportMensile()
-  }
+    fetchInsegnanti()
+  }, [anno, mese])
 
-  fetchInsegnanti()
-}, [anno, mese])
-
+  const COLORS = ['#28a745', '#dc3545', '#007bff', '#ffc107', '#6f42c1']
 
   return (
     <>
@@ -196,17 +192,108 @@ useEffect(() => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis allowDecimals={false} />
-                  <Tooltip formatter={(value) => `${value}`} />
-                  <Bar
-                    dataKey="valore"
-                    fill={(entry) => entry.fill}
-                    barSize={50}
-                  />
+                  <Tooltip />
+                  <Bar dataKey="valore" barSize={50}>
+                    {report &&
+                      ['#28a745', '#dc3545', '#007bff'].map((color, index) => (
+                        <Cell key={`cell-${index}`} fill={color} />
+                      ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="mt-4">
+            {report.oreInsegnate &&
+              Object.keys(report.oreInsegnate).length > 0 && (
+                <div className="mt-5">
+                  <h4>🧑‍🏫 Ore Insegnate per Insegnante</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart
+                      data={Object.entries(report.oreInsegnate).map(
+                        ([nome, ore]) => ({ nome, ore })
+                      )}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="nome" />
+                      <YAxis allowDecimals={false} />
+                      <Tooltip />
+                      <Bar dataKey="ore" fill="#17a2b8" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+            {report.pagamentiRicevuti &&
+              Object.keys(report.pagamentiRicevuti).length > 0 && (
+                <div className="mt-5">
+                  <h4>💳 Pagamenti per Metodo</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={Object.entries(report.pagamentiRicevuti).map(
+                          ([metodo, valore]) => ({
+                            name: metodo,
+                            value: valore,
+                          })
+                        )}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        label
+                      >
+                        {Object.keys(report.pagamentiRicevuti).map(
+                          (_, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={COLORS[index % COLORS.length]}
+                            />
+                          )
+                        )}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+            {report.speseRegistrate &&
+              Object.keys(report.speseRegistrate).length > 0 && (
+                <div className="mt-5">
+                  <h4>🧾 Spese per Categoria</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={Object.entries(report.speseRegistrate).map(
+                          ([categoria, valore]) => ({
+                            name: categoria,
+                            value: valore,
+                          })
+                        )}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        label
+                      >
+                        {Object.keys(report.speseRegistrate).map((_, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+            <div className="mt-5">
               <h5>📘 Report per Insegnante</h5>
               <select
                 className="form-select mb-2"

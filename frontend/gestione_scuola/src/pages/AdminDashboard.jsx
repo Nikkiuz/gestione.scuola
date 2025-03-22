@@ -7,7 +7,7 @@ import AdminNavbar from '../components/AdminNavbar'
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({ studenti: 0, corsi: 0, pagamenti: 0 })
-  const [avvisi, setAvvisi] = useState([])
+  const [dashboardAvvisi, setDashboardAvvisi] = useState([])
   const [pagamentiMensili, setPagamentiMensili] = useState({
     labels: [],
     data: [],
@@ -28,7 +28,7 @@ const AdminDashboard = () => {
         ])
 
         setStats(statsRes.data || { studenti: 0, corsi: 0, pagamenti: 0 })
-        setAvvisi(avvisiRes.data || [])
+        setDashboardAvvisi(avvisiRes.data || [])
         setPagamentiMensili({
           labels: pagamentiRes.data?.mesi || [],
           data: pagamentiRes.data?.importi || [],
@@ -81,12 +81,13 @@ const AdminDashboard = () => {
 
         {!loading && !error && (
           <div className="mb-4">
-            {avvisi.length > 0 ? (
-              avvisi.map((avviso, index) => (
+            {dashboardAvvisi.length > 0 ? (
+              dashboardAvvisi.map((avviso, index) => (
                 <div
                   key={index}
                   className="alert alert-warning"
                   onClick={() => navigate(avviso.link)}
+                  style={{ cursor: 'pointer' }}
                 >
                   {avviso.messaggio}
                 </div>
@@ -100,19 +101,31 @@ const AdminDashboard = () => {
         {!loading && !error && (
           <div className="row">
             <div className="col-md-4">
-              <div className="card p-4 text-center shadow">
+              <div
+                className="card p-4 text-center shadow"
+                style={{ cursor: 'pointer' }}
+                onClick={() => navigate('/studenti')}
+              >
                 <h5>📌 Studenti</h5>
                 <h2>{stats.studenti}</h2>
               </div>
             </div>
             <div className="col-md-4">
-              <div className="card p-4 text-center shadow">
+              <div
+                className="card p-4 text-center shadow"
+                style={{ cursor: 'pointer' }}
+                onClick={() => navigate('/corsi')}
+              >
                 <h5>📌 Corsi Attivi</h5>
                 <h2>{stats.corsi}</h2>
               </div>
             </div>
             <div className="col-md-4">
-              <div className="card p-4 text-center shadow">
+              <div
+                className="card p-4 text-center shadow"
+                style={{ cursor: 'pointer' }}
+                onClick={() => navigate('/report')}
+              >
                 <h5>💰 Totale Pagamenti</h5>
                 <h2>€ {stats.pagamenti}</h2>
               </div>
