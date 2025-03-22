@@ -139,7 +139,6 @@ const ModalePagamento = ({
             >
               <option value="CARTA">Carta</option>
               <option value="BONIFICO">Bonifico</option>
-              <option value="CONTANTI">Contanti</option>
             </Form.Select>
           </Form.Group>
 

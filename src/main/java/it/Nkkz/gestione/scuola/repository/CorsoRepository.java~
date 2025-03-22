@@ -32,7 +32,6 @@ public interface CorsoRepository extends JpaRepository<Corso, Long> {
 	// ✅ Trova corsi per tipologia
 	List<Corso> findByTipoCorsoAndAttivoTrue(String tipoCorso);
 
-	// ✅ Trova i corsi attivi per aula, giorno e orario (per evitare sovrapposizioni)
 	List<Corso> findByAulaIdAndGiornoAndOrarioAndAttivoTrue(Long aulaId, String giorno, String orario);
 
 

@@ -34,7 +34,9 @@ public class PagamentoService {
 		Pagamento pagamento = new Pagamento();
 		BeanUtils.copyProperties(requestDTO, pagamento);
 		pagamento.setStudente(studente);
-		pagamento.setNumeroRicevuta(UUID.randomUUID().toString()); // Genera un numero di ricevuta unico
+
+		// Non generare automaticamente il numero di ricevuta
+		// pagamento.setNumeroRicevuta(UUID.randomUUID().toString()); // Rimuovi questa linea
 
 		// Salva il pagamento
 		pagamentoRepository.save(pagamento);

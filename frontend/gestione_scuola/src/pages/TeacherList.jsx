@@ -8,7 +8,7 @@ const TeacherList = () => {
   const [insegnanti, setInsegnanti] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [showModal, setShowModal] = useState(false) // 🔹 Stato per il modale
+  const [showModal, setShowModal] = useState(false)
   const navigate = useNavigate()
 
   // Stato per il form di aggiunta insegnante
@@ -75,6 +75,16 @@ const TeacherList = () => {
       await apiClient.post('/insegnanti', formData)
       setShowModal(false)
       fetchInsegnanti()
+
+      // Resetta il formData dopo l'invio
+      setFormData({
+        nome: '',
+        cognome: '',
+        email: '',
+        lingua: '',
+        giorniDisponibili: [],
+        fasceOrarieDisponibili: [],
+      })
     } catch (error) {
       console.error('Errore nella creazione dell’insegnante', error)
     }
@@ -97,7 +107,7 @@ const TeacherList = () => {
       }
     }
   }
-  
+
   return (
     <>
       <AdminNavbar />
@@ -105,7 +115,7 @@ const TeacherList = () => {
         <h2 className="text-center mb-4">👨‍🏫 Gestione Insegnanti</h2>
 
         {/* Pulsante per aprire il modale */}
-        <div className="text-end mb-3">
+        <div className="text-start mb-3">
           <button
             className="btn btn-success"
             onClick={() => setShowModal(true)}

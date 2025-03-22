@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
+import ModaleCorso from '../components/ModaleCorso'
 
 const CourseDetails = () => {
   const { id } = useParams()
@@ -12,6 +13,7 @@ const CourseDetails = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [showModale, setShowModale] = useState(false)
 
   useEffect(() => {
     fetchCorso()
@@ -22,7 +24,8 @@ const CourseDetails = () => {
     setLoading(true)
     try {
       const response = await apiClient.get(`/corsi/${id}`)
-      setCorso(response.data || {}) // 🔥 Fix per evitare crash se API non restituisce dati
+      const corsoData = response.data || {}
+      setCorso(corsoData)
     } catch (error) {
       console.error('❌ Errore nel recupero del corso:', error)
       setError('Errore nel caricamento del corso.')
@@ -52,14 +55,22 @@ const CourseDetails = () => {
     }
   }
 
-  const disattivaCorso = async () => {
-    if (window.confirm('Vuoi disattivare questo corso?')) {
+  const toggleStatoCorso = async () => {
+    const conferma = corso?.attivo
+      ? 'Vuoi disattivare questo corso?'
+      : 'Vuoi riattivare questo corso?'
+
+    if (window.confirm(conferma)) {
       try {
-        await apiClient.put(`/corsi/${id}/interrompi`)
+        if (corso?.attivo) {
+          await apiClient.put(`/corsi/${id}/interrompi`)
+        } else {
+          await apiClient.put(`/corsi/${id}/riattiva`)
+        }
         fetchCorso()
       } catch (error) {
-        console.error('❌ Errore nella disattivazione del corso:', error)
-        setError('Errore durante la disattivazione del corso.')
+        console.error('❌ Errore nel cambio di stato del corso:', error)
+        setError('Errore durante il cambio di stato del corso.')
       }
     }
   }
@@ -111,12 +122,18 @@ const CourseDetails = () => {
             className={`btn ${
               corso?.attivo ? 'btn-warning' : 'btn-success'
             } me-2`}
-            onClick={disattivaCorso}
+            onClick={toggleStatoCorso}
           >
             {corso?.attivo ? '🚫 Disattiva Corso' : '✅ Riattiva Corso'}
           </button>
-          <button className="btn btn-danger" onClick={eliminaCorso}>
+          <button className="btn btn-danger me-2" onClick={eliminaCorso}>
             🗑 Elimina Corso
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setShowModale(true)}
+          >
+            ✏️ Modifica
           </button>
         </div>
 
@@ -158,6 +175,13 @@ const CourseDetails = () => {
             </ul>
           )}
         </div>
+
+        <ModaleCorso
+          show={showModale}
+          onHide={() => setShowModale(false)}
+          corso={corso}
+          refresh={fetchCorso}
+        />
       </div>
     </>
   )

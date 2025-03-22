@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
 import moment from 'moment'
 import 'moment/locale/it'
 import AdminNavbar from '../components/AdminNavbar'
 
 const Calendario = () => {
-  const [settimana, setSettimana] = useState(moment()) // Settimana corrente
+  const [settimana, setSettimana] = useState(moment())
   const [corsi, setCorsi] = useState([])
   const [insegnanti, setInsegnanti] = useState([])
   const [livelli, setLivelli] = useState([])
@@ -15,6 +16,8 @@ const Calendario = () => {
   const [filtroInsegnante, setFiltroInsegnante] = useState('')
   const [filtroLivello, setFiltroLivello] = useState('')
 
+  const navigate = useNavigate()
+
   useEffect(() => {
     fetchCorsi()
     fetchInsegnanti()
@@ -23,14 +26,23 @@ const Calendario = () => {
 
   const fetchCorsi = async () => {
     setLoading(true)
+    const giornoParam = settimana.startOf('isoWeek').format('YYYY-MM-DD')
+
+    console.log('📅 Parametri invio API:', {
+      giorno: giornoParam,
+      insegnante: filtroInsegnante,
+      livello: filtroLivello,
+    })
+
     try {
       const response = await apiClient.get(`/calendario/corsi-programmati`, {
         params: {
-          giorno: settimana.startOf('isoWeek').format('YYYY-MM-DD'),
+          giorno: giornoParam,
           insegnante: filtroInsegnante,
           livello: filtroLivello,
         },
       })
+      console.log('📦 Corsi ricevuti:', response.data)
       setCorsi(response.data || [])
     } catch (error) {
       console.error('❌ Errore nel recupero del calendario:', error)
@@ -52,7 +64,7 @@ const Calendario = () => {
 
   const fetchLivelli = async () => {
     try {
-      const response = await apiClient.get('/livelli') // ✅ Ora chiama l'endpoint giusto
+      const response = await apiClient.get('/livelli')
       setLivelli(response.data || [])
     } catch (error) {
       console.error('❌ Errore nel recupero dei livelli:', error)
@@ -60,7 +72,6 @@ const Calendario = () => {
     }
   }
 
-  // Naviga avanti o indietro nelle settimane
   const cambiaSettimana = (direzione) => {
     setSettimana(settimana.clone().add(direzione, 'weeks'))
   }
@@ -74,6 +85,9 @@ const Calendario = () => {
     'Sabato',
   ]
 
+  const normalizza = (str) =>
+    str?.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+
   return (
     <>
       <AdminNavbar />
@@ -81,7 +95,6 @@ const Calendario = () => {
       <div className="container mt-4">
         <h2 className="text-center mb-4">📅 Calendario Corsi</h2>
 
-        {/* Sezione Filtri */}
         <div className="row mb-3">
           <div className="col-md-4">
             <label className="form-label">🎓 Seleziona Insegnante:</label>
@@ -128,7 +141,6 @@ const Calendario = () => {
           </div>
         </div>
 
-        {/* Navigazione tra le settimane */}
         <div className="d-flex justify-content-between mb-3">
           <button
             className="btn btn-outline-primary"
@@ -174,25 +186,47 @@ const Calendario = () => {
                 <tr key={orario}>
                   <td>{orario}</td>
                   {giorniSettimana.map((giorno) => {
-                    const corso = corsi.find(
-                      (c) => c.giorno === giorno && c.orario === orario
+                    const corsiInSlot = corsi.filter(
+                      (c) =>
+                        normalizza(c.giorno) === normalizza(giorno) &&
+                        c.orario === orario
                     )
                     return (
                       <td
                         key={giorno + orario}
-                        className={corso ? 'bg-primary text-white' : 'bg-light'}
+                        className={
+                          corsiInSlot.length
+                            ? 'bg-primary text-white'
+                            : 'bg-light'
+                        }
                       >
-                        {corso ? (
-                          <>
-                            <strong>
-                              {corso.lingua} ({corso.livello || 'N/A'})
-                            </strong>
-                            <br />
-                            🏫 {corso.aula?.nome || 'N/A'}
-                            <br />
-                            👨‍🏫 {corso.insegnante?.nome}{' '}
-                            {corso.insegnante?.cognome}
-                          </>
+                        {corsiInSlot.length ? (
+                          corsiInSlot.map((corso) => (
+                            <div
+                              key={corso.corsoId}
+                              onClick={() =>
+                                navigate(`/corsi/${corso.corsoId}`)
+                              }
+                              style={{
+                                cursor: 'pointer',
+                                borderBottom: '1px solid white',
+                                paddingBottom: '4px',
+                                marginBottom: '4px',
+                              }}
+                            >
+                              <strong>
+                                {corso.lingua} ({corso.tipoCorso})
+                              </strong>
+                              <br />
+                              🎯 Livello: {corso.livello || 'N/A'}
+                              <br />
+                              📆 {corso.frequenza}
+                              <br />
+                              🏫 {corso.aula || 'N/A'}
+                              <br />
+                              👨‍🏫 {corso.insegnante || 'N/A'}
+                            </div>
+                          ))
                         ) : (
                           <span>-</span>
                         )}

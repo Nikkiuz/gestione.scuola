@@ -53,26 +53,30 @@ const StudentList = () => {
     fetchInsegnanti()
   }, [])
 
-  const fetchStudenti = async () => {
-    try {
-      const response = await apiClient.get('/studenti')
+ const fetchStudenti = async () => {
+   try {
+     const response = await apiClient.get('/studenti')
 
-      if (!response.data || !Array.isArray(response.data)) {
-        console.error(
-          '❌ Errore: response.data non è un array valido',
-          response.data
-        )
-        return
-      }
+     console.log('📌 Studenti ricevuti dal backend:', response.data) // 🔥 Debug
 
-      setStudenti(response.data.filter((s) => s.corsi?.length > 0))
-      setStudentiSenzaCorso(
-        response.data.filter((s) => !s.corsi || s.corsi.length === 0)
-      )
-    } catch (error) {
-      console.error('❌ Errore nel recupero degli studenti:', error)
-    }
-  }
+   setStudenti(
+     response.data.filter((s) => s.corsi?.some((corso) => corso.attivo))
+   )
+
+   setStudentiSenzaCorso(
+     response.data.filter(
+       (s) => !s.corsi || s.corsi.every((corso) => !corso.attivo)
+     )
+   )
+
+   console.log('📦 Studenti completi:', JSON.stringify(response.data, null, 2))
+
+
+   } catch (error) {
+     console.error('❌ Errore nel recupero degli studenti:', error)
+   }
+ }
+
 
   const fetchInsegnanti = async () => {
     try {
@@ -183,6 +187,7 @@ const StudentList = () => {
               <th>Nome</th>
               <th>Cognome</th>
               <th>Livello</th>
+              <th>Età</th>
               <th>Azioni</th>
             </tr>
           </thead>
@@ -194,6 +199,7 @@ const StudentList = () => {
                 <td>
                   <strong>{studente.livello}</strong>
                 </td>
+                <td>{studente.eta}</td>
                 <td>
                   <button
                     className="btn btn-primary btn-sm me-2"
@@ -221,6 +227,7 @@ const StudentList = () => {
               <th>Nome</th>
               <th>Cognome</th>
               <th>Livello</th>
+              <th>Età</th>
               <th>Azioni</th>
             </tr>
           </thead>
@@ -232,6 +239,7 @@ const StudentList = () => {
                 <td>
                   <strong>{studente.livello}</strong>
                 </td>
+                <td>{studente.eta}</td>
                 <td>
                   <button
                     className="btn btn-primary btn-sm me-2"

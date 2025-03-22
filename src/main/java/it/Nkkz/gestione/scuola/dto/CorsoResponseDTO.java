@@ -14,8 +14,9 @@ public class CorsoResponseDTO {
 	private String frequenza;
 	private String giorno;
 	private String orario;
-	private InsegnanteResponseDTO insegnantePreferito;
-	private AulaRequestDTO aula;
-	private List<String> nomiStudenti;
+	private InsegnanteResponseDTO insegnante;
+	private AulaResponseDTO aula;
+	private List<StudenteResponseDTO> studenti;
+	private boolean attivo;
 }
 

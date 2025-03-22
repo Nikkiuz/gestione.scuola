@@ -24,8 +24,12 @@ public class CalendarioController {
 
 	// Ottieni i corsi programmati in un certo giorno della settimana
 	@GetMapping("/corsi-programmati")
-	public List<CalendarioDTO> getCorsiProgrammati(@RequestParam String giorno) {
-		return calendarioService.getCorsiProgrammati(giorno);
+	public List<CalendarioDTO> getCorsiProgrammati(
+		@RequestParam String giorno,
+		@RequestParam(required = false) Long insegnante,
+		@RequestParam(required = false) String livello) {
+
+		return calendarioService.getCorsiSettimanaFiltrati(giorno, insegnante, livello);
 	}
 
 

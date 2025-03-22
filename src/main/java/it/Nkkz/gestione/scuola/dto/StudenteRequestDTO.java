@@ -6,6 +6,7 @@ import java.util.Set;
 
 @Data
 public class StudenteRequestDTO {
+	private Long studenteId;
 	private String nome;
 	private String cognome;
 	private int eta;

@@ -38,7 +38,7 @@ public class ReportService {
 	@Value("${spring.mail.username}")
 	private String adminEmail;
 
-	// 📈 Genera il report mensile
+	// 📌 Genera il report mensile
 	public ReportDTO generaReportMensile(int anno, int mese) {
 		YearMonth yearMonth = YearMonth.of(anno, mese);
 		LocalDate startDate = yearMonth.atDay(1);
@@ -46,33 +46,35 @@ public class ReportService {
 		return generaReport(startDate, endDate, "Mensile");
 	}
 
-	// 📈 Genera il report annuale
+	// 📌 Genera il report annuale
 	public ReportDTO generaReportAnnuale(int anno) {
 		LocalDate startDate = LocalDate.of(anno, 1, 1);
 		LocalDate endDate = LocalDate.of(anno, 12, 31);
 		return generaReport(startDate, endDate, "Annuale");
 	}
 
-	// 📈 Metodo generico per generare un report
+	// 📌 Metodo generico per generare un report
 	private ReportDTO generaReport(LocalDate startDate, LocalDate endDate, String periodo) {
 		ReportDTO report = new ReportDTO();
 		report.setPeriodo(periodo);
 
-		// 📈 Ore insegnate per insegnante
+		// 📌 Ore insegnate per insegnante
 		Map<String, Integer> oreInsegnate = calcolaOreInsegnateNelPeriodo(startDate, endDate);
 		report.setOreInsegnate(oreInsegnate);
 
-		// 📈 Totale ore insegnate
+		// 📌 Totale ore insegnate
 		int totaleOreInsegnate = oreInsegnate.values().stream().mapToInt(Integer::intValue).sum();
 		report.setTotaleOreInsegnate(totaleOreInsegnate);
 
-		// 📈 Entrate basate su mensilità saldata
-		String targetMeseAnno = formatMeseAnno(startDate);
+		// 📌 Entrate
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("it"));
+		String targetMeseAnno = startDate.format(formatter).toLowerCase();
 
 		List<Pagamento> pagamenti = pagamentoRepository.findAll().stream()
 			.filter(p -> p.getMensilitaSaldata() != null &&
 				p.getMensilitaSaldata().toLowerCase().equals(targetMeseAnno))
 			.collect(Collectors.toList());
+
 
 		Map<String, Double> pagamentiRicevuti = pagamenti.stream()
 			.collect(Collectors.groupingBy(
@@ -81,7 +83,7 @@ public class ReportService {
 			));
 		report.setPagamentiRicevuti(pagamentiRicevuti.isEmpty() ? Collections.emptyMap() : pagamentiRicevuti);
 
-		// 📈 Uscite (filtrate per data)
+		// 📌 Uscite
 		List<Spesa> spese = spesaRepository.findByDataSpesaBetween(startDate, endDate);
 		Map<String, Double> speseRegistrate = spese.stream()
 			.collect(Collectors.groupingBy(
@@ -90,7 +92,7 @@ public class ReportService {
 			));
 		report.setSpeseRegistrate(speseRegistrate.isEmpty() ? Collections.emptyMap() : speseRegistrate);
 
-		// 📈 Totali
+		// 📌 Calcolo totale entrate e uscite
 		double totaleEntrate = pagamentiRicevuti.values().stream().mapToDouble(Double::doubleValue).sum();
 		double totaleUscite = speseRegistrate.values().stream().mapToDouble(Double::doubleValue).sum();
 
@@ -98,7 +100,7 @@ public class ReportService {
 		report.setTotaleUscite(totaleUscite);
 		report.setBilancio(totaleEntrate - totaleUscite);
 
-		// 📈 Debug
+		// 📌 Debug log
 		System.out.println("📊 Report generato:");
 		System.out.println("💰 Totale Entrate: " + totaleEntrate);
 		System.out.println("📉 Totale Uscite: " + totaleUscite);
@@ -108,7 +110,7 @@ public class ReportService {
 		return report;
 	}
 
-	// 📈 Calcola ore insegnate per insegnante nel periodo
+	// 📌 Calcola ore insegnate per insegnante nel periodo
 	private Map<String, Integer> calcolaOreInsegnateNelPeriodo(LocalDate startDate, LocalDate endDate) {
 		Map<String, Integer> oreInsegnate = new HashMap<>();
 		List<Corso> corsi = corsoRepository.findByAttivoTrue();
@@ -130,13 +132,7 @@ public class ReportService {
 		return oreInsegnate.isEmpty() ? Collections.emptyMap() : oreInsegnate;
 	}
 
-	// 📈 Utility per formattare una data in "marzo 2024" (lowercase)
-	private String formatMeseAnno(LocalDate data) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("it"));
-		return data.format(formatter).toLowerCase();
-	}
-
-	// 📈 Genera e invia il report mensile via email
+	// 📌 Genera e invia il report mensile via email
 	public String inviaReportMensile(int anno, int mese) {
 		ReportDTO report = generaReportMensile(anno, mese);
 

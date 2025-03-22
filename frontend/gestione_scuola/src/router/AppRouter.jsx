@@ -15,7 +15,6 @@ import StudentDetails from '../pages/StudentDetails'
 import SpeseList from '../pages/SpeseList'
 import SpeseDetail from '../pages/SpeseDetail'
 import AulaList from '../pages/AulaList'
-import AulaDetail from '../pages/AulaDetail'
 import Calendario from '../pages/Calendario'
 import Report from '../pages/Report'
 import ProtectedRoute from './ProtectedRoute'
@@ -114,14 +113,6 @@ const AppRouter = () => {
           element={
             <ProtectedRoute>
               <AulaList />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/aule/:id"
-          element={
-            <ProtectedRoute>
-              <AulaDetail />
             </ProtectedRoute>
           }
         />
