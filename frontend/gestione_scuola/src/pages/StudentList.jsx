@@ -59,10 +59,19 @@ const StudentList = () => {
 
      console.log('📌 Studenti ricevuti dal backend:', response.data) // 🔥 Debug
 
-     setStudenti(response.data.filter((s) => s.corsi?.length > 0))
-     setStudentiSenzaCorso(
-       response.data.filter((s) => !s.corsi || s.corsi.length === 0)
+   setStudenti(
+     response.data.filter((s) => s.corsi?.some((corso) => corso.attivo))
+   )
+
+   setStudentiSenzaCorso(
+     response.data.filter(
+       (s) => !s.corsi || s.corsi.every((corso) => !corso.attivo)
      )
+   )
+
+   console.log('📦 Studenti completi:', JSON.stringify(response.data, null, 2))
+
+
    } catch (error) {
      console.error('❌ Errore nel recupero degli studenti:', error)
    }

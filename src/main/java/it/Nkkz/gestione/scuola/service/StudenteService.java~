@@ -130,16 +130,11 @@ public class StudenteService {
 
 		if (studente.getInsegnante() != null) {
 			dto.setInsegnanteId(studente.getInsegnante().getId());
-			dto.setInsegnanteNome(studente.getInsegnante().getNome());
-			dto.setInsegnanteCognome(studente.getInsegnante().getCognome());
-		}
-
-		// ✅ Mappa i corsi attivi in modo compatto
-		if (studente.getCorsi() != null && !studente.getCorsi().isEmpty()) {
-			List<StudenteResponseDTO.CorsoAttivo> corsiDTO = studente.getCorsi().stream()
-				.map(c -> new StudenteResponseDTO.CorsoAttivo(c.getId(), c.isAttivo()))
-				.toList();
-			dto.setCorsi(corsiDTO);
+			dto.setInsegnanteNome(studente.getInsegnante().getNome()); // 🔥 Aggiunto
+			dto.setInsegnanteCognome(studente.getInsegnante().getCognome()); // 🔥 Aggiunto
+			System.out.println("📌 Insegnante assegnato nel DTO: " + studente.getInsegnante().getNome());
+		} else {
+			System.out.println("❌ Insegnante assente nella risposta!");
 		}
 
 		return dto;

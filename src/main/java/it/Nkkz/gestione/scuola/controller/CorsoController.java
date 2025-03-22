@@ -152,6 +152,4 @@ public class CorsoController {
 		corsoService.aggiungiStudente(id, studenteRequestDTO.getStudenteId());
 		return ResponseEntity.ok("Studente assegnato al corso con successo.");
 	}
-
-
 }

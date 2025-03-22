@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
+import ModaleCorso from '../components/ModaleCorso'
 
 const CourseDetails = () => {
   const { id } = useParams()
@@ -12,27 +13,26 @@ const CourseDetails = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [showModale, setShowModale] = useState(false)
 
   useEffect(() => {
     fetchCorso()
     fetchStudentiDisponibili()
   }, [])
 
- const fetchCorso = async () => {
-   setLoading(true)
-   try {
-     const response = await apiClient.get(`/corsi/${id}`)
-     const corsoData = response.data || {}
-     console.log('Corso attivo:', corsoData.attivo) // Controlla se è true
-     setCorso(corsoData)
-   } catch (error) {
-     console.error('❌ Errore nel recupero del corso:', error)
-     setError('Errore nel caricamento del corso.')
-   } finally {
-     setLoading(false)
-   }
- }
-
+  const fetchCorso = async () => {
+    setLoading(true)
+    try {
+      const response = await apiClient.get(`/corsi/${id}`)
+      const corsoData = response.data || {}
+      setCorso(corsoData)
+    } catch (error) {
+      console.error('❌ Errore nel recupero del corso:', error)
+      setError('Errore nel caricamento del corso.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const fetchStudentiDisponibili = async () => {
     try {
@@ -54,33 +54,26 @@ const CourseDetails = () => {
       setError('Errore durante l’assegnazione dello studente.')
     }
   }
-const toggleStatoCorso = async () => {
-  console.log(
-    'Stato attuale del corso:',
-    corso?.attivo ? 'Attivo' : 'Non attivo'
-  )
-  const conferma = corso?.attivo
-    ? 'Vuoi disattivare questo corso?'
-    : 'Vuoi riattivare questo corso?'
 
-  if (window.confirm(conferma)) {
-    try {
-      if (corso?.attivo) {
-        console.log('Disattivazione in corso...')
-        await apiClient.put(`/corsi/${id}/interrompi`)
-      } else {
-        console.log('Riattivazione in corso...')
-        await apiClient.put(`/corsi/${id}/riattiva`)
+  const toggleStatoCorso = async () => {
+    const conferma = corso?.attivo
+      ? 'Vuoi disattivare questo corso?'
+      : 'Vuoi riattivare questo corso?'
+
+    if (window.confirm(conferma)) {
+      try {
+        if (corso?.attivo) {
+          await apiClient.put(`/corsi/${id}/interrompi`)
+        } else {
+          await apiClient.put(`/corsi/${id}/riattiva`)
+        }
+        fetchCorso()
+      } catch (error) {
+        console.error('❌ Errore nel cambio di stato del corso:', error)
+        setError('Errore durante il cambio di stato del corso.')
       }
-      console.log('Cambio stato completato. Ricarico il corso.')
-      fetchCorso() // Ricarica i dati del corso
-    } catch (error) {
-      console.error('❌ Errore nel cambio di stato del corso:', error)
-      setError('Errore durante il cambio di stato del corso.')
     }
   }
-}
-
 
   const eliminaCorso = async () => {
     if (window.confirm('Vuoi eliminare definitivamente questo corso?')) {
@@ -133,8 +126,14 @@ const toggleStatoCorso = async () => {
           >
             {corso?.attivo ? '🚫 Disattiva Corso' : '✅ Riattiva Corso'}
           </button>
-          <button className="btn btn-danger" onClick={eliminaCorso}>
+          <button className="btn btn-danger me-2" onClick={eliminaCorso}>
             🗑 Elimina Corso
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setShowModale(true)}
+          >
+            ✏️ Modifica
           </button>
         </div>
 
@@ -176,6 +175,13 @@ const toggleStatoCorso = async () => {
             </ul>
           )}
         </div>
+
+        <ModaleCorso
+          show={showModale}
+          onHide={() => setShowModale(false)}
+          corso={corso}
+          refresh={fetchCorso}
+        />
       </div>
     </>
   )

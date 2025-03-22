@@ -2,6 +2,7 @@ package it.Nkkz.gestione.scuola.controller;
 
 import it.Nkkz.gestione.scuola.dto.CorsoRequestDTO;
 import it.Nkkz.gestione.scuola.dto.CorsoResponseDTO;
+import it.Nkkz.gestione.scuola.dto.StudenteRequestDTO;
 import it.Nkkz.gestione.scuola.dto.StudenteResponseDTO;
 import it.Nkkz.gestione.scuola.entity.Livello;
 import it.Nkkz.gestione.scuola.service.CorsoService;
@@ -142,5 +143,15 @@ public class CorsoController {
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiInListaDiAttesa() {
 		return ResponseEntity.ok(corsoService.getListaDiAttesa());
 	}
+
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@PostMapping("/{id}/aggiungi-studente")
+	public ResponseEntity<String> aggiungiStudenteAlCorso(
+		@PathVariable Long id,
+		@RequestBody StudenteRequestDTO studenteRequestDTO) {
+		corsoService.aggiungiStudente(id, studenteRequestDTO.getStudenteId());
+		return ResponseEntity.ok("Studente assegnato al corso con successo.");
+	}
+
 
 }

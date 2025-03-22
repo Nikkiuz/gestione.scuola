@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,22 +35,6 @@ public class CalendarioService {
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera i corsi programmati in un determinato giorno della settimana
-	public List<CalendarioDTO> getCorsiProgrammati(String giorno) {
-		return corsoRepository.findByGiornoAndAttivoTrue(giorno).stream()
-			.map(corso -> new CalendarioDTO(
-				corso.getId(),
-				corso.getLingua(),
-				corso.getTipoCorso(),
-				corso.getFrequenza(),
-				corso.getGiorno(),
-				corso.getOrario(),
-				corso.getAula().getNome(),
-				corso.getInsegnante().getNome() + " " + corso.getInsegnante().getCognome()
-			))
-			.collect(Collectors.toList());
-	}
-
 	// 🔹 Interrompe un corso (senza eliminarlo) e libera l'orario dell'aula
 	public void interrompiCorso(Long corsoId) {
 		Corso corso = corsoRepository.findById(corsoId)
@@ -58,4 +43,28 @@ public class CalendarioService {
 		corso.setAttivo(false);
 		corsoRepository.save(corso);
 	}
+
+	// ✅ Recupera i corsi programmati in un determinato giorno della settimana
+	public List<CalendarioDTO> getCorsiSettimanaFiltrati(String giornoBase, Long insegnanteId, String livello) {
+		List<String> giorniSettimana = List.of("Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato");
+
+		return corsoRepository.findByAttivoTrue().stream()
+			.filter(c -> giorniSettimana.contains(c.getGiorno()))
+			.filter(c -> insegnanteId == null || c.getInsegnante().getId().equals(insegnanteId))
+			.filter(c -> livello == null || livello.isEmpty() || c.getLivello().toString().equalsIgnoreCase(livello))
+			.map(c -> new CalendarioDTO(
+				c.getId(),
+				c.getLingua(),
+				c.getTipoCorso(),
+				c.getFrequenza(),
+				c.getGiorno(),
+				c.getOrario(),
+				c.getAula().getNome(),
+				c.getInsegnante().getNome() + " " + c.getInsegnante().getCognome()
+			))
+			.collect(Collectors.toList());
+	}
+
+
+
 }
