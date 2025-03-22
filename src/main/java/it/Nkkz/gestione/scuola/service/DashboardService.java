@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Month;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -60,6 +61,28 @@ public class DashboardService {
 			));
 		}
 
+		long corsiConPochiStudenti = corsoRepository.findByAttivoTrue().stream()
+			.filter(c -> c.getStudenti().size() < 3)
+			.count();
+
+		if (corsiConPochiStudenti > 0) {
+			avvisi.add(Map.of(
+				"messaggio", "👥 " + corsiConPochiStudenti + " corsi hanno meno di 3 studenti.",
+				"link", "/corsi"
+			));
+		}
+
+		long studentiConPagamentiMancanti = studenteRepository.findAll().stream()
+			.filter(s -> pagamentoRepository.findByStudenteId(s.getId()).isEmpty())
+			.count();
+
+		if (studentiConPagamentiMancanti > 0) {
+			avvisi.add(Map.of(
+				"messaggio", "💸 " + studentiConPagamentiMancanti + " studenti non hanno ancora effettuato alcun pagamento.",
+				"link", "/studenti"
+			));
+		}
+
 		return avvisi;
 	}
 
@@ -72,19 +95,18 @@ public class DashboardService {
 			mappa.put(mese, mappa.getOrDefault(mese, 0.0) + pagamento.getImporto());
 		}
 
-		List<Month> mesiOrdinati = mappa.keySet().stream()
-			.sorted(Comparator.comparingInt(Month::getValue))
-			.toList();
+		List<Month> mesiOrdinati = new ArrayList<>(mappa.keySet());
+		Collections.sort(mesiOrdinati);
 
 		List<String> mesi = mesiOrdinati.stream()
 			.map(m -> m.getDisplayName(java.time.format.TextStyle.FULL, Locale.ITALIAN))
-			.toList();
+			.collect(Collectors.toList());
 
 		List<Double> importi = mesiOrdinati.stream()
 			.map(mappa::get)
-			.toList();
+			.collect(Collectors.toList());
 
 		return Map.of("mesi", mesi, "importi", importi);
 	}
-
 }
+

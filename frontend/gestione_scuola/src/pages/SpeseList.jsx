@@ -37,7 +37,7 @@ const SpeseList = () => {
   const fetchSpese = async () => {
     setLoading(true)
     try {
-      const response = await apiClient.get('/spese', {
+      const response = await apiClient.get('/spese/filtrate', {
         params: { anno, mese, categoria },
       })
       setSpese(response.data)

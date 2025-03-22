@@ -62,26 +62,26 @@ public class SpesaService {
 	}
 
 	public List<SpesaResponseDTO> getSpeseFiltrate(Integer anno, Integer mese, Spesa.CategoriaSpesa categoria) {
+		LocalDate inizio = null;
+		LocalDate fine = null;
+
 		if (anno != null && mese != null) {
 			YearMonth ym = YearMonth.of(anno, mese);
-			LocalDate inizio = ym.atDay(1);
-			LocalDate fine = ym.atEndOfMonth();
-
-			return spesaRepository.findAll().stream()
-				.filter(s -> categoria == null || s.getCategoria() == categoria)
-				.filter(s -> s.getDataSpesa() != null &&
-					!s.getDataSpesa().isBefore(inizio) &&
-					!s.getDataSpesa().isAfter(fine))
-				.map(this::convertToResponseDTO)
-				.collect(Collectors.toList());
+			inizio = ym.atDay(1);
+			fine = ym.atEndOfMonth();
 		}
 
-		// Se anno o mese sono nulli, filtra solo per categoria (se presente)
-		return spesaRepository.findAll().stream()
-			.filter(s -> categoria == null || s.getCategoria() == categoria)
+		List<Spesa> filtrate = spesaRepository.findAll().stream()
+			.filter(s -> (categoria == null || s.getCategoria() == categoria))
+			.filter(s -> (inizio == null || (s.getDataSpesa() != null &&
+				!s.getDataSpesa().isBefore(inizio) && !s.getDataSpesa().isAfter(fine))))
+			.collect(Collectors.toList());
+
+		return filtrate.stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
+
 
 
 	// 🔹 Converte una Spesa in DTO per la risposta
