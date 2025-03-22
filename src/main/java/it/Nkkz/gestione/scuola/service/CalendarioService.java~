@@ -60,8 +60,8 @@ public class CalendarioService {
 				c.getGiorno(),
 				c.getOrario(),
 				c.getAula().getNome(),
-				c.getInsegnante().getNome() + " " + c.getInsegnante().getCognome(),
-				c.getLivello().name()
+				c.getInsegnante().getNome() + " " + c.getInsegnante().getCognome()
+				
 			))
 			.collect(Collectors.toList());
 	}

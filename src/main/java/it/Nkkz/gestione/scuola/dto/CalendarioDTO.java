@@ -16,4 +16,5 @@ public class CalendarioDTO {
 	private String orario;
 	private String aula;
 	private String insegnante;
+	private String livello;
 }
