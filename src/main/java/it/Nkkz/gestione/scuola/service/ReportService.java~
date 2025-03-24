@@ -71,9 +71,8 @@ public class ReportService {
 
 		List<Pagamento> pagamenti = pagamentoRepository.findAll().stream()
 			.filter(p -> p.getMensilitaSaldata() != null &&
-				p.getMensilitaSaldata().toLowerCase().endsWith(String.valueOf(endDate.getYear())))
+				p.getMensilitaSaldata().toLowerCase().equals(targetMeseAnno))
 			.collect(Collectors.toList());
-
 
 		Map<String, Double> pagamentiRicevuti = pagamenti.stream()
 			.collect(Collectors.groupingBy(
