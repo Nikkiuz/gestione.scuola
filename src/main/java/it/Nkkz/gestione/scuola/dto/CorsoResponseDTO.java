@@ -14,6 +14,8 @@ public class CorsoResponseDTO {
 	private String frequenza;
 	private String giorno;
 	private String orario;
+	private String secondoGiorno;
+	private String secondoOrario;
 	private InsegnanteResponseDTO insegnante;
 	private AulaResponseDTO aula;
 	private List<StudenteResponseDTO> studenti;

@@ -14,6 +14,8 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
     frequenza: '',
     giorno: '',
     orario: '',
+    secondoGiorno: '',
+    secondoOrario: '',
     insegnanteId: '',
     aulaId: '',
   })
@@ -37,6 +39,8 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
           frequenza: corso.frequenza,
           giorno: corso.giorno,
           orario: corso.orario,
+          secondoGiorno: corso.secondoGiorno || '',
+          secondoOrario: corso.secondoOrario || '',
           insegnanteId: corso.insegnante?.id || '',
           aulaId: corso.aula?.id || '',
         })
@@ -50,6 +54,8 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
           frequenza: '',
           giorno: '',
           orario: '',
+          secondoGiorno: '',
+          secondoOrario: '',
           insegnanteId: '',
           aulaId: '',
         })
@@ -217,6 +223,32 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
               required
             />
           </Form.Group>
+
+          {formCorso.frequenza === '2 volte a settimana' && (
+            <>
+              <Form.Group className="mb-3">
+                <Form.Label>Secondo Giorno</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="secondoGiorno"
+                  value={formCorso.secondoGiorno}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Secondo Orario</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="secondoOrario"
+                  value={formCorso.secondoOrario}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+            </>
+          )}
 
           <Form.Group className="mb-3">
             <Form.Label>Insegnante</Form.Label>

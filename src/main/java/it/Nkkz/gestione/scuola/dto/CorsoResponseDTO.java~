@@ -17,5 +17,6 @@ public class CorsoResponseDTO {
 	private InsegnanteResponseDTO insegnante;
 	private AulaResponseDTO aula;
 	private List<StudenteResponseDTO> studenti;
+	private boolean attivo;
 }
 

@@ -130,6 +130,32 @@ public class ReportService {
 		return oreInsegnate.isEmpty() ? Collections.emptyMap() : oreInsegnate;
 	}
 
+	// 📈 Calcola ore insegnate per insegnante in un dato anno
+	public Map<String, Integer> calcolaOreInsegnateAnnuali(int anno) {
+		LocalDate startDate = LocalDate.of(anno, 1, 1);
+		LocalDate endDate = LocalDate.of(anno, 12, 31);
+		Map<String, Integer> oreInsegnate = new HashMap<>();
+		List<Corso> corsi = corsoRepository.findByAttivoTrue();
+
+		for (Corso corso : corsi) {
+			if (corso.getInsegnante() == null) continue;
+
+			String chiaveInsegnante = corso.getInsegnante().getNome() + " " + corso.getInsegnante().getCognome();
+			int orePerSettimana = corso.getFrequenza().equals("2 volte a settimana") ? 6 : 3;
+
+			long settimaneNelPeriodo = startDate
+				.datesUntil(endDate.plusDays(1))
+				.filter(data -> data.getDayOfWeek().toString().equalsIgnoreCase(corso.getGiorno()))
+				.count();
+
+			int totaleOre = (int) (orePerSettimana * settimaneNelPeriodo);
+			oreInsegnate.put(chiaveInsegnante, oreInsegnate.getOrDefault(chiaveInsegnante, 0) + totaleOre);
+		}
+
+		return oreInsegnate;
+	}
+
+
 	// 📈 Utility per formattare una data in "marzo 2024" (lowercase)
 	private String formatMeseAnno(LocalDate data) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy", new Locale("it"));
@@ -153,5 +179,24 @@ public class ReportService {
 		emailService.sendEmailWithAttachment(adminEmail, subject, body, pdfBytes, "report_mensile_" + anno + "_" + mese + ".pdf");
 
 		return "✅ Email con il report mensile inviata con successo!";
+	}
+
+	// 📧 Invia il report annuale via email
+	public String inviaReportAnnuale(int anno) {
+		ReportDTO report = generaReportAnnuale(anno);
+
+		if (report.getOreInsegnate().isEmpty() &&
+			report.getPagamentiRicevuti().isEmpty() &&
+			report.getSpeseRegistrate().isEmpty()) {
+			return "⚠️ Nessun dato disponibile per il report annuale del " + anno;
+		}
+
+		byte[] pdfBytes = pdfReportService.generateReportPdf(report);
+		String subject = "📊 Report Annuale - " + anno;
+		String body = "Ciao,\n\nIn allegato trovi il report annuale della scuola per l'anno " + anno + ".\n\nSaluti,\nGestione Scuola";
+
+		emailService.sendEmailWithAttachment(adminEmail, subject, body, pdfBytes, "report_annuale_" + anno + ".pdf");
+
+		return "✅ Email con il report annuale inviata con successo!";
 	}
 }

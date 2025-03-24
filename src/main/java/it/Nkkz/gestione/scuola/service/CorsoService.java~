@@ -93,6 +93,8 @@ public class CorsoService {
 
 		Corso corso = new Corso();
 		BeanUtils.copyProperties(request, corso);
+		corso.setSecondoGiorno(request.getSecondoGiorno());
+		corso.setSecondoOrario(request.getSecondoOrario());
 		corso.setAula(aula);
 		corso.setStudenti(studenteRepository.findAllById(request.getStudentiIds()));
 		corso.setAttivo(true);
@@ -125,6 +127,8 @@ public class CorsoService {
 		}
 
 		BeanUtils.copyProperties(request, corso, "id");
+		corso.setSecondoGiorno(request.getSecondoGiorno());
+		corso.setSecondoOrario(request.getSecondoOrario());
 		corso.setAula(aula);
 		corso.setStudenti(studenteRepository.findAllById(request.getStudentiIds()));
 
@@ -372,14 +376,29 @@ public class CorsoService {
 			})
 			.collect(Collectors.toList());
 	}
+	
+	public void aggiungiStudente(Long corsoId, Long studenteId) {
+		Corso corso = corsoRepository.findById(corsoId)
+			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato con ID: " + corsoId));
+		Studente studente = studenteRepository.findById(studenteId)
+			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato con ID: " + studenteId));
 
-
+		// Aggiungi lo studente alla lista
+		List<Studente> studenti = corso.getStudenti();
+		if (!studenti.contains(studente)) {
+			studenti.add(studente);
+			corsoRepository.save(corso);
+		} else {
+			throw new IllegalArgumentException("Lo studente è già assegnato a questo corso.");
+		}
+	}
 
 
 	// ✅ Metodo per convertire un Corso in CorsoResponseDTO
 	public CorsoResponseDTO convertToResponseDTO(Corso corso) {
 		CorsoResponseDTO dto = new CorsoResponseDTO();
 		BeanUtils.copyProperties(corso, dto);
+		
 
 		// Aggiungi il campo "attivo"
 		dto.setAttivo(corso.isAttivo());
@@ -410,6 +429,5 @@ public class CorsoService {
 
 		return dto;
 	}
-
 
 }

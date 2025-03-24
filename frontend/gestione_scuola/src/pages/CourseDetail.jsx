@@ -110,6 +110,18 @@ const CourseDetails = () => {
           <p>
             <strong>⏰ Orario:</strong> {corso?.orario || 'N/A'}
           </p>
+          {corso?.secondoGiorno && (
+            <p>
+              <strong>🗓 Secondo Giorno:</strong> {corso.secondoGiorno}
+            </p>
+          )}
+
+          {corso?.secondoOrario && (
+            <p>
+              <strong>⏰ Secondo Orario:</strong> {corso.secondoOrario}
+            </p>
+          )}
+
           <p>
             <strong>🏫 Aula:</strong> {corso?.aula?.nome || 'Non assegnata'}
           </p>

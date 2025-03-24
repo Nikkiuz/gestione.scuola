@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,28 +45,61 @@ public class CalendarioService {
 		corsoRepository.save(corso);
 	}
 
+	private String normalizza(String input) {
+		return input == null ? "" : input.toLowerCase().replace("ì", "i").replace("é", "e");
+	}
+
 	// ✅ Recupera i corsi programmati in un determinato giorno della settimana
 	public List<CalendarioDTO> getCorsiSettimanaFiltrati(String giornoBase, Long insegnanteId, String livello) {
 		List<String> giorniSettimana = List.of("Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato");
+		List<String> giorniNormalizzati = giorniSettimana.stream().map(this::normalizza).toList();
 
-		return corsoRepository.findByAttivoTrue().stream()
-			.filter(c -> giorniSettimana.contains(c.getGiorno()))
-			.filter(c -> insegnanteId == null || c.getInsegnante().getId().equals(insegnanteId))
+		List<CalendarioDTO> lezioni = new ArrayList<>();
+
+		List<Corso> corsi = corsoRepository.findByAttivoTrue().stream()
+			.filter(c -> insegnanteId == null || (c.getInsegnante() != null && c.getInsegnante().getId().equals(insegnanteId)))
 			.filter(c -> livello == null || livello.isEmpty() || c.getLivello().toString().equalsIgnoreCase(livello))
-			.map(c -> new CalendarioDTO(
-				c.getId(),
-				c.getLingua(),
-				c.getTipoCorso(),
-				c.getFrequenza(),
-				c.getGiorno(),
-				c.getOrario(),
-				c.getAula().getNome(),
-				c.getInsegnante().getNome() + " " + c.getInsegnante().getCognome(),
-				c.getLivello().name()
-			))
-			.collect(Collectors.toList());
+			.toList();
+
+		for (Corso c : corsi) {
+			String aulaNome = c.getAula() != null ? c.getAula().getNome() : "N/A";
+			String insegnanteNome = c.getInsegnante() != null
+				? c.getInsegnante().getNome() + " " + c.getInsegnante().getCognome()
+				: "N/A";
+
+			if (c.getGiorno() != null && giorniNormalizzati.contains(normalizza(c.getGiorno()))) {
+				lezioni.add(new CalendarioDTO(
+					c.getId(),
+					c.getLingua(),
+					c.getTipoCorso(),
+					c.getFrequenza(),
+					c.getGiorno(),
+					c.getOrario(),
+					aulaNome,
+					insegnanteNome,
+					c.getLivello().name()
+				));
+			}
+
+			if ("2 volte a settimana".equalsIgnoreCase(c.getFrequenza())
+				&& c.getSecondoGiorno() != null
+				&& c.getSecondoOrario() != null
+				&& giorniNormalizzati.contains(normalizza(c.getSecondoGiorno()))) {
+
+				lezioni.add(new CalendarioDTO(
+					c.getId(),
+					c.getLingua(),
+					c.getTipoCorso(),
+					c.getFrequenza(),
+					c.getSecondoGiorno(),
+					c.getSecondoOrario(),
+					aulaNome,
+					insegnanteNome,
+					c.getLivello().name()
+				));
+			}
+		}
+
+		return lezioni;
 	}
-
-
-
 }

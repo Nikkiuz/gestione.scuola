@@ -13,6 +13,8 @@ public class CorsoRequestDTO {
 	private String frequenza;
 	private String giorno;
 	private String orario;
+	private String secondoGiorno;
+	private String secondoOrario;
 	private Long insegnanteId;
 	private Long aulaId;
 	private List<Long> studentiIds;

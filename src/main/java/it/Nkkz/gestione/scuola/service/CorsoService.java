@@ -93,6 +93,8 @@ public class CorsoService {
 
 		Corso corso = new Corso();
 		BeanUtils.copyProperties(request, corso);
+		corso.setSecondoGiorno(request.getSecondoGiorno());
+		corso.setSecondoOrario(request.getSecondoOrario());
 		corso.setAula(aula);
 		corso.setStudenti(studenteRepository.findAllById(request.getStudentiIds()));
 		corso.setAttivo(true);
@@ -125,6 +127,8 @@ public class CorsoService {
 		}
 
 		BeanUtils.copyProperties(request, corso, "id");
+		corso.setSecondoGiorno(request.getSecondoGiorno());
+		corso.setSecondoOrario(request.getSecondoOrario());
 		corso.setAula(aula);
 		corso.setStudenti(studenteRepository.findAllById(request.getStudentiIds()));
 
@@ -395,8 +399,11 @@ public class CorsoService {
 		CorsoResponseDTO dto = new CorsoResponseDTO();
 		BeanUtils.copyProperties(corso, dto);
 
+
 		// Aggiungi il campo "attivo"
 		dto.setAttivo(corso.isAttivo());
+		dto.setSecondoGiorno(corso.getSecondoGiorno());
+		dto.setSecondoOrario(corso.getSecondoOrario());
 
 		// ✅ Assegna manualmente l'insegnante
 		if (corso.getInsegnante() != null) {
@@ -424,6 +431,5 @@ public class CorsoService {
 
 		return dto;
 	}
-
 
 }
