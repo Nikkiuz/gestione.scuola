@@ -398,10 +398,12 @@ public class CorsoService {
 	public CorsoResponseDTO convertToResponseDTO(Corso corso) {
 		CorsoResponseDTO dto = new CorsoResponseDTO();
 		BeanUtils.copyProperties(corso, dto);
-		
+
 
 		// Aggiungi il campo "attivo"
 		dto.setAttivo(corso.isAttivo());
+		dto.setSecondoGiorno(corso.getSecondoGiorno());
+		dto.setSecondoOrario(corso.getSecondoOrario());
 
 		// ✅ Assegna manualmente l'insegnante
 		if (corso.getInsegnante() != null) {
