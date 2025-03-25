@@ -107,7 +107,7 @@ const TeacherDetail = () => {
   return (
     <>
       <AdminNavbar />
-      <div className="container mt-4">
+      <div className="container pt-5 mt-5">
         <h2 className="text-center mb-4">👨‍🏫 Dettagli Insegnante</h2>
 
         {/* Bottone per tornare alla lista */}
@@ -119,8 +119,7 @@ const TeacherDetail = () => {
           🔙 Torna alla lista
         </Button>
 
-        <Form onSubmit={handleSubmit}
-        className='mb-5'>
+        <Form onSubmit={handleSubmit} className="mb-5">
           <Form.Group className="mb-3">
             <Form.Label>Nome</Form.Label>
             <Form.Control

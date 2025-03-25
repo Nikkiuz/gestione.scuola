@@ -14,7 +14,7 @@ const AdminNavbar = () => {
   }
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+    <nav className="navbar navbar-expand-lg shadow custom-navbar fixed-top">
       <div className="container">
         {/* Logo e Nome */}
         <Link className="navbar-brand fw-bold" to="/dashboard">

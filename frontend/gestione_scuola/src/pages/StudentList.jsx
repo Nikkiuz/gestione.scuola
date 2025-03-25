@@ -124,7 +124,7 @@ const StudentList = () => {
   return (
     <>
       <AdminNavbar />
-      <div className="container mt-4">
+      <div className="container pt-5 mt-5">
         <h2 className="text-center mb-4">🎓 Gestione Studenti</h2>
 
         <button
@@ -181,7 +181,14 @@ const StudentList = () => {
 
         {/* 📌 Studenti con Corso */}
         <h4>📌 Studenti con Corso</h4>
-        <table className="table table-striped">
+        <table className="table table-striped table-hover align-middle w-100">
+          <colgroup>
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '30%' }} />
+          </colgroup>
           <thead>
             <tr>
               <th>Nome</th>
@@ -196,11 +203,13 @@ const StudentList = () => {
               <tr key={studente.id}>
                 <td>{studente.nome}</td>
                 <td>{studente.cognome}</td>
-                <td>
-                  <strong>{studente.livello}</strong>
+                <td className="text-center">
+                  <span className={`badge-livello ${studente.livello}`}>
+                    {studente.livello}
+                  </span>
                 </td>
                 <td>{studente.eta}</td>
-                <td>
+                <td className="d-flex justify-content-center gap-2">
                   <button
                     className="btn btn-primary btn-sm me-2"
                     onClick={() => navigate(`/studenti/${studente.id}`)}
@@ -221,7 +230,14 @@ const StudentList = () => {
 
         {/* ⚠️ Studenti Senza Corso */}
         <h4 className="mt-4">⚠️ Studenti Senza Corso</h4>
-        <table className="table table-striped">
+        <table className="table table-striped table-hover align-middle w-100">
+          <colgroup>
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '30%' }} />
+          </colgroup>
           <thead>
             <tr>
               <th>Nome</th>
@@ -236,11 +252,13 @@ const StudentList = () => {
               <tr key={studente.id}>
                 <td>{studente.nome}</td>
                 <td>{studente.cognome}</td>
-                <td>
-                  <strong>{studente.livello}</strong>
+                <td className="text-center">
+                  <span className={`badge-livello ${studente.livello}`}>
+                    {studente.livello}
+                  </span>
                 </td>
                 <td>{studente.eta}</td>
-                <td>
+                <td className="d-flex justify-content-center gap-2">
                   <button
                     className="btn btn-primary btn-sm me-2"
                     onClick={() => navigate(`/studenti/${studente.id}`)}

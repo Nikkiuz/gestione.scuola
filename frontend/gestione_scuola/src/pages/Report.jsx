@@ -86,38 +86,6 @@ const Report = () => {
     }
   }
 
-  const scaricaOreInsegnante = async () => {
-    if (isTutti) {
-      alert('Seleziona un insegnante prima di scaricare il report.')
-      return
-    }
-    setLoading(true)
-    try {
-      const endpoint =
-        mode === 'annuale'
-          ? `/report/insegnante/pdf?anno=${anno}&insegnanteId=${insegnante}`
-          : `/report/insegnante/pdf?anno=${anno}&mese=${mese}&insegnanteId=${insegnante}`
-
-      const response = await apiClient.get(endpoint, { responseType: 'blob' })
-      const url = window.URL.createObjectURL(new Blob([response.data]))
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute(
-        'download',
-        `Report_Insegnante_${mode}_${anno}${
-          mode === 'mensile' ? '_' + mese : ''
-        }.pdf`
-      )
-      document.body.appendChild(link)
-      link.click()
-    } catch (error) {
-      console.error('Errore nel download del report insegnante', error)
-      setError('Errore nel download del report insegnante.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const getNomeInsegnanteById = (id) => {
     if (!id || id === 'tutti') return 'Tutti gli insegnanti'
     const found = listaInsegnanti.find(
@@ -134,17 +102,59 @@ const Report = () => {
     fetchInsegnanti()
   }, [])
 
-  const COLORS = ['#28a745', '#dc3545', '#007bff', '#ffc107', '#6f42c1']
+  const COLORS = [
+    '#486258',
+    '#CC9C77',
+    '#A67D5E',
+    '#DB8B6E',
+    '#7A9E9F',
+    '#D9A404',
+  ]
+
   const nomeSelezionato = getNomeInsegnanteById(insegnante)
+
+  // DA IMPLEMENTARE
+  // const scaricaOreInsegnante = async () => {
+  //   if (isTutti) {
+  //     alert('Seleziona un insegnante prima di scaricare il report.')
+  //     return
+  //   }
+  //   setLoading(true)
+  //   try {
+  //     const endpoint =
+  //       mode === 'annuale'
+  //         ? `/report/insegnante/pdf?anno=${anno}&insegnanteId=${insegnante}`
+  //         : `/report/insegnante/pdf?anno=${anno}&mese=${mese}&insegnanteId=${insegnante}`
+
+  //     const response = await apiClient.get(endpoint, { responseType: 'blob' })
+  //     const url = window.URL.createObjectURL(new Blob([response.data]))
+  //     const link = document.createElement('a')
+  //     link.href = url
+  //     link.setAttribute(
+  //       'download',
+  //       `Report_Insegnante_${mode}_${anno}${
+  //         mode === 'mensile' ? '_' + mese : ''
+  //       }.pdf`
+  //     )
+  //     document.body.appendChild(link)
+  //     link.click()
+  //   } catch (error) {
+  //     console.error('Errore nel download del report insegnante', error)
+  //     setError('Errore nel download del report insegnante.')
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
   return (
     <>
       <AdminNavbar />
-      <div className="container mt-5">
+      <div className="container pt-5 mt-5">
         <h2 className="text-center mb-4">
           📊 Report {mode === 'annuale' ? 'Annuale' : 'Mensile'}
         </h2>
 
+        {/* 🎛️ Filtri */}
         <div className="d-flex justify-content-center mb-3 gap-2 flex-wrap">
           <select
             className="form-select w-auto"
@@ -178,13 +188,14 @@ const Report = () => {
             ))}
           </select>
 
-          <button
-            className="btn btn-primary"
-            onClick={scaricaOreInsegnante}
-            disabled={loading || isTutti}
-          >
-            {loading ? 'Scaricamento...' : '📥 Report Insegnante'}
-          </button>
+          {/* DA IMPLEMENTARE */}
+          {/* <button
+          className="btn btn-primary"
+          onClick={scaricaOreInsegnante}
+          disabled={loading || isTutti}
+        >
+          {loading ? 'Scaricamento...' : '📥 Report Insegnante'}
+        </button> */}
 
           <button
             className="btn btn-success"
@@ -211,6 +222,7 @@ const Report = () => {
           <div className="alert alert-danger">{error}</div>
         ) : report ? (
           <>
+            {/* 📊 Riepilogo */}
             <div className="row mb-4">
               <div className="col-md-3">
                 <div className="card p-4 text-center shadow">
@@ -244,46 +256,7 @@ const Report = () => {
               </div>
             </div>
 
-            <div className="mt-5">
-              <h4>🧑‍🏫 Ore Insegnate per Insegnante</h4>
-              {report.oreInsegnate ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={
-                      isTutti
-                        ? Object.entries(report.oreInsegnate).map(
-                            ([nome, ore]) => ({
-                              nome,
-                              ore,
-                            })
-                          )
-                        : listaInsegnanti.some(
-                            (ins) =>
-                              getNomeInsegnanteById(ins.id) === nomeSelezionato
-                          )
-                        ? [
-                            {
-                              nome: nomeSelezionato,
-                              ore: report.oreInsegnate[nomeSelezionato] || 0,
-                            },
-                          ]
-                        : []
-                    }
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="nome" />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip />
-                    <Bar dataKey="ore" fill="#17a2b8" />
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <p className="text-center">
-                  Nessuna ora insegnata disponibile per questo periodo.
-                </p>
-              )}
-            </div>
-
+            {/* 💳 Pagamenti */}
             {report.pagamentiRicevuti &&
               Object.keys(report.pagamentiRicevuti).length > 0 && (
                 <div className="mt-5">
@@ -320,6 +293,7 @@ const Report = () => {
                 </div>
               )}
 
+            {/* 🧾 Spese */}
             {report.speseRegistrate &&
               Object.keys(report.speseRegistrate).length > 0 && (
                 <div className="mt-5">
@@ -358,6 +332,40 @@ const Report = () => {
           <p>Nessun dato disponibile per il periodo selezionato.</p>
         )}
       </div>
+
+      {/* ✅ Ore Insegnate per Insegnante - DA IMPLEMENTARE CON REGISTRO ELETTRONICO*/}
+      {report?.oreInsegnate && (
+        <div className="container grafico-final">
+          <h4 className="mb-4 text-start">🧑‍🏫 Ore Insegnate per Insegnante</h4>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={
+                isTutti
+                  ? Object.entries(report.oreInsegnate).map(([nome, ore]) => ({
+                      nome,
+                      ore,
+                    }))
+                  : listaInsegnanti.some(
+                      (ins) => getNomeInsegnanteById(ins.id) === nomeSelezionato
+                    )
+                  ? [
+                      {
+                        nome: nomeSelezionato,
+                        ore: report.oreInsegnate[nomeSelezionato] || 0,
+                      },
+                    ]
+                  : []
+              }
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="nome" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Bar dataKey="ore" fill="#17a2b8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </>
   )
 }

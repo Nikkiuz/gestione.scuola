@@ -65,47 +65,55 @@ const eliminaSpesa = async (id) => {
 }
 
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    console.log('📤 Dati inviati al backend:', formData)
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  setError('')
+  console.log('📤 Dati inviati al backend:', formData)
 
-    try {
-      await apiClient.post('/spese', {
-        ...formData,
-        dataSpesa: formData.dataSpesa.toISOString().split('T')[0], // 👈 Formatta la data
-      })
-      setShowModal(false)
-      fetchSpese()
-      alert('✅ Spesa aggiunta con successo!')
-      setShowModal(false)
-      fetchSpese()
-      sessionStorage.setItem('refreshReport', 'true')
+  try {
+    await apiClient.post('/spese', {
+      ...formData,
+      dataSpesa: formData.dataSpesa.toISOString().split('T')[0],
+    })
 
-    } catch (error) {
-      console.error('❌ Errore nella creazione della spesa', error)
-      if (error.response) {
-        console.error('📩 Risposta dal server:', error.response.data)
-      }
-      setError(
-        error.response
-          ? JSON.stringify(error.response.data, null, 2)
-          : 'Errore generico.'
-      )
+    setShowModal(false)
+    setSelectedDate(new Date(formData.dataSpesa)) // 👈 Forza il filtro corretto
+    fetchSpese()
+    alert('✅ Spesa aggiunta con successo!')
+    sessionStorage.setItem('refreshReport', 'true')
+  } catch (error) {
+    console.error('❌ Errore nella creazione della spesa', error)
+    if (error.response) {
+      console.error('📩 Risposta dal server:', error.response.data)
     }
+    setError(
+      error.response
+        ? JSON.stringify(error.response.data, null, 2)
+        : 'Errore generico.'
+    )
   }
+}
+
 
   return (
     <>
       <AdminNavbar />
-      <div className="container mt-4">
+      <div className="container pt-5 mt-5">
         <h2 className="text-center mb-4">💰 Lista Spese</h2>
 
         {/* Pulsante per aggiungere una nuova spesa */}
         <div className="mb-3 text-start">
           <button
             className="btn btn-success"
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setFormData({
+                categoria: '',
+                importo: '',
+                descrizione: '',
+                dataSpesa: new Date(),
+              })
+              setShowModal(true)
+            }}
           >
             ➕ Aggiungi Spesa
           </button>

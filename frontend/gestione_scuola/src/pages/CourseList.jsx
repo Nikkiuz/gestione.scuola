@@ -99,7 +99,7 @@ const CourseList = () => {
   return (
     <>
       <AdminNavbar />
-      <div className="container mt-5">
+      <div className="container pt-5 mt-5">
         <h2 className="text-center mb-4">📚 Gestione Corsi</h2>
 
         <div className="d-flex justify-content-between mb-3">
@@ -156,7 +156,7 @@ const CourseList = () => {
                           className="btn btn-info btn-sm me-2"
                           onClick={() => navigate(`/corsi/${corso.id}`)}
                         >
-                          🔍 Dettagli
+                          📄 Dettagli
                         </button>
                         <button
                           className="btn btn-warning btn-sm me-2"
@@ -209,7 +209,7 @@ const CourseList = () => {
                           className="btn btn-info btn-sm me-2"
                           onClick={() => navigate(`/corsi/${corso.id}`)}
                         >
-                          🔍 Dettagli
+                          📄 Dettagli
                         </button>
                         <button
                           className="btn btn-warning btn-sm me-2"
@@ -262,7 +262,7 @@ const CourseList = () => {
                           className="btn btn-info btn-sm me-2"
                           onClick={() => navigate(`/corsi/${corso.id}`)}
                         >
-                          🔍 Dettagli
+                          📄 Dettagli
                         </button>
                         <button
                           className="btn btn-success btn-sm"

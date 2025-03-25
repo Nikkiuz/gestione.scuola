@@ -114,7 +114,7 @@ const AulaList = () => {
   return (
     <>
       <AdminNavbar />
-      <div className="container mt-4">
+      <div className="container pt-5 mt-5">
         <h2 className="text-center mb-4">🏫 Lista Aule</h2>
 
         {loading && <p className="text-center">⏳ Caricamento in corso...</p>}

@@ -88,7 +88,7 @@ const PagamentiDetail = () => {
  return (
    <>
      <AdminNavbar />
-     <div className="container mt-4">
+     <div className="container pt-5 mt-5">
        <h2 className="text-center mb-4">💳 Dettaglio Pagamento</h2>
 
        <div className="card p-4 shadow">
@@ -127,41 +127,42 @@ const PagamentiDetail = () => {
            </Button>
          </div>
        </div>
-     
+
        <Button
          className="btn btn-secondary mt-3"
          onClick={() => navigate('/pagamenti')}
        >
          🔙 Torna alla lista pagamenti
        </Button>
-     
 
-     {/* 🔹 Modale di Modifica */}
-     <ModalePagamento
-       show={isEditing}
-       onHide={() => setIsEditing(false)}
-       pagamentoSelezionato={formData}
-       setPagamentoSelezionato={setFormData}
-       isEditing={true}
-       studenti={studenti}
-       disableStudentSelect={true}
-       handleSubmit={async (e) => {
-         e.preventDefault()
-         try {
-           await apiClient.put(`/pagamenti/${id}`, {
-             ...formData,
-             dataPagamento: formData.dataPagamento.toISOString().split('T')[0],
-           })
-           alert('✅ Modifica salvata con successo!')
-           setIsEditing(false)
-           fetchPagamento()
-           sessionStorage.setItem('refreshReport', 'true')
-         } catch (error) {
-           console.error('❌ Errore nel salvataggio:', error)
-           alert('Errore durante la modifica del pagamento.')
-         }
-       }}
-     />
+       {/* 🔹 Modale di Modifica */}
+       <ModalePagamento
+         show={isEditing}
+         onHide={() => setIsEditing(false)}
+         pagamentoSelezionato={formData}
+         setPagamentoSelezionato={setFormData}
+         isEditing={true}
+         studenti={studenti}
+         disableStudentSelect={true}
+         handleSubmit={async (e) => {
+           e.preventDefault()
+           try {
+             await apiClient.put(`/pagamenti/${id}`, {
+               ...formData,
+               dataPagamento: formData.dataPagamento
+                 .toISOString()
+                 .split('T')[0],
+             })
+             alert('✅ Modifica salvata con successo!')
+             setIsEditing(false)
+             fetchPagamento()
+             sessionStorage.setItem('refreshReport', 'true')
+           } catch (error) {
+             console.error('❌ Errore nel salvataggio:', error)
+             alert('Errore durante la modifica del pagamento.')
+           }
+         }}
+       />
      </div>
    </>
  )

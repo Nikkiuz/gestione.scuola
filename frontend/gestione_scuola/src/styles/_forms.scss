@@ -1,0 +1,61 @@
+.form-control,
+.form-select {
+  border-radius: 8px;
+  border-color: $colore-marrone;
+  background-color: #fff;
+  color: $colore-verde-scuro;
+  box-shadow: none;
+  font-weight: 500;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    border-color: $colore-verde-intenso;
+    box-shadow: 0 0 0 0.2rem rgba(72, 98, 88, 0.25);
+    outline: none;
+  }
+}
+
+.form-label {
+  font-weight: 600;
+  color: $colore-verde-scuro;
+}
+
+::placeholder {
+  color: lighten($colore-verde-scuro, 25%);
+  opacity: 0.8;
+}
+
+// =======================
+// ☑️ CHECKBOX
+// =======================
+input[type='checkbox'],
+.form-check-input {
+  accent-color: $colore-verde-intenso;
+  transition: accent-color 0.2s ease;
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(72, 98, 88, 0.25);
+  }
+}
+
+.form-check-input {
+  width: 1.1em;
+  height: 1.1em;
+  background-color: white;
+  border: 1px solid $colore-marrone;
+  border-radius: 0.25em;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:checked {
+    background-color: $colore-verde-intenso;
+    border-color: $colore-verde-intenso;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.15rem rgba(72, 98, 88, 0.35);
+  }
+}
+

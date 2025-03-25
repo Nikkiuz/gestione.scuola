@@ -1,0 +1,140 @@
+@keyframes fadeInSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calendario-cella-vuota {
+  background-color: $colore-sabbia;
+  color: $colore-verde-scuro;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 1.2rem;
+  text-align: center;
+  font-weight: 500;
+  opacity: 0.7;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: lighten($colore-sabbia, 5%);
+  }
+}
+
+.calendario-cella-piena {
+  color: white;
+  background-color: $colore-verde-intenso;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s ease;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  white-space: pre-line;
+  animation: fadeInSlide 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  position: relative;
+
+  &:hover {
+    transform: scale(1.01);
+  }
+
+  &:focus {
+    outline: 2px dashed $colore-sabbia;
+    outline-offset: 3px;
+  }
+
+  strong {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 2px;
+    color: $colore-sabbia;
+    font-size: 1rem;
+  }
+
+  span {
+    color: white;
+    font-size: 0.85rem;
+    display: block;
+  }
+
+  &.corso-privato {
+    background-color: $colore-privato !important;
+  }
+
+  &.corso-gruppo {
+    background-color: $colore-gruppo !important;
+  }
+}
+
+.badge-livello {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 8px;
+  margin-top: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+  &.BASE { background-color: #ffe066; color: #7f4f24; }
+  &.A1 { background-color: #b7e4c7; color: #1b4332; }
+  &.A2 { background-color: #95d5b2; color: #1b4332; }
+  &.B1 { background-color: #ffd6a5; color: #7f4f24; }
+  &.B2 { background-color: #ffc8dd; color: #6a0572; }
+  &.C1 { background-color: #bdb2ff; color: #3c096c; }
+  &.C2 { background-color: #a0c4ff; color: #023e8a; }
+}
+
+.table.calendario-table {
+  thead th {
+    background-color: $colore-verde-intenso;
+    color: white;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+
+  tbody td {
+    vertical-align: top;
+    min-width: 160px;
+    height: 140px;
+    padding: 10px;
+    text-align: left;
+    background-color: white;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: $colore-verde-intenso transparent;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: $colore-verde-intenso;
+      border-radius: 4px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+
+    tbody td {
+      min-width: auto;
+      height: auto;
+      padding: 6px;
+    }
+
+    .calendario-cella-piena {
+      font-size: 0.8rem;
+      padding: 6px 8px;
+    }
+  }
+}

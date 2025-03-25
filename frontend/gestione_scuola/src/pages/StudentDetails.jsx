@@ -257,7 +257,7 @@ const handleChangeStudente = () => {
   return (
     <>
       <AdminNavbar />
-      <div className="container mt-4">
+      <div className="container pt-5 mt-5">
         <h2 className="text-center mb-4">🎓 Dettagli Studente</h2>
         <button
           className="btn btn-secondary"

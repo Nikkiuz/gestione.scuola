@@ -8,7 +8,6 @@ import it.Nkkz.gestione.scuola.repository.StudenteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -89,31 +88,20 @@ public class DashboardService {
 
 	public Map<String, Object> getPagamentiMensili() {
 		List<Pagamento> pagamenti = pagamentoRepository.findAll();
+
+		// Inizializza la mappa con tutti i 12 mesi a 0
 		Map<Month, Double> mappa = new LinkedHashMap<>();
-
-		// Inizializza tutti i mesi con 0.0
-		for (Month m : Month.values()) {
-			mappa.put(m, 0.0);
+		for (Month mese : Month.values()) {
+			mappa.put(mese, 0.0);
 		}
 
-		int annoCorrente = java.time.Year.now().getValue();
-		java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ITALIAN);
-
+		// Somma gli importi nei mesi giusti
 		for (Pagamento pagamento : pagamenti) {
-			String mensilita = pagamento.getMensilitaSaldata(); // es: "Gennaio 2025"
-			try {
-				// Aggiungo "01 " per creare una data completa tipo "01 Gennaio 2025"
-				LocalDate data = LocalDate.parse("01 " + mensilita, java.time.format.DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ITALIAN));
-				if (data.getYear() == annoCorrente) {
-					Month mese = data.getMonth();
-					mappa.put(mese, mappa.get(mese) + pagamento.getImporto());
-				}
-			} catch (Exception e) {
-				System.out.println("Errore parsing mensilità: " + mensilita);
-			}
+			Month mese = pagamento.getDataPagamento().getMonth();
+			mappa.put(mese, mappa.get(mese) + pagamento.getImporto());
 		}
 
-		// Trasforma la mappa in due liste ordinate
+		// Lista dei nomi dei mesi in italiano (gennaio → dicembre)
 		List<String> mesi = mappa.keySet().stream()
 			.map(m -> m.getDisplayName(java.time.format.TextStyle.FULL, Locale.ITALIAN))
 			.collect(Collectors.toList());

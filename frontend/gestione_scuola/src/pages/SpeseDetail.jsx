@@ -60,23 +60,22 @@ const SpeseDetail = () => {
 return (
   <>
     <AdminNavbar />
-    <div className="container mt-4">
+    <div className="container pt-5 mt-5">
       <h2 className="text-center mb-4">💰 Dettagli Spesa</h2>
 
       <div className="card p-3 shadow">
         <p>
-          <strong>Importo:</strong> € {spesa.importo}
+          <strong>Importo:</strong> € {spesa.importo ?? 0}
         </p>
         <p>
-          <strong>Categoria:</strong> {spesa.categoria}
+          <strong>Categoria:</strong> {String(spesa.categoria || '—')}
         </p>
         <p>
-          <strong>Descrizione:</strong> {spesa.descrizione}
+          <strong>Descrizione:</strong> {spesa.descrizione || '—'}
         </p>
         <p>
-          <strong>Data:</strong> {spesa.dataSpesa}
+          <strong>Data:</strong> {spesa.dataSpesa || '—'}
         </p>
-
         <div className="d-flex justify-content-between">
           <Button variant="primary" onClick={handleEdit}>
             ✏️ Modifica Spesa

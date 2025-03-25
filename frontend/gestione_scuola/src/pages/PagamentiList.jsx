@@ -137,8 +137,8 @@ const eliminaPagamento = async (id) => {
   return (
     <>
       <AdminNavbar />
-      <div className="container mt-4">
-        <h2 className="text-center mb-4">💰 Lista Pagamenti</h2>
+      <div className="container pt-5 mt-5">
+        <h2 className="text-center mb-4">💳 Lista Pagamenti</h2>
 
         {loading && <p className="text-center">⏳ Caricamento in corso...</p>}
         {error && <div className="alert alert-danger">{error}</div>}
@@ -211,7 +211,7 @@ const eliminaPagamento = async (id) => {
                     className="btn btn-info btn-sm me-2"
                     onClick={() => navigate(`/pagamenti/${pagamento.id}`)} // Reindirizza alla pagina dei dettagli
                   >
-                    👁️ Dettagli
+                    📄 Dettagli
                   </button>
                   <button
                     className="btn btn-danger btn-sm"

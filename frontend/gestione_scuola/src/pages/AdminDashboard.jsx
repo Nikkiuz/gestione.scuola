@@ -43,38 +43,56 @@ const AdminDashboard = () => {
     fetchData()
   }, [])
 
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: { display: false },
-      title: {
-        display: true,
-        text: '📊 Pagamenti Mensili (€)',
-        font: { size: 16 },
-      },
-      tooltip: {
-        callbacks: {
-          label: (context) => `€ ${context.raw.toLocaleString('it-IT')}`,
-        },
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: (value) => `€ ${value.toLocaleString('it-IT')}`,
-        },
-      },
-      x: {
-        ticks: { font: { size: 14 } },
-      },
-    },
-  }
+ const chartOptions = {
+   responsive: true,
+   plugins: {
+     legend: { display: false },
+     title: {
+       display: true,
+       text: '📊 Pagamenti Mensili (€)',
+       font: {
+         size: 18,
+         family: 'Cabin Condensed',
+       },
+       color: '#334542',
+     },
+     tooltip: {
+       callbacks: {
+         label: (context) => `€ ${context.raw.toLocaleString('it-IT')}`,
+       },
+       backgroundColor: '#334542',
+       titleColor: '#E7CB9E',
+       bodyColor: '#E7CB9E',
+     },
+   },
+   scales: {
+     y: {
+       beginAtZero: true,
+       ticks: {
+         callback: (value) => `€ ${value.toLocaleString('it-IT')}`,
+         color: '#334542',
+       },
+       grid: {
+         color: 'rgba(72, 98, 88, 0.1)', // #486258 con trasparenza
+       },
+     },
+     x: {
+       ticks: {
+         font: { size: 14 },
+         color: '#334542',
+       },
+       grid: {
+         color: 'rgba(72, 98, 88, 0.05)',
+       },
+     },
+   },
+ }
+
 
   return (
     <>
       <AdminNavbar />
-      <div className="container mt-5">
+      <div className="container mt-5 pt-5 mt-5">
         <h2 className="text-center mb-4">Dashboard Admin</h2>
         {loading && <p className="text-center">⏳ Caricamento dati...</p>}
         {error && <div className="alert alert-danger">{error}</div>}
@@ -143,8 +161,9 @@ const AdminDashboard = () => {
                   {
                     label: 'Pagamenti Mensili (€)',
                     data: pagamentiMensili.data,
-                    backgroundColor: '#007bff',
-                    borderColor: '#0056b3',
+                    backgroundColor: '#486258',
+                    borderColor: '#334542',
+                    hoverBackgroundColor: '#CC9C77',
                     borderWidth: 2,
                     barThickness: 40,
                     borderRadius: 5,

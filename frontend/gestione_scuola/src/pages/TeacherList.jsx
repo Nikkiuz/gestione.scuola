@@ -111,7 +111,7 @@ const TeacherList = () => {
   return (
     <>
       <AdminNavbar />
-      <div className="container mt-4">
+      <div className="container pt-5 mt-5">
         <h2 className="text-center mb-4">👨‍🏫 Gestione Insegnanti</h2>
 
         {/* Pulsante per aprire il modale */}
