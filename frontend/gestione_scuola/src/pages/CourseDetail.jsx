@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
 import ModaleCorso from '../components/ModaleCorso'
+import OverlaySpinner from '../components/OverlaySpinner'
+
 
 const CourseDetails = () => {
   const { id } = useParams()
@@ -24,8 +26,7 @@ const CourseDetails = () => {
     setLoading(true)
     try {
       const response = await apiClient.get(`/corsi/${id}`)
-      const corsoData = response.data || {}
-      setCorso(corsoData)
+      setCorso(response.data || {})
     } catch (error) {
       console.error('❌ Errore nel recupero del corso:', error)
       setError('Errore nel caricamento del corso.')
@@ -87,23 +88,34 @@ const CourseDetails = () => {
     }
   }
 
-  if (loading) return <p>⏳ Caricamento in corso...</p>
+  if (loading) return <OverlaySpinner />
   if (error) return <div className="alert alert-danger">{error}</div>
 
   return (
     <>
       <AdminNavbar />
-      <div className="container pt-5 mt-5">
+      <div className="container pt-5 mt-5 mb-5">
         <h2 className="text-center mb-4">📚 Dettagli Corso</h2>
 
         {successMessage && (
           <div className="alert alert-success">{successMessage}</div>
         )}
 
-        <div className="card shadow p-4">
-          <h5>
-            {corso?.lingua} - Livello <strong>{corso?.livello || 'N/A'}</strong>
-          </h5>
+        <div className="card shadow p-4 border-0 rounded-4 bg-light-subtle">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h5 className="mb-0">
+              {corso?.lingua} - Livello{' '}
+              <strong>{corso?.livello || 'N/A'}</strong>
+            </h5>
+            <span
+              className={`badge ${
+                corso?.attivo ? 'bg-success' : 'bg-secondary'
+              }`}
+            >
+              {corso?.attivo ? 'Attivo' : 'Disattivato'}
+            </span>
+          </div>
+
           <p>
             <strong>🗓 Giorno:</strong> {corso?.giorno || 'N/A'}
           </p>
@@ -115,13 +127,11 @@ const CourseDetails = () => {
               <strong>🗓 Secondo Giorno:</strong> {corso.secondoGiorno}
             </p>
           )}
-
           {corso?.secondoOrario && (
             <p>
               <strong>⏰ Secondo Orario:</strong> {corso.secondoOrario}
             </p>
           )}
-
           <p>
             <strong>🏫 Aula:</strong> {corso?.aula?.nome || 'Non assegnata'}
           </p>
@@ -130,62 +140,67 @@ const CourseDetails = () => {
             {corso?.insegnante?.cognome}
           </p>
 
-          <button
-            className={`btn ${
-              corso?.attivo ? 'btn-warning' : 'btn-success'
-            } me-2`}
-            onClick={toggleStatoCorso}
-          >
-            {corso?.attivo ? '🚫 Disattiva Corso' : '✅ Riattiva Corso'}
-          </button>
-          <button className="btn btn-danger me-2" onClick={eliminaCorso}>
-            🗑 Elimina Corso
-          </button>
-          <button
-            className="btn btn-secondary"
-            onClick={() => setShowModale(true)}
-          >
-            ✏️ Modifica
-          </button>
+          <div className="d-flex flex-wrap gap-2 mt-3">
+            <button
+              className={`btn ${corso?.attivo ? 'btn-warning' : 'btn-success'}`}
+              onClick={toggleStatoCorso}
+            >
+              {corso?.attivo ? '🚫 Disattiva Corso' : '✅ Riattiva Corso'}
+            </button>
+            <button className="btn btn-danger" onClick={eliminaCorso}>
+              🗑 Elimina Corso
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowModale(true)}
+            >
+              ✏️ Modifica
+            </button>
+          </div>
         </div>
 
-        <div className="mt-4">
-          <h5>🎓 Studenti Iscritti</h5>
-          {corso?.studenti?.length === 0 ? (
-            <p className="text-muted">Nessuno studente iscritto</p>
-          ) : (
-            <ul className="list-group">
-              {corso?.studenti?.map((studente) => (
-                <li key={studente.id} className="list-group-item">
-                  {studente.nome} {studente.cognome}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div className="mt-4">
-          <h5>🎓 Studenti disponibili</h5>
-          {studentiDisponibili.length === 0 ? (
-            <p className="text-muted">Nessuno studente disponibile</p>
-          ) : (
-            <ul className="list-group">
-              {studentiDisponibili.map((studente) => (
-                <li
-                  key={studente.id}
-                  className="list-group-item d-flex justify-content-between align-items-center"
-                >
-                  {studente.nome} {studente.cognome}
-                  <button
-                    className="btn btn-success btn-sm"
-                    onClick={() => assegnaStudente(studente.id)}
+        <div className="row mt-5">
+          <div className="col-md-6">
+            <h5>🎓 Studenti Iscritti</h5>
+            {corso?.studenti?.length === 0 ? (
+              <p className="text-muted">Nessuno studente iscritto</p>
+            ) : (
+              <ul className="list-group shadow-sm rounded-3">
+                {corso?.studenti?.map((studente) => (
+                  <li
+                    key={studente.id}
+                    className="list-group-item d-flex align-items-center"
                   >
-                    ➕ Assegna
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+                    {studente.nome} {studente.cognome}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="col-md-6 mt-4 mt-md-0">
+            <h5>🎓 Studenti Disponibili</h5>
+            {studentiDisponibili.length === 0 ? (
+              <p className="text-muted">Nessuno studente disponibile</p>
+            ) : (
+              <ul className="list-group shadow-sm rounded-3">
+                {studentiDisponibili.map((studente) => (
+                  <li
+                    key={studente.id}
+                    className="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    {studente.nome} {studente.cognome}
+                    <button
+                      className="btn btn-outline-success btn-sm"
+                      onClick={() => assegnaStudente(studente.id)}
+                    >
+                      ➕ Assegna
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
 
         <ModaleCorso

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
 import { Form, Button } from 'react-bootstrap'
+import CustomSpinner from '../components/CustomSpinner'
 
 const TeacherDetail = () => {
   const { id } = useParams()
@@ -15,10 +16,15 @@ const TeacherDetail = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [corsiAssegnati, setCorsiAssegnati] = useState([])
 
-  useEffect(() => {
-    fetchInsegnante()
-    fetchCorsiAssegnati()
-  }, [])
+ useEffect(() => {
+   const fetchData = async () => {
+     setLoading(true)
+     await Promise.all([fetchInsegnante(), fetchCorsiAssegnati()])
+     setLoading(false)
+   }
+   fetchData()
+ }, [])
+
 
   const fetchInsegnante = async () => {
     try {
@@ -98,7 +104,7 @@ const TeacherDetail = () => {
     }
   }
 
-  if (loading) return <p>Caricamento in corso...</p>
+  if (loading) return <CustomSpinner message="Caricamento insegnante..." />
   if (error) return <div className="alert alert-danger">{error}</div>
   if (!insegnante) return <p>⚠️ Nessun insegnante trovato.</p>
 
@@ -125,7 +131,7 @@ const TeacherDetail = () => {
             <Form.Control
               type="text"
               name="nome"
-              value={dati.nome}
+              value={dati.nome || ''} 
               onChange={handleChange}
               disabled={!isEditing}
             />
@@ -136,7 +142,7 @@ const TeacherDetail = () => {
             <Form.Control
               type="text"
               name="cognome"
-              value={dati.cognome}
+              value={dati.cognome || ''}
               onChange={handleChange}
               disabled={!isEditing}
             />
@@ -147,7 +153,7 @@ const TeacherDetail = () => {
             <Form.Control
               type="email"
               name="email"
-              value={dati.email}
+              value={dati.email || ''}
               onChange={handleChange}
               disabled={!isEditing}
             />
@@ -158,7 +164,7 @@ const TeacherDetail = () => {
             <Form.Control
               type="text"
               name="lingua"
-              value={dati.lingua}
+              value={dati.lingua || ''}
               onChange={handleChange}
               disabled={!isEditing}
             />

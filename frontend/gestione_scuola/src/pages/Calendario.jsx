@@ -6,6 +6,7 @@ import 'moment/locale/it'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 import AdminNavbar from '../components/AdminNavbar'
+import CustomSpinner from '../components/CustomSpinner'
 
 const Calendario = () => {
   const [settimana, setSettimana] = useState(moment())
@@ -184,7 +185,7 @@ return (
 
       {/* 📅 Calendario */}
       {loading ? (
-        <p>⏳ Caricamento in corso...</p>
+        <CustomSpinner message="Caricamento calendario..." />
       ) : error ? (
         <div className="alert alert-danger">{error}</div>
       ) : (

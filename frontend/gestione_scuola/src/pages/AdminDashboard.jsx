@@ -4,6 +4,7 @@ import apiClient from '../api/apiClient'
 import { Bar } from 'react-chartjs-2'
 import 'chart.js/auto'
 import AdminNavbar from '../components/AdminNavbar'
+import CustomSpinner from '../components/CustomSpinner'
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({ studenti: 0, corsi: 0, pagamenti: 0 })
@@ -73,7 +74,7 @@ const AdminDashboard = () => {
          color: '#334542',
        },
        grid: {
-         color: 'rgba(72, 98, 88, 0.1)', // #486258 con trasparenza
+         color: 'rgba(72, 98, 88, 0.1)', 
        },
      },
      x: {
@@ -94,7 +95,7 @@ const AdminDashboard = () => {
       <AdminNavbar />
       <div className="container mt-5 pt-5 mt-5">
         <h2 className="text-center mb-4">Dashboard Admin</h2>
-        {loading && <p className="text-center">⏳ Caricamento dati...</p>}
+        {loading && <CustomSpinner message="Caricamento dati dashboard..." />}
         {error && <div className="alert alert-danger">{error}</div>}
 
         {!loading && !error && (

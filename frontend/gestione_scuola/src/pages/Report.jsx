@@ -18,6 +18,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { registerLocale } from 'react-datepicker'
 import it from 'date-fns/locale/it'
+import CustomSpinner from '../components/CustomSpinner'
 
 registerLocale('it', it)
 
@@ -213,11 +214,7 @@ const Report = () => {
         )}
 
         {loading ? (
-          <div className="text-center my-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Caricamento...</span>
-            </div>
-          </div>
+          <CustomSpinner message="Caricamento report in corso..." />
         ) : error ? (
           <div className="alert alert-danger">{error}</div>
         ) : report ? (

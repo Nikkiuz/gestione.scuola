@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Modal, Form, Button, Spinner } from 'react-bootstrap'
+import { Modal, Form, Button,} from 'react-bootstrap'
 import apiClient from '../api/apiClient'
+import CustomSpinner from './CustomSpinner'
 
 const LIVELLI = ['BASE', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 const FREQUENZE = ['1 volta a settimana', '2 volte a settimana']
@@ -141,194 +142,198 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form onSubmit={handleSalva}>
-          <Form.Group className="mb-3">
-            <Form.Label>Lingua</Form.Label>
-            <Form.Control
-              type="text"
-              name="lingua"
-              value={formCorso.lingua}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
+        {saving ? (
+          <CustomSpinner message="Salvataggio corso in corso..." />
+        ) : (
+          <Form onSubmit={handleSalva}>
+            <Form.Group className="mb-3">
+              <Form.Label>Lingua</Form.Label>
+              <Form.Control
+                type="text"
+                name="lingua"
+                value={formCorso.lingua}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Livello</Form.Label>
-            <Form.Select
-              name="livello"
-              value={formCorso.livello}
-              onChange={handleChange}
-              required
-            >
-              {LIVELLI.map((l) => (
-                <option key={l} value={l}>
-                  {l}
-                </option>
+            <Form.Group className="mb-3">
+              <Form.Label>Livello</Form.Label>
+              <Form.Select
+                name="livello"
+                value={formCorso.livello}
+                onChange={handleChange}
+                required
+              >
+                {LIVELLI.map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Tipo Corso</Form.Label>
+              <Form.Select
+                name="tipoCorso"
+                value={formCorso.tipoCorso}
+                onChange={handleChange}
+                required
+              >
+                {TIPI_CORSO.map((tipo) => (
+                  <option key={tipo} value={tipo}>
+                    {tipo}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Frequenza</Form.Label>
+              <Form.Select
+                name="frequenza"
+                value={formCorso.frequenza}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleziona frequenza</option>
+                {FREQUENZE.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Giorno</Form.Label>
+              <Form.Control
+                type="text"
+                name="giorno"
+                value={formCorso.giorno}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Orario</Form.Label>
+              <Form.Control
+                type="text"
+                name="orario"
+                value={formCorso.orario}
+                onChange={handleChange}
+                required
+              />
+            </Form.Group>
+
+            {formCorso.frequenza === '2 volte a settimana' && (
+              <>
+                <Form.Group className="mb-3">
+                  <Form.Label>Secondo Giorno</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="secondoGiorno"
+                    value={formCorso.secondoGiorno}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Secondo Orario</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="secondoOrario"
+                    value={formCorso.secondoOrario}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+              </>
+            )}
+
+            <Form.Group className="mb-3">
+              <Form.Label>Insegnante</Form.Label>
+              <Form.Select
+                name="insegnanteId"
+                value={formCorso.insegnanteId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleziona insegnante</option>
+                {insegnanti.map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {i.nome} {i.cognome}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Aula</Form.Label>
+              <Form.Select
+                name="aulaId"
+                value={formCorso.aulaId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleziona aula</option>
+                {aule.map((aula) => (
+                  <option key={aula.id} value={aula.id}>
+                    {aula.nome}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+
+            <hr />
+
+            <h5>🎓 Studenti Assegnati</h5>
+            <ul>
+              {studentiAssegnati.map((studente) => (
+                <li key={studente.id}>
+                  {studente.nome} {studente.cognome}
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    className="ms-2"
+                    onClick={() => handleRimuoviStudente(studente)}
+                  >
+                    Rimuovi
+                  </Button>
+                </li>
               ))}
-            </Form.Select>
-          </Form.Group>
+            </ul>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Tipo Corso</Form.Label>
-            <Form.Select
-              name="tipoCorso"
-              value={formCorso.tipoCorso}
-              onChange={handleChange}
-              required
-            >
-              {TIPI_CORSO.map((tipo) => (
-                <option key={tipo} value={tipo}>
-                  {tipo}
-                </option>
+            <h5 className="mt-4">🎓 Studenti Disponibili</h5>
+            <ul>
+              {studentiDisponibili.map((studente) => (
+                <li key={studente.id}>
+                  {studente.nome} {studente.cognome}
+                  <Button
+                    variant="success"
+                    size="sm"
+                    className="ms-2"
+                    onClick={() => handleAggiungiStudente(studente)}
+                  >
+                    Aggiungi
+                  </Button>
+                </li>
               ))}
-            </Form.Select>
-          </Form.Group>
+            </ul>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Frequenza</Form.Label>
-            <Form.Select
-              name="frequenza"
-              value={formCorso.frequenza}
-              onChange={handleChange}
-              required
+            <Button
+              type="submit"
+              variant="primary"
+              className="mt-3"
+              disabled={saving}
             >
-              <option value="">Seleziona frequenza</option>
-              {FREQUENZE.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Giorno</Form.Label>
-            <Form.Control
-              type="text"
-              name="giorno"
-              value={formCorso.giorno}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Orario</Form.Label>
-            <Form.Control
-              type="text"
-              name="orario"
-              value={formCorso.orario}
-              onChange={handleChange}
-              required
-            />
-          </Form.Group>
-
-          {formCorso.frequenza === '2 volte a settimana' && (
-            <>
-              <Form.Group className="mb-3">
-                <Form.Label>Secondo Giorno</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="secondoGiorno"
-                  value={formCorso.secondoGiorno}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Secondo Orario</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="secondoOrario"
-                  value={formCorso.secondoOrario}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-            </>
-          )}
-
-          <Form.Group className="mb-3">
-            <Form.Label>Insegnante</Form.Label>
-            <Form.Select
-              name="insegnanteId"
-              value={formCorso.insegnanteId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Seleziona insegnante</option>
-              {insegnanti.map((i) => (
-                <option key={i.id} value={i.id}>
-                  {i.nome} {i.cognome}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>Aula</Form.Label>
-            <Form.Select
-              name="aulaId"
-              value={formCorso.aulaId}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Seleziona aula</option>
-              {aule.map((aula) => (
-                <option key={aula.id} value={aula.id}>
-                  {aula.nome}
-                </option>
-              ))}
-            </Form.Select>
-          </Form.Group>
-
-          <hr />
-
-          <h5>🎓 Studenti Assegnati</h5>
-          <ul>
-            {studentiAssegnati.map((studente) => (
-              <li key={studente.id}>
-                {studente.nome} {studente.cognome}
-                <Button
-                  variant="danger"
-                  size="sm"
-                  className="ms-2"
-                  onClick={() => handleRimuoviStudente(studente)}
-                >
-                  Rimuovi
-                </Button>
-              </li>
-            ))}
-          </ul>
-
-          <h5 className="mt-4">🎓 Studenti Disponibili</h5>
-          <ul>
-            {studentiDisponibili.map((studente) => (
-              <li key={studente.id}>
-                {studente.nome} {studente.cognome}
-                <Button
-                  variant="success"
-                  size="sm"
-                  className="ms-2"
-                  onClick={() => handleAggiungiStudente(studente)}
-                >
-                  Aggiungi
-                </Button>
-              </li>
-            ))}
-          </ul>
-
-          <Button
-            type="submit"
-            variant="primary"
-            className="mt-3"
-            disabled={saving}
-          >
-            {saving ? <Spinner animation="border" size="sm" /> : '💾 Salva'}
-          </Button>
-        </Form>
+              💾 Salva
+            </Button>
+          </Form>
+        )}
       </Modal.Body>
     </Modal>
   )

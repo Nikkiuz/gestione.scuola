@@ -8,6 +8,7 @@ import ModalePagamento from '../components/ModalePagamento'
 import 'react-datepicker/dist/react-datepicker.css'
 import { registerLocale } from 'react-datepicker'
 import it from 'date-fns/locale/it'
+import CustomSpinner from '../components/CustomSpinner'
 
 registerLocale('it', it)
 
@@ -140,7 +141,7 @@ const eliminaPagamento = async (id) => {
       <div className="container pt-5 mt-5">
         <h2 className="text-center mb-4">💳 Lista Pagamenti</h2>
 
-        {loading && <p className="text-center">⏳ Caricamento in corso...</p>}
+        {loading && <CustomSpinner message="Caricamento pagamenti in corso..." />}
         {error && <div className="alert alert-danger">{error}</div>}
 
         <div className="row mb-3">
@@ -208,7 +209,7 @@ const eliminaPagamento = async (id) => {
                 <td>
                   {/* Pulsante per visualizzare i dettagli del pagamento */}
                   <button
-                    className="btn btn-info btn-sm me-2"
+                    className="btn btn-primary btn-sm me-2"
                     onClick={() => navigate(`/pagamenti/${pagamento.id}`)} // Reindirizza alla pagina dei dettagli
                   >
                     📄 Dettagli

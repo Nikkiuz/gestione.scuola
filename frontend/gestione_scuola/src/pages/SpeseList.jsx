@@ -7,7 +7,8 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { registerLocale } from 'react-datepicker'
 import ModaleSpesa from '../components/ModaleSpesa'
-import it from 'date-fns/locale/it' // Localizzazione italiana
+import it from 'date-fns/locale/it'
+import CustomSpinner from '../components/CustomSpinner'
 
 registerLocale('it', it)
 
@@ -158,7 +159,7 @@ const handleSubmit = async (e) => {
 
         {/* 🔹 Tabella Spese */}
         {loading ? (
-          <p className="text-center">⏳ Caricamento in corso...</p>
+          <CustomSpinner message="Caricamento spese in corso..." />
         ) : error ? (
           <div className="alert alert-danger">{error}</div>
         ) : (
@@ -189,7 +190,7 @@ const handleSubmit = async (e) => {
                     <td>
                       <button
                         className="btn btn-primary btn-sm me-2"
-                        onClick={() => navigate(`/spese/${spesa.id}`)} // 👈 Naviga a SpesaDetail
+                        onClick={() => navigate(`/spese/${spesa.id}`)}
                       >
                         ✏️ Modifica
                       </button>

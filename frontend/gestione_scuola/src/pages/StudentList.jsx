@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
 import ModaleStudente from '../components/ModaleStudente'
+import OverlaySpinner from '../components/OverlaySpinner'
+
 
 const StudentList = () => {
   const [studenti, setStudenti] = useState([])
@@ -12,6 +14,7 @@ const StudentList = () => {
   const [filtroCognome, setFiltroCognome] = useState('')
   const [filtroLivello, setFiltroLivello] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
   const LIVELLI = ['BASE', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'] // 🔥 Enum dei livelli
@@ -21,7 +24,7 @@ const StudentList = () => {
     cognome: '',
     eta: '',
     linguaDaImparare: '',
-    livello: 'BASE', // 🔥 Ora parte con un valore valido dell'enum
+    livello: 'BASE', 
     tipologiaIscrizione: '',
     giorniPreferiti: [],
     fasceOrariePreferite: [],
@@ -48,10 +51,12 @@ const StudentList = () => {
     })
   }
 
-  useEffect(() => {
-    fetchStudenti()
-    fetchInsegnanti()
-  }, [])
+ useEffect(() => {
+   setLoading(true)
+   Promise.all([fetchStudenti(), fetchInsegnanti()]).finally(() =>
+     setLoading(false)
+   )
+ }, [])
 
  const fetchStudenti = async () => {
    try {
@@ -122,62 +127,66 @@ const StudentList = () => {
   }
 
   return (
-    <>
-      <AdminNavbar />
-      <div className="container pt-5 mt-5">
-        <h2 className="text-center mb-4">🎓 Gestione Studenti</h2>
+  <>
+    <AdminNavbar />
+    <div className="container pt-5 mt-5">
+      <h2 className="text-center mb-4">🎓 Gestione Studenti</h2>
 
-        <button
-          className="btn btn-success mb-3"
-          onClick={() => setShowModal(true)}
-        >
-          ➕ Aggiungi Studente
-        </button>
+      <button
+        className="btn btn-success mb-3"
+        onClick={() => setShowModal(true)}
+      >
+        ➕ Aggiungi Studente
+      </button>
 
-        <ModaleStudente
-          show={showModal}
-          onHide={() => setShowModal(false)}
-          formStudente={formData}
-          setFormStudente={setFormData}
-          handleSalvaModificheStudente={handleSubmit}
-          insegnanti={insegnanti}
-        />
+      <ModaleStudente
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        formStudente={formData}
+        setFormStudente={setFormData}
+        handleSalvaModificheStudente={handleSubmit}
+        insegnanti={insegnanti}
+      />
 
-        {/* 🔎 Filtro Studenti */}
-        <div className="row mb-3">
-          <div className="col-md-4">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Filtra per nome"
-              value={filtroNome}
-              onChange={(e) => setFiltroNome(e.target.value)}
-            />
-          </div>
-          <div className="col-md-4">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Filtra per cognome"
-              value={filtroCognome}
-              onChange={(e) => setFiltroCognome(e.target.value)}
-            />
-          </div>
-          <div className="col-md-4">
-            <select
-              className="form-control"
-              value={filtroLivello}
-              onChange={(e) => setFiltroLivello(e.target.value)}
-            >
-              <option value="">Tutti i livelli</option>
-              {LIVELLI.map((liv) => (
-                <option key={liv} value={liv}>
-                  {liv}
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* 🔎 Filtro Studenti */}
+      <div className="row mb-3">
+        <div className="col-md-4">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Filtra per nome"
+            value={filtroNome}
+            onChange={(e) => setFiltroNome(e.target.value)}
+          />
         </div>
+        <div className="col-md-4">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Filtra per cognome"
+            value={filtroCognome}
+            onChange={(e) => setFiltroCognome(e.target.value)}
+          />
+        </div>
+        <div className="col-md-4">
+          <select
+            className="form-control"
+            value={filtroLivello}
+            onChange={(e) => setFiltroLivello(e.target.value)}
+          >
+            <option value="">Tutti i livelli</option>
+            {LIVELLI.map((liv) => (
+              <option key={liv} value={liv}>
+                {liv}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* 🌀 Spinner su sezione tabelle */}
+      <div className="position-relative">
+        {loading && <OverlaySpinner message="Caricamento studenti..." />}
 
         {/* 📌 Studenti con Corso */}
         <h4>📌 Studenti con Corso</h4>
@@ -277,8 +286,9 @@ const StudentList = () => {
           </tbody>
         </table>
       </div>
-    </>
-  )
+    </div>
+  </>
+)
 }
 
 export default StudentList

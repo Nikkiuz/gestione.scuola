@@ -90,7 +90,7 @@ const AdminNavbar = () => {
             </li>
             <li className="nav-item">
               <button
-                className="btn btn-outline-danger ms-lg-3 w-100 w-lg-auto"
+                className="btn btn-danger ms-lg-3 w-100 w-lg-auto"
                 onClick={handleLogout}
               >
                 🔴 Logout

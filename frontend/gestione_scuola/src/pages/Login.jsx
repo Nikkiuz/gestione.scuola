@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux'
 import { loginSuccess } from '../redux/slices/authSlice.js'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient.js'
+import FullscreenSpinner from '../components/FullScreenSpinner.jsx'
 
 const Login = () => {
   const [email, setEmail] = useState('')
@@ -50,6 +51,9 @@ const Login = () => {
   }
 
   return (
+     <>
+      {loading && <FullscreenSpinner message="Accesso in corso..." />}
+
     <div className="container pt-5 mt-5">
       <div className="row justify-content-center">
         <div className="col-md-4">
@@ -87,6 +91,7 @@ const Login = () => {
         </div>
       </div>
     </div>
+    </>
   )
 }
 

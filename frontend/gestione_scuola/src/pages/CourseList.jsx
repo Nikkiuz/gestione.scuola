@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
 import ModaleCorso from '../components/ModaleCorso'
+import OverlaySpinner from '../components/OverlaySpinner'
+
 
 const CourseList = () => {
   const [corsiGruppo, setCorsiGruppo] = useState([])
@@ -118,11 +120,13 @@ const CourseList = () => {
           </button>
         </div>
 
-        {loading ? (
-          <p>Caricamento...</p>
-        ) : error ? (
-          <div className="alert alert-danger">{error}</div>
-        ) : (
+       {loading && <OverlaySpinner />}
+
+{!loading && error && (
+  <div className="alert alert-danger">{error}</div>
+)}
+
+{!loading && !error && (
           <>
             <h4>📌 Corsi di Gruppo</h4>
             {corsiGruppo.length === 0 ? (
@@ -153,7 +157,7 @@ const CourseList = () => {
                       <td>{corso.orario}</td>
                       <td>
                         <button
-                          className="btn btn-info btn-sm me-2"
+                          className="btn btn-primary btn-sm me-2"
                           onClick={() => navigate(`/corsi/${corso.id}`)}
                         >
                           📄 Dettagli
@@ -206,7 +210,7 @@ const CourseList = () => {
                       <td>{corso.orario}</td>
                       <td>
                         <button
-                          className="btn btn-info btn-sm me-2"
+                          className="btn btn-primary btn-sm me-2"
                           onClick={() => navigate(`/corsi/${corso.id}`)}
                         >
                           📄 Dettagli

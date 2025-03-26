@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Modal, Button, Form } from 'react-bootstrap'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
+import CustomSpinner from '../components/CustomSpinner'
 
 const AulaList = () => {
   const [aule, setAule] = useState([])
@@ -117,7 +118,7 @@ const AulaList = () => {
       <div className="container pt-5 mt-5">
         <h2 className="text-center mb-4">🏫 Lista Aule</h2>
 
-        {loading && <p className="text-center">⏳ Caricamento in corso...</p>}
+        {loading && <CustomSpinner message="Caricamento aule in corso..." />}
         {error && <div className="alert alert-danger">{error}</div>}
 
         <button

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
 import { Modal, Button, Form } from 'react-bootstrap'
+import CustomSpinner from '../components/CustomSpinner'
 
 const TeacherList = () => {
   const [insegnanti, setInsegnanti] = useState([])
@@ -76,6 +77,8 @@ const TeacherList = () => {
       setShowModal(false)
       fetchInsegnanti()
 
+      alert('✅ Insegnante aggiunto con successo!')
+
       // Resetta il formData dopo l'invio
       setFormData({
         nome: '',
@@ -87,6 +90,8 @@ const TeacherList = () => {
       })
     } catch (error) {
       console.error('Errore nella creazione dell’insegnante', error)
+      alert('❌ Errore durante la creazione dell’insegnante.')
+
     }
   }
 
@@ -98,7 +103,7 @@ const TeacherList = () => {
       )
     ) {
       try {
-        await apiClient.delete(`/api/insegnanti/${id}`, {
+        await apiClient.delete(`/insegnanti/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
         fetchInsegnanti() // 🔄 Aggiorna la lista dopo l'eliminazione
@@ -233,7 +238,7 @@ const TeacherList = () => {
         </Modal>
 
         {/* 🔎 Mostra messaggio di caricamento o errore */}
-        {loading && <p>⏳ Caricamento in corso...</p>}
+        {loading && <CustomSpinner message="Caricamento insegnanti..." />}
         {error && <div className="alert alert-danger">{error}</div>}
 
         {/* 📌 Tabella Insegnanti */}

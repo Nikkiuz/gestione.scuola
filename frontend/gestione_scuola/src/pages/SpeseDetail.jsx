@@ -4,6 +4,7 @@ import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
 import { Button } from 'react-bootstrap'
 import ModaleSpesa from '../components/ModaleSpesa'
+import CustomSpinner from '../components/CustomSpinner'
 
 const SpeseDetail = () => {
   const { id } = useParams()
@@ -52,7 +53,7 @@ const SpeseDetail = () => {
     }
   }
 
-  if (loading) return <p>⏳ Caricamento in corso...</p>
+  if (loading) return <CustomSpinner message="Caricamento spesa in corso..." />
   if (error) return <div className="alert alert-danger">{error}</div>
   if (!spesa) return <p>⚠️ Nessuna spesa trovata.</p>
 
@@ -76,7 +77,7 @@ return (
         <p>
           <strong>Data:</strong> {spesa.dataSpesa || '—'}
         </p>
-        <div className="d-flex justify-content-between">
+        <div className="d-flex justify-content-start gap-3">
           <Button variant="primary" onClick={handleEdit}>
             ✏️ Modifica Spesa
           </Button>

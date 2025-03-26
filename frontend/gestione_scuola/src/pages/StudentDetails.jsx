@@ -9,6 +9,10 @@ import { registerLocale } from 'react-datepicker'
 import it from 'date-fns/locale/it'
 import ModalePagamento from '../components/ModalePagamento'
 import ModaleStudente from '../components/ModaleStudente'
+import FullscreenSpinner from '../components/FullScreenSpinner'
+import OverlaySpinner from '../components/OverlaySpinner'
+
+
 
 registerLocale('it', it)
 
@@ -29,6 +33,8 @@ const StudentDetail = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [pagamentoSelezionato, setPagamentoSelezionato] = useState(null)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [salvataggioStudenteLoading, setSalvataggioStudenteLoading] = useState(false)
+  const [salvataggioPagamentoLoading, setSalvataggioPagamentoLoading] = useState(false)
 
   const [formStudente, setFormStudente] = useState({
     nome: '',
@@ -55,7 +61,7 @@ const fetchDatiStudente = async () => {
   try {
     const [studenteRes, pagamentiRes] = await Promise.all([
       apiClient.get(`/studenti/${id}`),
-      apiClient.get(`/studenti/${id}/pagamenti`),
+      apiClient.get(`/pagamenti/studente/${id}`),
     ])
 
     console.log('📌 Studente ricevuto dal backend:', studenteRes.data) // 🔥 Debug
@@ -89,10 +95,10 @@ const fetchDatiStudente = async () => {
     return
   }
 
-  try {
-    console.log('Dati da inviare:', formStudente) // 🔍 Debug: verifica i dati
+  setSalvataggioStudenteLoading(true)
 
-    await apiClient.put(`/studenti/${id}`, formStudente, {
+  try {
+      await apiClient.put(`/studenti/${id}`, formStudente, {
       headers: { Authorization: `Bearer ${token}` },
     })
 
@@ -111,8 +117,11 @@ const fetchDatiStudente = async () => {
         `Errore: ${error.response?.data?.message || 'Errore sconosciuto.'}`
       )
     }
+  } finally {
+    setSalvataggioStudenteLoading(false)
   }
 }
+
 const handleChangeStudente = () => {
   if (!studente) {
     alert('❌ Errore: nessuno studente selezionato.')
@@ -223,6 +232,8 @@ const handleChangeStudente = () => {
       note: note || '',
     }
 
+    setSalvataggioPagamentoLoading(true)
+
     try {
       if (isEditing) {
         await apiClient.put(
@@ -247,11 +258,13 @@ const handleChangeStudente = () => {
         alert(
           `Errore: ${error.response?.data?.message || 'Errore sconosciuto.'}`
         )
-      }
+      } 
+    } finally {
+      setSalvataggioPagamentoLoading(false)
     }
   }
 
-  if (loading) return <p>⏳ Caricamento in corso...</p>
+  if (loading) return <FullscreenSpinner message="Caricamento studente..." />
   if (error) return <div className="alert alert-danger">{error}</div>
 
   return (
@@ -331,8 +344,11 @@ const handleChangeStudente = () => {
           </div>
         )}
 
-        <div className="mt-4">
-          <h5>💰 Pagamenti</h5>
+        <div className="mt-4 position-relative">
+          {salvataggioPagamentoLoading && (
+            <OverlaySpinner message="Salvataggio pagamento..." />
+          )}
+          <h5>💳 Pagamenti</h5>
           {pagamenti.length === 0 ? (
             <p>Nessun pagamento registrato</p>
           ) : (
@@ -373,7 +389,6 @@ const handleChangeStudente = () => {
           </button>
         </div>
       </div>
-
       {/* Modale Pagamento */}
       <ModalePagamento
         show={showModal}
@@ -386,14 +401,20 @@ const handleChangeStudente = () => {
       />
 
       {/* Modale Studente */}
-      <ModaleStudente
-        show={showEditModal}
-        onHide={() => setShowEditModal(false)}
-        formStudente={formStudente}
-        setFormStudente={setFormStudente}
-        handleSalvaModificheStudente={handleSalvaModificheStudente}
-        insegnanti={insegnanti}
-      />
+      <div className="position-relative">
+        {salvataggioStudenteLoading && (
+          <OverlaySpinner message="Salvataggio studente..." />
+        )}
+        <ModaleStudente
+          show={showEditModal}
+          onHide={() => setShowEditModal(false)}
+          formStudente={formStudente}
+          setFormStudente={setFormStudente}
+          handleSalvaModificheStudente={handleSalvaModificheStudente}
+          insegnanti={insegnanti}
+          loading={salvataggioStudenteLoading}
+        />
+      </div>
     </>
   )
 }

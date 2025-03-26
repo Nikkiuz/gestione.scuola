@@ -3,11 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Form, Button } from 'react-bootstrap'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
-import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { registerLocale } from 'react-datepicker'
 import it from 'date-fns/locale/it'
 import ModalePagamento from '../components/ModalePagamento'
+import CustomSpinner from '../components/CustomSpinner'
 
 registerLocale('it', it)
 
@@ -81,7 +81,7 @@ const PagamentiDetail = () => {
     }
   }
 
-  if (loading) return <p>Caricamento in corso...</p>
+  if (loading) return <CustomSpinner message="Caricamento pagamento..." />
   if (error) return <div className="alert alert-danger">{error}</div>
   if (!pagamento) return <p>⚠️ Nessun pagamento trovato.</p>
 
