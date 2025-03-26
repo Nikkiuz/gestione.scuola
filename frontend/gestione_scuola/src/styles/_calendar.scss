@@ -84,14 +84,24 @@
   margin-top: 4px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 
-  &.BASE { background-color: #ffe066; color: #7f4f24; }
-  &.A1 { background-color: #b7e4c7; color: #1b4332; }
-  &.A2 { background-color: #95d5b2; color: #1b4332; }
-  &.B1 { background-color: #ffd6a5; color: #7f4f24; }
-  &.B2 { background-color: #ffc8dd; color: #6a0572; }
-  &.C1 { background-color: #bdb2ff; color: #3c096c; }
-  &.C2 { background-color: #a0c4ff; color: #023e8a; }
+  &.STARTERS { background-color: #ffe066; color: #7f4f24; }
+  &.KIDS_BOX1 { background-color: #d8f3dc; color: #2d6a4f; }
+  &.KIDS_BOX2 { background-color: #b7e4c7; color: #1b4332; }
+  &.KIDS_BOX3 { background-color: #95d5b2; color: #1b4332; }
+
+  &.KET_CAMBRIDGE { background-color: #fefae0; color: #bc6c25; }
+  &.PET_CAMBRIDGE { background-color: #faedcd; color: #bc6c25; }
+  &.FIRST_CAMBRIDGE { background-color: #ffc8dd; color: #6a0572; }
+  &.ADVANCED_CAMBRIDGE { background-color: #bdb2ff; color: #3c096c; }
+
+  &.A2_ADULTI { background-color: #b7e4c7; color: #1b4332; }
+  &.B1_ADULTI { background-color: #ffd6a5; color: #7f4f24; }
+  &.B2_ADULTI { background-color: #ffb4a2; color: #6a040f; }
+  &.C1_ADULTI { background-color: #a0c4ff; color: #023e8a; }
+  &.C2_ADULTI { background-color: #90e0ef; color: #0077b6; }
 }
+
+
 
 .table.calendario-table {
   thead th {

@@ -1,11 +1,17 @@
 package it.Nkkz.gestione.scuola.entity;
 
 public enum Livello {
-	BASE,
-	A1,
-	A2,
-	B1,
-	B2,
-	C1,
-	C2
+	STARTERS,
+	KIDS_BOX1,
+	KIDS_BOX2,
+	KIDS_BOX3,
+	KET_CAMBRIDGE,
+	PET_CAMBRIDGE,
+	FIRST_CAMBRIDGE,
+	ADVANCED_CAMBRIDGE,
+	A2_ADULTI,
+	B1_ADULTI,
+	B2_ADULTI,
+	C1_ADULTI,
+	C2_ADULTI
 }

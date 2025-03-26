@@ -3,14 +3,29 @@ import { Modal, Form, Button,} from 'react-bootstrap'
 import apiClient from '../api/apiClient'
 import CustomSpinner from './CustomSpinner'
 
-const LIVELLI = ['BASE', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+const LIVELLI = [
+  'STARTERS',
+  'KIDS_BOX1',
+  'KIDS_BOX2',
+  'KIDS_BOX3',
+  'KET_CAMBRIDGE',
+  'PET_CAMBRIDGE',
+  'FIRST_CAMBRIDGE',
+  'ADVANCED_CAMBRIDGE',
+  'A2_ADULTI',
+  'B1_ADULTI',
+  'B2_ADULTI',
+  'C1_ADULTI',
+  'C2_ADULTI',
+]
+
 const FREQUENZE = ['1 volta a settimana', '2 volte a settimana']
 const TIPI_CORSO = ['GRUPPO', 'PRIVATO']
 
 const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
   const [formCorso, setFormCorso] = useState({
     lingua: '',
-    livello: 'BASE',
+    livello: 'STARTERS',
     tipoCorso: 'GRUPPO',
     frequenza: '',
     giorno: '',
