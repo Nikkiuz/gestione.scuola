@@ -73,6 +73,7 @@ const ModaleStudente = ({
                 name="nome"
                 value={formStudente.nome || ''}
                 onChange={handleChange}
+                placeholder="Es. Mario"
                 required
               />
             </Form.Group>
@@ -83,6 +84,7 @@ const ModaleStudente = ({
                 name="cognome"
                 value={formStudente.cognome || ''}
                 onChange={handleChange}
+                placeholder="Es. Rossi"
                 required
               />
             </Form.Group>
@@ -93,6 +95,7 @@ const ModaleStudente = ({
                 name="eta"
                 value={formStudente.eta || ''}
                 onChange={handleChange}
+                placeholder="Es. 25"
                 required
               />
             </Form.Group>
@@ -103,6 +106,7 @@ const ModaleStudente = ({
                 name="linguaDaImparare"
                 value={formStudente.linguaDaImparare || ''}
                 onChange={handleChange}
+                placeholder="Es. Inglese, Francese..."
                 required
               />
             </Form.Group>
@@ -131,6 +135,7 @@ const ModaleStudente = ({
                 name="tipologiaIscrizione"
                 value={formStudente.tipologiaIscrizione || ''}
                 onChange={handleChange}
+                placeholder="Es. Pacchetto"
                 required
               />
             </Form.Group>
@@ -204,6 +209,7 @@ const ModaleStudente = ({
                   value={formStudente.frequenzaCorsoPrivato || ''}
                   onChange={handleChange}
                   min="1"
+                  placeholder="Minimo 1 ora settimanale"
                   required
                 />
               </Form.Group>

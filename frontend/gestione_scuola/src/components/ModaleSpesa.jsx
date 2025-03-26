@@ -65,6 +65,7 @@ const ModaleSpesa = ({
             <Form.Control
               type="number"
               name="importo"
+              placeholder="Es. 120.50"
               value={formData.importo || ''}
               onChange={handleChange}
               required

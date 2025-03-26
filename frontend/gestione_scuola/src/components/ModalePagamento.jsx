@@ -110,6 +110,7 @@ const ModalePagamento = ({
             <Form.Control
               type="number"
               name="importo"
+              placeholder="Es. 150.00"
               value={pagamentoSelezionato.importo || ''}
               onChange={(e) =>
                 setPagamentoSelezionato({

@@ -154,6 +154,7 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
                 value={formCorso.lingua}
                 onChange={handleChange}
                 required
+                placeholder="Es. Inglese, Spagnolo..."
               />
             </Form.Group>
 
@@ -214,6 +215,7 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
                 value={formCorso.giorno}
                 onChange={handleChange}
                 required
+                placeholder="Es. Lunedì"
               />
             </Form.Group>
 
@@ -225,6 +227,7 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
                 value={formCorso.orario}
                 onChange={handleChange}
                 required
+                placeholder="Es. 10:00-12:00"
               />
             </Form.Group>
 
@@ -238,6 +241,7 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
                     value={formCorso.secondoGiorno}
                     onChange={handleChange}
                     required
+                    placeholder="Es. Mercoledì"
                   />
                 </Form.Group>
 
@@ -249,6 +253,7 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
                     value={formCorso.secondoOrario}
                     onChange={handleChange}
                     required
+                    placeholder="Es. 14:00-16:00"
                   />
                 </Form.Group>
               </>
