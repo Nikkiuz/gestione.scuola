@@ -100,11 +100,32 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
+		<!-- Core PDF API -->
 		<dependency>
 			<groupId>com.itextpdf</groupId>
-			<artifactId>itext7-core</artifactId>
+			<artifactId>kernel</artifactId>
 			<version>7.2.2</version>
 		</dependency>
+
+		<!-- Layout (per testo, paragrafi, tabelle, ecc.) -->
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>layout</artifactId>
+			<version>7.2.2</version>
+		</dependency>
+
+		<!-- IO module (gestione stream, immagini, ecc.) -->
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>io</artifactId>
+			<version>7.2.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+
 
 	</dependencies>
 
