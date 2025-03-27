@@ -330,7 +330,7 @@ const Report = () => {
         )}
       </div>
 
-      {/* ✅ Ore Insegnate per Insegnante - DA IMPLEMENTARE CON REGISTRO ELETTRONICO*/}
+      {/* Ore Insegnate per Insegnante - DA IMPLEMENTARE CON REGISTRO ELETTRONICO*/}
       {report?.oreInsegnate && (
         <div className="container grafico-final">
           <h4 className="mb-4 text-start">🧑‍🏫 Ore Insegnate per Insegnante</h4>

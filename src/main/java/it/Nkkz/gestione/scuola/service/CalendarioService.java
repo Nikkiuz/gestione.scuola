@@ -23,7 +23,7 @@ public class CalendarioService {
 	@Autowired
 	private AulaRepository aulaRepository;
 
-	// 🔹 Recupera le aule disponibili in un giorno e orario specifico
+	//Recupera le aule disponibili in un giorno e orario specifico
 	public List<String> getAuleDisponibili(String giorno, String orario) {
 		List<Long> auleOccupate = corsoRepository.findByGiornoAndOrarioAndAttivoTrue(giorno, orario)
 			.stream()
@@ -36,7 +36,7 @@ public class CalendarioService {
 			.collect(Collectors.toList());
 	}
 
-	// 🔹 Interrompe un corso (senza eliminarlo) e libera l'orario dell'aula
+	//Interrompe un corso (senza eliminarlo) e libera l'orario dell'aula
 	public void interrompiCorso(Long corsoId) {
 		Corso corso = corsoRepository.findById(corsoId)
 			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
@@ -49,7 +49,7 @@ public class CalendarioService {
 		return input == null ? "" : input.toLowerCase().replace("ì", "i").replace("é", "e");
 	}
 
-	// ✅ Recupera i corsi programmati in un determinato giorno della settimana
+	//Recupera i corsi programmati in un determinato giorno della settimana
 	public List<CalendarioDTO> getCorsiSettimanaFiltrati(String giornoBase, Long insegnanteId, String livello) {
 		List<String> giorniSettimana = List.of("Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato");
 		List<String> giorniNormalizzati = giorniSettimana.stream().map(this::normalizza).toList();

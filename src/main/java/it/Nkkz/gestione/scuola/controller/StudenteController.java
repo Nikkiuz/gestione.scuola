@@ -26,63 +26,96 @@ import java.util.List;
 public class StudenteController {
 
 	private final StudenteService studenteService;
-	private final StudenteRepository studenteRepository;
-	private final CorsoRepository corsoRepository;
-	private final PagamentoRepository pagamentoRepository;
 
-	// 🔹 Costruttore per iniettare i repository e il service
+<<<<<<< Updated upstream
+	public StudenteController(StudenteService studenteService) {
+=======
+	//Costruttore per iniettare i repository e il service
 	public StudenteController(
 		StudenteService studenteService,
 		StudenteRepository studenteRepository,
 		CorsoRepository corsoRepository,
 		PagamentoRepository pagamentoRepository
 	) {
+>>>>>>> Stashed changes
 		this.studenteService = studenteService;
 		this.studenteRepository = studenteRepository;
 		this.corsoRepository = corsoRepository;
 		this.pagamentoRepository = pagamentoRepository;
 	}
 
-	// ✅ Recupera tutti gli studenti
+<<<<<<< Updated upstream
+	// ✅ SOLO ADMIN - Recupera tutti gli studenti
+=======
+	//Recupera tutti gli studenti
+>>>>>>> Stashed changes
 	@GetMapping
 	public ResponseEntity<List<StudenteResponseDTO>> getAllStudenti() {
 		return ResponseEntity.ok(studenteService.getAllStudenti());
 	}
 
-	// ✅ Recupera uno studente per ID
+<<<<<<< Updated upstream
+	// ✅ SOLO ADMIN - Recupera uno studente per ID
+=======
+	//Recupera uno studente per ID
+>>>>>>> Stashed changes
 	@GetMapping("/{id}")
 	public ResponseEntity<StudenteResponseDTO> getStudenteById(@PathVariable Long id) {
 		return ResponseEntity.ok(studenteService.getStudenteById(id));
 	}
 
-	// ✅ Recupera studenti per lingua e livello iniziale (ORA SENZA STRINGHE)
+<<<<<<< Updated upstream
+	// ✅ SOLO ADMIN - Recupera studenti per lingua e livello iniziale
+=======
+	//Recupera studenti per lingua e livello iniziale (ORA SENZA STRINGHE)
+>>>>>>> Stashed changes
 	@GetMapping("/filtra")
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByLinguaELivello(
 		@RequestParam String lingua,
-		@RequestParam Livello livello) { // ✅ Ora Livello è direttamente un ENUM
+<<<<<<< Updated upstream
+		@RequestParam String livello) {
 		return ResponseEntity.ok(studenteService.getStudentiByLinguaELivello(lingua, livello));
 	}
 
-	// ✅ Recupera gli studenti di un insegnante specifico
+	// ✅ SOLO ADMIN - Recupera gli studenti di un insegnante specifico
+=======
+		@RequestParam Livello livello) {
+		return ResponseEntity.ok(studenteService.getStudentiByLinguaELivello(lingua, livello));
+	}
+
+	//Recupera gli studenti di un insegnante specifico
+>>>>>>> Stashed changes
 	@GetMapping("/insegnante/{id}")
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByInsegnante(@PathVariable Long id) {
 		return ResponseEntity.ok(studenteService.getStudentiByInsegnante(id));
 	}
 
-	// ✅ Recupera studenti per tipo di corso (privato o di gruppo)
+<<<<<<< Updated upstream
+	// ✅ SOLO ADMIN - Recupera studenti per tipo di corso (privato o di gruppo)
+=======
+	//Recupera studenti per tipo di corso (privato o di gruppo)
+>>>>>>> Stashed changes
 	@GetMapping("/tipo-corso")
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByTipoCorso(@RequestParam boolean corsoPrivato) {
 		return ResponseEntity.ok(studenteService.getStudentiByTipoCorso(corsoPrivato));
 	}
 
-	// ✅ Crea un nuovo studente
+<<<<<<< Updated upstream
+	// ✅ SOLO ADMIN - Crea un nuovo studente
+=======
+	//Crea un nuovo studente
+>>>>>>> Stashed changes
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public StudenteResponseDTO createStudente(@RequestBody StudenteRequestDTO studenteRequestDTO) {
 		return studenteService.createStudente(studenteRequestDTO);
 	}
 
-	// ✅ Modifica uno studente
+<<<<<<< Updated upstream
+	// ✅ SOLO ADMIN - Modifica uno studente
+=======
+	//Modifica uno studente
+>>>>>>> Stashed changes
 	@PutMapping("/{id}")
 	public ResponseEntity<StudenteResponseDTO> updateStudente(
 		@PathVariable Long id,
@@ -94,21 +127,27 @@ public class StudenteController {
 		return ResponseEntity.ok(studenteService.updateStudente(id, studenteRequestDTO));
 	}
 
-	// ✅ Elimina uno studente
+<<<<<<< Updated upstream
+	// ✅ SOLO ADMIN - Elimina uno studente
+=======
+	//Elimina uno studente
+>>>>>>> Stashed changes
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteStudente(@PathVariable Long id) {
 		studenteService.deleteStudente(id);
 	}
+<<<<<<< Updated upstream
+=======
 
-	// ✅ Recupera gli studenti senza corso
+	//Recupera gli studenti senza corso
 	@GetMapping("/senza-corso")
 	public ResponseEntity<List<Studente>> getStudentiSenzaCorso() {
 		List<Studente> studentiSenzaCorso = studenteService.getStudentiSenzaCorso();
 		return ResponseEntity.ok(studentiSenzaCorso);
 	}
 
-	// ✅ Recupera i corsi di uno studente
+	//Recupera i corsi di uno studente
 	@GetMapping("/{id}/corsi")
 	public ResponseEntity<List<Corso>> getCorsiStudente(@PathVariable Long id) {
 		Studente studente = studenteRepository.findById(id)
@@ -117,14 +156,14 @@ public class StudenteController {
 		return ResponseEntity.ok(studente.getCorsi());
 	}
 
-	// ✅ Recupera i pagamenti di uno studente
+	//Recupera i pagamenti di uno studente
 	@GetMapping("/{id}/pagamenti")
 	public ResponseEntity<List<Pagamento>> getPagamentiStudente(@PathVariable Long id) {
 		List<Pagamento> pagamenti = pagamentoRepository.findByStudenteId(id);
 		return ResponseEntity.ok(pagamenti);
 	}
 
-	// ✅ Rimuove uno studente da un corso
+	//Rimuove uno studente da un corso
 	@DeleteMapping("/{studenteId}/rimuovi-da-corso/{corsoId}")
 	public ResponseEntity<?> rimuoviStudenteDaCorso(@PathVariable Long studenteId, @PathVariable Long corsoId) {
 		Studente studente = studenteRepository.findById(studenteId)
@@ -141,7 +180,7 @@ public class StudenteController {
 		return ResponseEntity.ok("Studente rimosso dal corso");
 	}
 
-	// ✅ Aggiungi un pagamento a uno studente
+	//Aggiungi un pagamento a uno studente
 	@PostMapping("/{id}/pagamenti")
 	public ResponseEntity<?> aggiungiPagamento(
 		@PathVariable Long id,
@@ -153,7 +192,7 @@ public class StudenteController {
 
 		// Creiamo il nuovo pagamento
 		Pagamento nuovoPagamento = new Pagamento();
-		nuovoPagamento.setStudente(studente); // ✅ Assegna lo studente dal database
+		nuovoPagamento.setStudente(studente);
 		nuovoPagamento.setImporto(pagamentoRequestDTO.getImporto());
 		nuovoPagamento.setDataPagamento(pagamentoRequestDTO.getDataPagamento());
 		nuovoPagamento.setMensilitaSaldata(pagamentoRequestDTO.getMensilitaSaldata());
@@ -164,4 +203,5 @@ public class StudenteController {
 		pagamentoRepository.save(nuovoPagamento);
 		return ResponseEntity.ok(nuovoPagamento);
 	}
+>>>>>>> Stashed changes
 }

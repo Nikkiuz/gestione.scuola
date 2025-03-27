@@ -4,12 +4,12 @@ const apiClient = axios.create({
   baseURL: 'http://localhost:8080/api', // 🔹 Base URL del backend
 })
 
-// 🔥 Intercettore per aggiungere il token JWT a tutte le richieste API
+// Intercettore per aggiungere il token JWT a tutte le richieste API
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token') // ✅ Recupera il token salvato
+    const token = localStorage.getItem('token') // Recupera il token salvato
     if (token) {
-      config.headers.Authorization = `Bearer ${token}` // ✅ Aggiunge il token nell'header
+      config.headers.Authorization = `Bearer ${token}` // Aggiunge il token nell'header
     }
     return config
   },
@@ -18,7 +18,7 @@ apiClient.interceptors.request.use(
   }
 )
 
-// 🚨 Intercettore per gestire errori di autenticazione
+// Intercettore per gestire errori di autenticazione
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {

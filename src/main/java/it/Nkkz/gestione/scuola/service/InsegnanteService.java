@@ -18,21 +18,21 @@ public class InsegnanteService {
 	@Autowired
 	private InsegnanteRepository insegnanteRepository;
 
-	// ✅ Recupera tutti gli insegnanti
+	//Recupera tutti gli insegnanti
 	public List<InsegnanteResponseDTO> getAllInsegnanti() {
 		return insegnanteRepository.findAll().stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera un insegnante per ID
+	//Recupera un insegnante per ID
 	public InsegnanteResponseDTO getInsegnanteById(Long id) {
 		Insegnante insegnante = insegnanteRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Insegnante non trovato con ID: " + id));
 		return convertToResponseDTO(insegnante);
 	}
 
-	// ✅ Crea un nuovo insegnante
+	//Crea un nuovo insegnante
 	public InsegnanteResponseDTO createInsegnante(InsegnanteRequestDTO insegnanteRequestDTO) {
 		Insegnante insegnante = new Insegnante();
 		BeanUtils.copyProperties(insegnanteRequestDTO, insegnante);
@@ -40,7 +40,7 @@ public class InsegnanteService {
 		return convertToResponseDTO(insegnante);
 	}
 
-	// ✅ Modifica un insegnante
+	//Modifica un insegnante
 	public InsegnanteResponseDTO updateInsegnante(Long id, InsegnanteRequestDTO insegnanteRequestDTO) {
 		Insegnante insegnante = insegnanteRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Insegnante non trovato con ID: " + id));
@@ -49,12 +49,12 @@ public class InsegnanteService {
 		return convertToResponseDTO(insegnante);
 	}
 
-	// ✅ Elimina un insegnante
+	//Elimina un insegnante
 	public void deleteInsegnante(Long id) {
 		insegnanteRepository.deleteById(id);
 	}
 
-	// ✅ Converte un'entità Insegnante in DTO
+	//Converte un'entità Insegnante in DTO
 	private InsegnanteResponseDTO convertToResponseDTO(Insegnante insegnante) {
 		InsegnanteResponseDTO dto = new InsegnanteResponseDTO();
 		BeanUtils.copyProperties(insegnante, dto);

@@ -41,13 +41,13 @@ const TeacherList = () => {
     }
   }
 
-  // ✅ Gestisce il cambiamento nei campi del form
+  //Gestisce il cambiamento nei campi del form
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData({ ...formData, [name]: value })
   }
 
-  // ✅ Gestisce le checkbox per i giorni disponibili
+  //Gestisce le checkbox per i giorni disponibili
   const handleGiorniDisponibiliChange = (e) => {
     const { value, checked } = e.target
     setFormData((prev) => ({
@@ -58,7 +58,7 @@ const TeacherList = () => {
     }))
   }
 
-  // ✅ Gestisce le checkbox per le fasce orarie disponibili
+  //Gestisce le checkbox per le fasce orarie disponibili
   const handleFasceOrarieChange = (e) => {
     const { value, checked } = e.target
     setFormData((prev) => ({
@@ -69,7 +69,7 @@ const TeacherList = () => {
     }))
   }
 
-  // ✅ Invia il form per aggiungere un nuovo insegnante
+  //Invia il form per aggiungere un nuovo insegnante
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
@@ -95,7 +95,7 @@ const TeacherList = () => {
     }
   }
 
-  // 🔹 Elimina un insegnante con doppia conferma
+  //Elimina un insegnante con doppia conferma
   const eliminaInsegnante = async (id) => {
     if (
       window.confirm(
@@ -129,7 +129,7 @@ const TeacherList = () => {
           </button>
         </div>
 
-        {/* 🔹 MODALE PER AGGIUNGERE INSEGNANTE */}
+        {/* MODALE PER AGGIUNGERE INSEGNANTE */}
         <Modal show={showModal} onHide={() => setShowModal(false)}>
           <Modal.Header closeButton>
             <Modal.Title>Aggiungi Insegnante</Modal.Title>
@@ -237,7 +237,7 @@ const TeacherList = () => {
           </Modal.Body>
         </Modal>
 
-        {/* 🔎 Mostra messaggio di caricamento o errore */}
+        {/* Mostra messaggio di caricamento o errore */}
         {loading && <CustomSpinner message="Caricamento insegnanti..." />}
         {error && <div className="alert alert-danger">{error}</div>}
 

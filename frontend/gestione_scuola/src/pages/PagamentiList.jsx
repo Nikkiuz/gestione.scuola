@@ -113,7 +113,7 @@ const eliminaPagamento = async (id) => {
       await apiClient.delete(`/pagamenti/${id}`)
       alert('✅ Pagamento eliminato con successo!')
       fetchPagamenti()
-      sessionStorage.setItem('refreshReport', 'true') // 🔥 Flag per report
+      sessionStorage.setItem('refreshReport', 'true') // Flag per report
     } catch (error) {
       console.error('❌ Errore nella cancellazione del pagamento:', error)
       setError('Errore nella cancellazione del pagamento.')

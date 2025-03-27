@@ -23,7 +23,7 @@ public class PagamentoService {
 	private final PagamentoRepository pagamentoRepository;
 	private final StudenteRepository studenteRepository;
 
-	// ✅ Registra un nuovo pagamento
+	//Registra un nuovo pagamento
 	@Transactional
 	public PagamentoResponseDTO registraPagamento(PagamentoRequestDTO requestDTO) {
 		// Verifica che lo studente esista
@@ -43,14 +43,17 @@ public class PagamentoService {
 		return convertToResponseDTO(pagamento);
 	}
 
-	// ✅ Recupera tutti i pagamenti
+	//Recupera tutti i pagamenti
 	public List<PagamentoResponseDTO> getTuttiIPagamenti() {
 		return pagamentoRepository.findAll().stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera un singolo pagamento
+<<<<<<< Updated upstream
+	// ✅ Recupera i pagamenti di un singolo studente
+=======
+	//Recupera un singolo pagamento
 	public PagamentoResponseDTO getPagamentoById(Long id) {
 		// Recupera il pagamento dal repository o lancia un'eccezione se non trovato
 		Pagamento pagamento = pagamentoRepository.findById(id)
@@ -60,21 +63,22 @@ public class PagamentoService {
 		return convertToResponseDTO(pagamento);
 	}
 
-	// ✅ Recupera i pagamenti di un singolo studente
+	//Recupera i pagamenti di un singolo studente
+>>>>>>> Stashed changes
 	public List<PagamentoResponseDTO> getPagamentiByStudente(Long studenteId) {
 		return pagamentoRepository.findByStudenteId(studenteId).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera i pagamenti per una specifica mensilità
+	//Recupera i pagamenti per una specifica mensilità
 	public List<PagamentoResponseDTO> getPagamentiByMensilita(String mensilita) {
 		return pagamentoRepository.findByMensilitaSaldata(mensilita).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Elimina un pagamento
+	//Elimina un pagamento
 	@Transactional
 	public void eliminaPagamento(Long pagamentoId) {
 		// Verifica che il pagamento esista
@@ -85,7 +89,10 @@ public class PagamentoService {
 		pagamentoRepository.delete(pagamento);
 	}
 
-	// ✅ Aggiorna un pagamento esistente
+<<<<<<< Updated upstream
+	// 🔹 Converte da Pagamento a PagamentoResponseDTO
+=======
+	//Aggiorna un pagamento esistente
 	@Transactional
 	public PagamentoResponseDTO aggiornaPagamento(Long pagamentoId, PagamentoRequestDTO requestDTO) {
 		// Verifica che il pagamento esista
@@ -108,7 +115,8 @@ public class PagamentoService {
 	}
 
 
-	// 🔹 Converte da Pagamento a PagamentoResponseDTO
+	//Converte da Pagamento a PagamentoResponseDTO
+>>>>>>> Stashed changes
 	private PagamentoResponseDTO convertToResponseDTO(Pagamento pagamento) {
 		PagamentoResponseDTO dto = new PagamentoResponseDTO();
 		BeanUtils.copyProperties(pagamento, dto);

@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Service
 public class PdfReportService {
 
-	// 🔹 Metodo per generare il PDF
+	//Metodo per generare il PDF
 	public byte[] generateReportPdf(ReportDTO report) {
 		try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 			PdfWriter writer = new PdfWriter(outputStream);
@@ -24,7 +24,7 @@ public class PdfReportService {
 			document.add(new Paragraph("Report " + report.getPeriodo() + " - " + LocalDate.now())
 				.setBold().setFontSize(16));
 
-			// 🔹 Tabella Ore Insegnate
+			//Tabella Ore Insegnate
 			document.add(new Paragraph("\nOre Insegnate per Insegnante:"));
 			Table tableOre = new Table(2);
 			tableOre.addCell("Insegnante");
@@ -35,7 +35,7 @@ public class PdfReportService {
 			});
 			document.add(tableOre);
 
-			// 🔹 Tabella Pagamenti Ricevuti
+			//Tabella Pagamenti Ricevuti
 			document.add(new Paragraph("\nPagamenti Ricevuti:"));
 			Table tablePagamenti = new Table(2);
 			tablePagamenti.addCell("Metodo di Pagamento");
@@ -46,7 +46,7 @@ public class PdfReportService {
 			});
 			document.add(tablePagamenti);
 
-			// 🔹 Tabella Spese
+			//Tabella Spese
 			document.add(new Paragraph("\nSpese Registrate:"));
 			Table tableSpese = new Table(2);
 			tableSpese.addCell("Categoria");
@@ -57,7 +57,7 @@ public class PdfReportService {
 			});
 			document.add(tableSpese);
 
-			// 🔹 Bilancio Finale
+			//Bilancio Finale
 			document.add(new Paragraph("\nBilancio Totale: " + String.format("%.2f", report.getBilancio()) + " €")
 				.setBold().setFontSize(14));
 

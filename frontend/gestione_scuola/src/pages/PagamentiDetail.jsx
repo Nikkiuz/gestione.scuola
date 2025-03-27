@@ -135,7 +135,7 @@ const PagamentiDetail = () => {
          🔙 Torna alla lista pagamenti
        </Button>
 
-       {/* 🔹 Modale di Modifica */}
+       {/* Modale di Modifica */}
        <ModalePagamento
          show={isEditing}
          onHide={() => setIsEditing(false)}

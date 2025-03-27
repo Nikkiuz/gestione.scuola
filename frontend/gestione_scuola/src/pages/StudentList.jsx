@@ -148,7 +148,7 @@ const StudentList = () => {
         insegnanti={insegnanti}
       />
 
-      {/* 🔎 Filtro Studenti */}
+      {/* Filtro Studenti */}
       <div className="row mb-3">
         <div className="col-md-4">
           <input
@@ -184,11 +184,11 @@ const StudentList = () => {
         </div>
       </div>
 
-      {/* 🌀 Spinner su sezione tabelle */}
+      {/* Spinner su sezione tabelle */}
       <div className="position-relative">
         {loading && <OverlaySpinner message="Caricamento studenti..." />}
 
-        {/* 📌 Studenti con Corso */}
+        {/* Studenti con Corso */}
         <h4>📌 Studenti con Corso</h4>
         <table className="table table-striped table-hover align-middle w-100">
           <colgroup>
@@ -237,7 +237,7 @@ const StudentList = () => {
           </tbody>
         </table>
 
-        {/* ⚠️ Studenti Senza Corso */}
+        {/* Studenti Senza Corso */}
         <h4 className="mt-4">⚠️ Studenti Senza Corso</h4>
         <table className="table table-striped table-hover align-middle w-100">
           <colgroup>

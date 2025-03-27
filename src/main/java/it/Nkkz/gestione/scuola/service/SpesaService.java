@@ -61,6 +61,9 @@ public class SpesaService {
 		spesaRepository.deleteById(id);
 	}
 
+<<<<<<< Updated upstream
+	// 🔹 Converte una Spesa in DTO per la risposta
+=======
 	public List<SpesaResponseDTO> getSpeseFiltrate(Integer anno, Integer mese, Spesa.CategoriaSpesa categoria) {
 		if (anno != null && mese != null) {
 			YearMonth ym = YearMonth.of(anno, mese);
@@ -84,7 +87,8 @@ public class SpesaService {
 	}
 
 
-	// 🔹 Converte una Spesa in DTO per la risposta
+	//Converte una Spesa in DTO per la risposta
+>>>>>>> Stashed changes
 	private SpesaResponseDTO convertToResponseDTO(Spesa spesa) {
 		SpesaResponseDTO dto = new SpesaResponseDTO();
 		BeanUtils.copyProperties(spesa, dto);

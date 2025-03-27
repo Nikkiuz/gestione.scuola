@@ -33,13 +33,13 @@ const SpeseDetail = () => {
     }
   }
 
-  // ✅ Attiva la modalità modifica e clona i dati
+  // Attiva la modalità modifica e clona i dati
   const handleEdit = () => {
     setTempSpesa({ ...spesa }) // Clona i dati per modifiche sicure
     setIsEditing(true)
   }
 
-  // ✅ Elimina la spesa
+  // Elimina la spesa
   const eliminaSpesa = async () => {
     if (window.confirm('⚠️ Sei sicuro di voler eliminare questa spesa?')) {
       try {

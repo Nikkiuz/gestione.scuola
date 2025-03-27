@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Modal, Button, Form } from 'react-bootstrap'
 import apiClient from '../api/apiClient'
 import AdminNavbar from '../components/AdminNavbar'
 import DatePicker from 'react-datepicker'
@@ -157,7 +156,7 @@ const handleSubmit = async (e) => {
           </div>
         </div>
 
-        {/* 🔹 Tabella Spese */}
+        {/* Tabella Spese */}
         {loading ? (
           <CustomSpinner message="Caricamento spese in corso..." />
         ) : error ? (
@@ -208,7 +207,7 @@ const handleSubmit = async (e) => {
           </table>
         )}
 
-        {/* 🔹 Modale di Aggiunta Spesa */}
+        {/* Modale di Aggiunta Spesa */}
         <ModaleSpesa
           show={showModal}
           onHide={() => setShowModal(false)}

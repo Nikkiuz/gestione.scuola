@@ -40,7 +40,7 @@ public class AppUserService {
     @Autowired
     private EmailService emailService;
 
-    @Value("${spring.mail.username}") // Ottiene l'email dell'Admin
+    @Value("${spring.mail.username}")
     private String adminEmail;
 
     public AppUser registerUser(String username, String email, String password, Role role) {
@@ -80,6 +80,8 @@ public class AppUserService {
         return appUser;
     }
 
+<<<<<<< Updated upstream
+=======
     public LoginResponse authenticate(LoginRequest loginRequest) {
         System.out.println("➡️ Tentativo di login con email: " + loginRequest.getEmail());
 
@@ -102,10 +104,10 @@ public class AppUserService {
         String token = jwtTokenUtil.generateToken(user);
         System.out.println("🛡️ Token generato: " + token);
 
-        // Restituiamo solo il token e l'ID utente (senza il ruolo)
         return new LoginResponse(token, user.getId());
     }
 
+>>>>>>> Stashed changes
     public Optional<AppUser> findByUsername(String username) {
         return appUserRepository.findByUsername(username);
     }

@@ -66,10 +66,10 @@ const ModaleStudente = ({
 
       setFormStudente((prev) => ({
         ...prev,
-        insegnanteId: prev.insegnanteId ? String(prev.insegnanteId) : '', // 🔥 Forza il valore come stringa per il Select
+        insegnanteId: prev.insegnanteId ? String(prev.insegnanteId) : '', //  Forza il valore come stringa per il Select
       }))
     }
-  }, [show]) // 🔥 Attiva il reset solo quando il modale si apre
+  }, [show]) // Attiva il reset solo quando il modale si apre
 
   return (
     <div className="position-relative">
@@ -213,7 +213,7 @@ const ModaleStudente = ({
               />
             </Form.Group>
 
-            {/* 🔥 Mostra il campo solo se il corso è privato */}
+            {/* Mostra il campo solo se il corso è privato */}
             {formStudente.corsoPrivato && (
               <Form.Group className="mb-3">
                 <Form.Label>Ore Settimanali</Form.Label>
@@ -229,7 +229,7 @@ const ModaleStudente = ({
               </Form.Group>
             )}
 
-            {/* 🔥 Campo insegnante preferito (sempre visibile) */}
+            {/* Campo insegnante preferito (sempre visibile) */}
             <Form.Group className="mb-3">
               <Form.Label>Insegnante Preferito</Form.Label>
               <Form.Select
@@ -241,14 +241,14 @@ const ModaleStudente = ({
                 {insegnanti.map((insegnante) => (
                   <option key={insegnante.id} value={String(insegnante.id)}>
                     {' '}
-                    {/* 🔥 Forza `value` come stringa */}
+                    {/* Forza `value` come stringa */}
                     {insegnante.nome} {insegnante.cognome}
                   </option>
                 ))}
               </Form.Select>
             </Form.Group>
 
-            {/* 🔥 Nascondi questi campi se corsoPrivato è attivo */}
+            {/* Nascondi questi campi se corsoPrivato è attivo */}
             {!formStudente.corsoPrivato && (
               <Form.Group className="mb-3">
                 <Form.Label>Tipo di Corso di Gruppo</Form.Label>

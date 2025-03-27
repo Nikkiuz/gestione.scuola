@@ -16,7 +16,7 @@ public class CalendarioController {
 	@Autowired
 	private CalendarioService calendarioService;
 
-	// 🔹 Ottieni le aule disponibili in un giorno della settimana e orario
+	// Ottieni le aule disponibili in un giorno della settimana e orario
 	@GetMapping("/aule-disponibili")
 	public List<String> getAuleDisponibili(@RequestParam String giorno, @RequestParam String orario) {
 		return calendarioService.getAuleDisponibili(giorno, orario);
@@ -33,7 +33,7 @@ public class CalendarioController {
 	}
 
 
-	// 🔹 Segna un corso come interrotto
+	// Segna un corso come interrotto
 	@PostMapping("/interrompi-corso/{corsoId}")
 	public void interrompiCorso(@PathVariable Long corsoId) {
 		calendarioService.interrompiCorso(corsoId);

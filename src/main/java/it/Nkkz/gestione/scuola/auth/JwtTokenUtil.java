@@ -60,6 +60,15 @@ public class JwtTokenUtil {
             user.getRoles().stream().map(Enum::name).collect(Collectors.toList()) :
             List.of(); // Se roles è null, usa una lista vuota
 
+<<<<<<< Updated upstream
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .claim("roles", roles) // Aggiunge i ruoli come claim
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact();
+=======
         String token = Jwts.builder()
             .setSubject(user.getEmail()) // ✅ Ora usa l'email come identificatore
             .claim("roles", roles) // Aggiunge i ruoli come claim
@@ -67,9 +76,8 @@ public class JwtTokenUtil {
             .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
             .signWith(SignatureAlgorithm.HS256, secret)
             .compact();
-
-        System.out.println("🛡️ Token generato per " + user.getEmail() + ": " + token); // 🔍 Debug
         return token;
+>>>>>>> Stashed changes
     }
 
 

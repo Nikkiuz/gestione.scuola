@@ -53,14 +53,17 @@ public class ReportController {
 			.body(pdfBytes);
 	}
 
-	// 📊 Recupera il report annuale
+<<<<<<< Updated upstream
+	// Endpoint per inviare il report via email
+=======
+	//Recupera il report annuale
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/annuale/{anno}")
 	public ReportDTO getReportAnnuale(@PathVariable int anno) {
 		return reportService.generaReportAnnuale(anno);
 	}
 
-	// 📧 Invia il report annuale via email
+	//Invia il report annuale via email
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/annuale/{anno}/email")
 	public ResponseEntity<String> inviaReportAnnuale(@PathVariable int anno) {
@@ -68,7 +71,8 @@ public class ReportController {
 		return ResponseEntity.ok(result);
 	}
 
-	// Endpoint per inviare il report via email
+	//Endpoint per inviare il report via email
+>>>>>>> Stashed changes
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@PostMapping("/mensile/email")
 	public String inviaReportMensile(@RequestParam int anno, @RequestParam int mese) {

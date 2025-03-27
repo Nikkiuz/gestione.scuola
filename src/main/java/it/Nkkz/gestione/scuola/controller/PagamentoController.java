@@ -17,7 +17,7 @@ public class PagamentoController {
 
 	private final PagamentoService pagamentoService;
 
-	// ✅ Registra un nuovo pagamento (Solo Admin)
+	//Registra un nuovo pagamento (Solo Admin)
 	@PostMapping
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -25,7 +25,7 @@ public class PagamentoController {
 		return pagamentoService.registraPagamento(requestDTO);
 	}
 
-	// ✅ Recupera tutti i pagamenti (Solo Admin)
+	//Recupera tutti i pagamenti (Solo Admin)
 	@GetMapping
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.OK)
@@ -33,7 +33,10 @@ public class PagamentoController {
 		return pagamentoService.getTuttiIPagamenti();
 	}
 
-	// ✅ Recupera un singolo pagamento tramite ID (Solo Admin)
+<<<<<<< Updated upstream
+	// ✅ Recupera i pagamenti di uno studente specifico (Solo Admin)
+=======
+	//Recupera un singolo pagamento tramite ID (Solo Admin)
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.OK)
@@ -41,7 +44,8 @@ public class PagamentoController {
 		return pagamentoService.getPagamentoById(id);
 	}
 
-	// ✅ Recupera i pagamenti di uno studente specifico (Solo Admin)
+	//Recupera i pagamenti di uno studente specifico (Solo Admin)
+>>>>>>> Stashed changes
 	@GetMapping("/studente/{studenteId}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.OK)
@@ -49,7 +53,7 @@ public class PagamentoController {
 		return pagamentoService.getPagamentiByStudente(studenteId);
 	}
 
-	// ✅ Recupera i pagamenti per una mensilità specifica (Solo Admin)
+	//Recupera i pagamenti per una mensilità specifica (Solo Admin)
 	@GetMapping("/mensilita/{mensilita}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.OK)
@@ -57,15 +61,17 @@ public class PagamentoController {
 		return pagamentoService.getPagamentiByMensilita(mensilita);
 	}
 
-	// ✅ Elimina un pagamento (Solo Admin)
+	//Elimina un pagamento (Solo Admin)
 	@DeleteMapping("/{pagamentoId}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void eliminaPagamento(@PathVariable Long pagamentoId) {
 		pagamentoService.eliminaPagamento(pagamentoId);
 	}
+<<<<<<< Updated upstream
+=======
 
-	// ✅ Aggiorna un pagamento esistente (Solo Admin)
+	//Aggiorna un pagamento esistente (Solo Admin)
 	@PutMapping("/{pagamentoId}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.OK)
@@ -75,4 +81,5 @@ public class PagamentoController {
 	) {
 		return pagamentoService.aggiornaPagamento(pagamentoId, requestDTO);
 	}
+>>>>>>> Stashed changes
 }

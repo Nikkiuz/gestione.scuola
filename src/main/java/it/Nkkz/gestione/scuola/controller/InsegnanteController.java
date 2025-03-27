@@ -21,21 +21,25 @@ public class InsegnanteController {
 		this.insegnanteService = insegnanteService;
 	}
 
-	// ✅ SOLO ADMIN - Recupera tutti gli insegnanti
+	//SOLO ADMIN - Recupera tutti gli insegnanti
 	@GetMapping
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<InsegnanteResponseDTO>> getAllInsegnanti() {
 		return ResponseEntity.ok(insegnanteService.getAllInsegnanti());
 	}
 
-	// ✅ ADMIN - Recupera un insegnante per ID
+<<<<<<< Updated upstream
+	// ✅ ADMIN & INSEGNANTE - Recupera un insegnante per ID
+=======
+	//ADMIN - Recupera un insegnante per ID
+>>>>>>> Stashed changes
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or #id == authentication.principal.id")
 	public ResponseEntity<InsegnanteResponseDTO> getInsegnanteById(@PathVariable Long id, Authentication authentication) {
 		return ResponseEntity.ok(insegnanteService.getInsegnanteById(id));
 	}
 
-	// ✅ SOLO ADMIN - Crea un nuovo insegnante
+	//SOLO ADMIN - Crea un nuovo insegnante
 	@PostMapping
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -43,7 +47,7 @@ public class InsegnanteController {
 		return insegnanteService.createInsegnante(insegnanteRequestDTO);
 	}
 
-	// ✅ ADMIN - Modifica qualsiasi insegnante | INSEGNANTE - Modifica solo se stesso
+	//ADMIN - Modifica qualsiasi insegnante | INSEGNANTE - Modifica solo se stesso
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or #id == authentication.principal.id")
 	public ResponseEntity<InsegnanteResponseDTO> updateInsegnante(
@@ -53,7 +57,7 @@ public class InsegnanteController {
 		return ResponseEntity.ok(insegnanteService.updateInsegnante(id, insegnanteRequestDTO));
 	}
 
-	// ✅ SOLO ADMIN - Elimina un insegnante
+	//SOLO ADMIN - Elimina un insegnante
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
