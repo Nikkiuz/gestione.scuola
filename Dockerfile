@@ -4,6 +4,10 @@ WORKDIR /app
 
 COPY . .
 
+# 👉 Rendi eseguibile lo script mvnw
+RUN chmod +x mvnw
+
+# 👉 Ora puoi eseguire il comando
 RUN ./mvnw clean package -DskipTests
 
 EXPOSE 8080
