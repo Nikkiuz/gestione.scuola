@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api', // 🔹 Base URL del backend
+  baseURL: import.meta.env.VITE_API_URL,
 })
 
 // Intercettore per aggiungere il token JWT a tutte le richieste API
