@@ -60,6 +60,7 @@ public class JwtTokenUtil {
                                         .map(GrantedAuthority::getAuthority)
                                         .collect(Collectors.toList());
 
+<<<<<<< Updated upstream
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .claim("roles", roles) // Aggiunge i ruoli come claim
@@ -67,6 +68,16 @@ public class JwtTokenUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
+=======
+        String token = Jwts.builder()
+            .setSubject(user.getEmail()) // ✅ Ora usa l'email come identificatore
+            .claim("roles", roles) // Aggiunge i ruoli come claim
+            .setIssuedAt(new Date(System.currentTimeMillis()))
+            .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
+            .signWith(SignatureAlgorithm.HS256, secret)
+            .compact();
+        return token;
+>>>>>>> Stashed changes
     }
 
     // Estrae i ruoli dal token JWT

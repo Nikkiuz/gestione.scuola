@@ -59,7 +59,34 @@ public class SpesaService {
 		spesaRepository.deleteById(id);
 	}
 
+<<<<<<< Updated upstream
 	// 🔹 Converte una Spesa in DTO per la risposta
+=======
+	public List<SpesaResponseDTO> getSpeseFiltrate(Integer anno, Integer mese, Spesa.CategoriaSpesa categoria) {
+		if (anno != null && mese != null) {
+			YearMonth ym = YearMonth.of(anno, mese);
+			LocalDate inizio = ym.atDay(1);
+			LocalDate fine = ym.atEndOfMonth();
+
+			return spesaRepository.findAll().stream()
+				.filter(s -> categoria == null || s.getCategoria() == categoria)
+				.filter(s -> s.getDataSpesa() != null &&
+					!s.getDataSpesa().isBefore(inizio) &&
+					!s.getDataSpesa().isAfter(fine))
+				.map(this::convertToResponseDTO)
+				.collect(Collectors.toList());
+		}
+
+		// Se anno o mese sono nulli, filtra solo per categoria (se presente)
+		return spesaRepository.findAll().stream()
+			.filter(s -> categoria == null || s.getCategoria() == categoria)
+			.map(this::convertToResponseDTO)
+			.collect(Collectors.toList());
+	}
+
+
+	//Converte una Spesa in DTO per la risposta
+>>>>>>> Stashed changes
 	private SpesaResponseDTO convertToResponseDTO(Spesa spesa) {
 		SpesaResponseDTO dto = new SpesaResponseDTO();
 		BeanUtils.copyProperties(spesa, dto);

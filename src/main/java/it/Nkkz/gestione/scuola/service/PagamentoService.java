@@ -23,7 +23,7 @@ public class PagamentoService {
 	private final PagamentoRepository pagamentoRepository;
 	private final StudenteRepository studenteRepository;
 
-	// ✅ Registra un nuovo pagamento
+	//Registra un nuovo pagamento
 	@Transactional
 	public PagamentoResponseDTO registraPagamento(PagamentoRequestDTO requestDTO) {
 		Studente studente = studenteRepository.findById(requestDTO.getStudenteId())
@@ -38,28 +38,42 @@ public class PagamentoService {
 		return convertToResponseDTO(pagamento);
 	}
 
-	// ✅ Recupera tutti i pagamenti
+	//Recupera tutti i pagamenti
 	public List<PagamentoResponseDTO> getTuttiIPagamenti() {
 		return pagamentoRepository.findAll().stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
+<<<<<<< Updated upstream
 	// ✅ Recupera i pagamenti di un singolo studente
+=======
+	//Recupera un singolo pagamento
+	public PagamentoResponseDTO getPagamentoById(Long id) {
+		// Recupera il pagamento dal repository o lancia un'eccezione se non trovato
+		Pagamento pagamento = pagamentoRepository.findById(id)
+			.orElseThrow(() -> new EntityNotFoundException("Pagamento non trovato con ID: " + id));
+
+		// Converti l'entità Pagamento in PagamentoResponseDTO
+		return convertToResponseDTO(pagamento);
+	}
+
+	//Recupera i pagamenti di un singolo studente
+>>>>>>> Stashed changes
 	public List<PagamentoResponseDTO> getPagamentiByStudente(Long studenteId) {
 		return pagamentoRepository.findByStudenteId(studenteId).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera i pagamenti per una specifica mensilità
+	//Recupera i pagamenti per una specifica mensilità
 	public List<PagamentoResponseDTO> getPagamentiByMensilita(String mensilita) {
 		return pagamentoRepository.findByMensilitaSaldata(mensilita).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Elimina un pagamento
+	//Elimina un pagamento
 	@Transactional
 	public void eliminaPagamento(Long pagamentoId) {
 		Pagamento pagamento = pagamentoRepository.findById(pagamentoId)
@@ -67,7 +81,34 @@ public class PagamentoService {
 		pagamentoRepository.delete(pagamento);
 	}
 
+<<<<<<< Updated upstream
 	// 🔹 Converte da Pagamento a PagamentoResponseDTO
+=======
+	//Aggiorna un pagamento esistente
+	@Transactional
+	public PagamentoResponseDTO aggiornaPagamento(Long pagamentoId, PagamentoRequestDTO requestDTO) {
+		// Verifica che il pagamento esista
+		Pagamento pagamento = pagamentoRepository.findById(pagamentoId)
+			.orElseThrow(() -> new EntityNotFoundException("Pagamento non trovato con ID: " + pagamentoId));
+
+		// Aggiorna i campi del pagamento
+		pagamento.setDataPagamento(requestDTO.getDataPagamento());
+		pagamento.setImporto(requestDTO.getImporto());
+		pagamento.setMensilitaSaldata(requestDTO.getMensilitaSaldata());
+		pagamento.setMetodoPagamento(requestDTO.getMetodoPagamento());
+		pagamento.setNumeroRicevuta(requestDTO.getNumeroRicevuta());
+		pagamento.setNote(requestDTO.getNote());
+
+		// Salva il pagamento aggiornato
+		Pagamento pagamentoAggiornato = pagamentoRepository.save(pagamento);
+
+		// Restituisci il DTO aggiornato
+		return convertToResponseDTO(pagamentoAggiornato);
+	}
+
+
+	//Converte da Pagamento a PagamentoResponseDTO
+>>>>>>> Stashed changes
 	private PagamentoResponseDTO convertToResponseDTO(Pagamento pagamento) {
 		PagamentoResponseDTO dto = new PagamentoResponseDTO();
 		BeanUtils.copyProperties(pagamento, dto);

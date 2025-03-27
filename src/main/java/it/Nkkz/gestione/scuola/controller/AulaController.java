@@ -20,21 +20,21 @@ public class AulaController {
 		this.aulaService = aulaService;
 	}
 
-	// ✅ SOLO ADMIN - Recupera tutte le aule
+	//SOLO ADMIN - Recupera tutte le aule
 	@GetMapping
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<AulaResponseDTO>> getAllAule() {
 		return ResponseEntity.ok(aulaService.getAllAule());
 	}
 
-	// ✅ SOLO ADMIN - Recupera un'aula per ID
+	//SOLO ADMIN - Recupera un'aula per ID
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<AulaResponseDTO> getAulaById(@PathVariable Long id) {
 		return ResponseEntity.ok(aulaService.getAulaById(id));
 	}
 
-	// ✅ SOLO ADMIN - Crea un'aula
+	//SOLO ADMIN - Crea un'aula
 	@PostMapping
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -42,14 +42,14 @@ public class AulaController {
 		return aulaService.createAula(aulaRequestDTO);
 	}
 
-	// ✅ SOLO ADMIN - Modifica un'aula
+	//SOLO ADMIN - Modifica un'aula
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<AulaResponseDTO> updateAula(@PathVariable Long id, @RequestBody AulaRequestDTO aulaRequestDTO) {
 		return ResponseEntity.ok(aulaService.updateAula(id, aulaRequestDTO));
 	}
 
-	// ✅ SOLO ADMIN - Elimina un'aula
+	//SOLO ADMIN - Elimina un'aula
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
@@ -57,7 +57,7 @@ public class AulaController {
 		aulaService.deleteAula(id);
 	}
 
-	// ✅ SOLO ADMIN - Recupera le aule disponibili in un determinato giorno e orario
+	//SOLO ADMIN - Recupera le aule disponibili in un determinato giorno e orario
 	@GetMapping("/disponibilita")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<AulaResponseDTO>> getAuleDisponibili(

@@ -18,24 +18,24 @@ public class Pagamento {
 
 	@ManyToOne
 	@JoinColumn(name = "studente_id", nullable = false)
-	private Studente studente; // Studente associato al pagamento
+	private Studente studente;
 
 	@Column(nullable = false)
-	private LocalDate dataPagamento; // Data della transazione
+	private LocalDate dataPagamento;
 
 	@Column(nullable = false)
-	private double importo; // Importo pagato
+	private double importo;
 
 	@Column(nullable = false)
-	private String mensilitaSaldata; // Mensilità a cui si riferisce il pagamento (es. "Febbraio 2025")
+	private String mensilitaSaldata;
 
 	@Column(nullable = false, unique = true)
-	private String numeroRicevuta; // Numero ricevuta/fattura univoco
+	private String numeroRicevuta;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private MetodoPagamento metodoPagamento; // Metodo di pagamento utilizzato
+	private MetodoPagamento metodoPagamento;
 
-	private String note; // Eventuali note aggiuntive
+	private String note;
 
 }

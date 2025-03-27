@@ -36,7 +36,7 @@ public class AppUserService {
     @Autowired
     private EmailService emailService;
 
-    @Value("${spring.mail.username}") // Ottiene l'email dell'Admin
+    @Value("${spring.mail.username}")
     private String adminEmail;
 
     public AppUser registerUser(String username, String email, String password, Set<Role> roles) {
@@ -79,6 +79,34 @@ public class AppUserService {
         return appUser;
     }
 
+<<<<<<< Updated upstream
+=======
+    public LoginResponse authenticate(LoginRequest loginRequest) {
+        System.out.println("➡️ Tentativo di login con email: " + loginRequest.getEmail());
+
+        // Trova l'utente nel database usando l'email
+        AppUser user = appUserRepository.findByEmail(loginRequest.getEmail())
+            .orElseThrow(() -> {
+                System.out.println("❌ Utente non trovato per email: " + loginRequest.getEmail());
+                return new UsernameNotFoundException("Utente non trovato");
+            });
+
+        System.out.println("🔑 Trovato utente: " + user.getEmail());
+
+        // Autenticazione usando l'email e la password
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(user.getEmail(), loginRequest.getPassword())
+        );
+
+        System.out.println("✅ Autenticazione riuscita per: " + user.getEmail());
+
+        String token = jwtTokenUtil.generateToken(user);
+        System.out.println("🛡️ Token generato: " + token);
+
+        return new LoginResponse(token, user.getId());
+    }
+
+>>>>>>> Stashed changes
     public Optional<AppUser> findByUsername(String username) {
         return appUserRepository.findByUsername(username);
     }

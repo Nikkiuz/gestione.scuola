@@ -10,10 +10,10 @@ import java.util.List;
 @Repository
 public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
-	// ✅ Recupera tutti i pagamenti di uno studente
+	//Recupera tutti i pagamenti di uno studente
 	List<Pagamento> findByStudenteId(Long studenteId);
 
-	// ✅ Recupera i pagamenti per una specifica mensilità
+	//Recupera i pagamenti per una specifica mensilità
 	List<Pagamento> findByMensilitaSaldata(String mensilita);
 
 	List<Pagamento> findByDataPagamentoBetween(LocalDate start, LocalDate end);

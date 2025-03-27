@@ -1,0 +1,168 @@
+// =======================
+// 🎨 VARIABILI
+// =======================
+$colore-sfondo: #BCC89C;
+$colore-sabbia: #E7CB9E;
+$colore-marrone: #CC9C77;
+$colore-verde-intenso: #486258;
+$colore-verde-scuro: #334542;
+$colore-privato: #2b695d; 
+$colore-gruppo: #2f4f7a;
+$colore-tasto: #eceb88;
+
+// =======================
+// ✨ BASE
+// =======================
+body {
+  font-family: 'Cabin Condensed', sans-serif;
+  background-color: $colore-sfondo;
+  color: $colore-verde-scuro;
+}
+
+h1, h2, h3, h4, h5 {
+  color: $colore-verde-scuro;
+  font-weight: 700;
+}
+
+// =======================
+// 🛍️ NAVBAR
+// =======================
+@import 'navbar';
+
+// =======================
+// 📦 MODALI
+// =======================
+@import 'modals';
+
+// =======================
+// 📜 FORM
+// =======================
+@import 'forms';
+
+// =======================
+// 📋 CARD
+// =======================
+.card {
+  background-color: $colore-sabbia;
+  border-color: $colore-marrone;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(51, 69, 66, 0.15);
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+}
+
+// =======================
+// 📊 TABELLE
+// =======================
+.table {
+  background-color: #fff;
+  color: $colore-verde-scuro;
+  border-radius: 12px;
+  overflow: hidden;
+
+  thead {
+    background-color: $colore-sfondo;
+  }
+
+  &.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #fdf9f1;
+  }
+
+  &.table-bordered td,
+  &.table-bordered th {
+    border-color: $colore-marrone;
+  }
+
+  th, td {
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  thead th {
+    font-weight: 700;
+    background-color: $colore-sfondo;
+    color: $colore-verde-scuro;
+    border-bottom: 2px solid $colore-marrone;
+  }
+
+  tbody td {
+    padding: 12px;
+  }
+}
+
+// =======================
+// ⚠️ ALERT
+// =======================
+.alert-warning {
+  background-color: $colore-sabbia;
+  border-left: 4px solid $colore-verde-intenso;
+  color: $colore-verde-scuro;
+  font-weight: 500;
+}
+
+.alert-success {
+  background-color: $colore-sfondo;
+  border-left: 4px solid $colore-verde-intenso;
+  color: $colore-verde-scuro;
+  font-weight: 500;
+}
+
+// =======================
+// 🔘 BOTTONI
+// =======================
+@import 'buttons';
+
+// =======================
+// 🗕 CALENDARIO
+// =======================
+@import 'calendar';
+
+// =======================
+// 📈 GRAFICO FINALE
+// =======================
+.grafico-final {
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+  padding: 2rem;
+  background-color: $colore-sabbia;
+  border: 2px solid $colore-marrone;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+
+  h4 {
+    text-align: center;
+    color: $colore-verde-scuro;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+  }
+}
+
+// =======================
+// SPINNER
+// ======================
+
+.fullscreen-spinner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1050;
+  background-color: rgba(0, 0, 0, 0.4); 
+  backdrop-filter: blur(2px);
+}
+
+.overlay-spinner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 1rem;
+}
+

@@ -20,21 +20,21 @@ public class AulaService {
 		this.aulaRepository = aulaRepository;
 	}
 
-	// ✅ Recupera tutte le aule
+	//Recupera tutte le aule
 	public List<AulaResponseDTO> getAllAule() {
 		return aulaRepository.findAll().stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Recupera un'aula per ID
+	//Recupera un'aula per ID
 	public AulaResponseDTO getAulaById(Long id) {
 		Aula aula = aulaRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Aula non trovata con ID: " + id));
 		return convertToResponseDTO(aula);
 	}
 
-	// ✅ Crea un'aula
+	//Crea un'aula
 	public AulaResponseDTO createAula(AulaRequestDTO aulaRequestDTO) {
 		Aula aula = new Aula();
 		BeanUtils.copyProperties(aulaRequestDTO, aula);
@@ -42,7 +42,7 @@ public class AulaService {
 		return convertToResponseDTO(aula);
 	}
 
-	// ✅ Modifica un'aula
+	//Modifica un'aula
 	public AulaResponseDTO updateAula(Long id, AulaRequestDTO aulaRequestDTO) {
 		Aula aula = aulaRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Aula non trovata con ID: " + id));
@@ -51,19 +51,19 @@ public class AulaService {
 		return convertToResponseDTO(aula);
 	}
 
-	// ✅ Elimina un'aula
+	//Elimina un'aula
 	public void deleteAula(Long id) {
 		aulaRepository.deleteById(id);
 	}
 
-	// ✅ Recupera le aule disponibili per un giorno e orario specifici
+	//Recupera le aule disponibili per un giorno e orario specifici
 	public List<AulaResponseDTO> getAuleDisponibiliByGiornoEOrario(String giorno, String orario) {
 		return aulaRepository.findAuleDisponibiliByGiornoEOrario(giorno, orario).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
 	}
 
-	// ✅ Converte un'aula in DTO
+	//Converte un'aula in DTO
 	private AulaResponseDTO convertToResponseDTO(Aula aula) {
 		AulaResponseDTO dto = new AulaResponseDTO();
 		BeanUtils.copyProperties(aula, dto);
