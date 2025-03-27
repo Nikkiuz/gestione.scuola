@@ -58,8 +58,7 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("http://localhost:5173",
-			"https://gestione-scuola-frontend.vercel.app"));
+		configuration.setAllowedOrigins(List.of("http://localhost:5173")); // ⚠Usa la porta giusta
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 		configuration.setAllowCredentials(true); // Consente credenziali come token di autenticazione
