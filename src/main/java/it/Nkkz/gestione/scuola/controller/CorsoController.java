@@ -21,21 +21,21 @@ public class CorsoController {
 	@Autowired
 	private CorsoService corsoService;
 
-	// ✅ Recupera tutti i corsi (solo Admin)
+	//Recupera tutti i corsi (solo Admin)
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping
 	public ResponseEntity<List<CorsoResponseDTO>> getTuttiICorsi() {
 		return ResponseEntity.ok(corsoService.getTuttiICorsi());
 	}
 
-	// ✅ Recupera un corso
+	//Recupera un corso
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/{id}")
 	public ResponseEntity<CorsoResponseDTO> getCorsoById(@PathVariable Long id) {
 		return ResponseEntity.ok(corsoService.getCorsoById(id));
 	}
 
-	// ✅ Recupera corsi per insegnante
+	//Recupera corsi per insegnante
 
 	@GetMapping("/insegnante/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_INSEGNANTE')")
@@ -43,7 +43,7 @@ public class CorsoController {
 		return ResponseEntity.ok(corsoService.getCorsiByInsegnante(id));
 	}
 
-	// ✅ Recupera corsi per giorno e orario
+	//Recupera corsi per giorno e orario
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/giorno-orario")
 	public ResponseEntity<List<CorsoResponseDTO>> getCorsiByGiornoEOrario(
@@ -52,11 +52,7 @@ public class CorsoController {
 		return ResponseEntity.ok(corsoService.getCorsiByGiornoEOrario(giorno, orario));
 	}
 
-<<<<<<< Updated upstream
-	// ✅ Recupera corsi per lingua e livello
-=======
 	//Recupera corsi per lingua e livello (ORA SENZA STRINGHE)
->>>>>>> Stashed changes
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/lingua-livello")
 	public ResponseEntity<List<CorsoResponseDTO>> getCorsiByLinguaELivello(
@@ -110,20 +106,13 @@ public class CorsoController {
 		return ResponseEntity.ok("Operazione eseguita con successo.");
 	}
 
-<<<<<<< Updated upstream
-	// ✅ Genera corsi automaticamente basandosi su preferenze, livello e età (solo Admin)
-=======
 	//Genera corsi automaticamente basandosi su preferenze, livello, età ecc.
->>>>>>> Stashed changes
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@PostMapping("/genera-automatico")
 	public ResponseEntity<String> generaCorsiAutomaticamente() {
 		corsoService.generaCorsiAutomaticamente();
 		return ResponseEntity.ok("✅ Corsi generati automaticamente (verifica la lista aggiornata).");
 	}
-<<<<<<< Updated upstream
-}
-=======
 
 	//Recupera tutti i corsi disattivati
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -164,4 +153,3 @@ public class CorsoController {
 		return ResponseEntity.ok("Studente assegnato al corso con successo.");
 	}
 }
->>>>>>> Stashed changes
