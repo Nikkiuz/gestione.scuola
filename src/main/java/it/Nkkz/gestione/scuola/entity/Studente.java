@@ -35,17 +35,17 @@ public class Studente {
 	private Livello livello;
 
 	@ElementCollection
-	private Set<String> giorniPreferiti;
+	private Set<String> giorniPreferiti;  // Es. ["Lunedì", "Mercoledì"]
 
 	@ElementCollection
-	private Set<String> fasceOrariePreferite;
+	private Set<String> fasceOrariePreferite;  // Es. ["16:00-18:00", "18:00-20:00"]
 
 	@Column(nullable = false)
-	private boolean corsoPrivato;
+	private boolean corsoPrivato;  // True = privato, False = gruppo
 
-	private Integer frequenzaCorsoPrivato;
+	private Integer frequenzaCorsoPrivato; // Valido solo se corsoPrivato == true (minimo 1 ora)
 
-	private String tipoCorsoGruppo;
+	private String tipoCorsoGruppo; // "1 volta a settimana" oppure "2 volte a settimana"
 
 	@ManyToMany(mappedBy = "studenti")
 	private List<Corso> corsi = new ArrayList<>();

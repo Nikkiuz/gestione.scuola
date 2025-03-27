@@ -49,7 +49,7 @@ public class CalendarioService {
 		return input == null ? "" : input.toLowerCase().replace("ì", "i").replace("é", "e");
 	}
 
-	//Recupera i corsi programmati in un determinato giorno della settimana
+	// ✅ Recupera i corsi programmati in un determinato giorno della settimana
 	public List<CalendarioDTO> getCorsiSettimanaFiltrati(String giornoBase, Long insegnanteId, String livello) {
 		List<String> giorniSettimana = List.of("Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato");
 		List<String> giorniNormalizzati = giorniSettimana.stream().map(this::normalizza).toList();

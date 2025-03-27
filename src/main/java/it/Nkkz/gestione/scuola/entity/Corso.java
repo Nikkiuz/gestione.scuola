@@ -58,21 +58,22 @@ public class Corso {
 
 	@Column(nullable = false)
 	private boolean attivo = true; // Indica se il corso è attivo o interrotto
-<<<<<<< Updated upstream
-=======
 
-	//Costruttore per clonare un corso e assegnare nuovi studenti
+	// Costruttore per clonare un corso e assegnare nuovi studenti
 	public Corso(Corso corsoOriginale, List<Studente> nuoviStudenti) {
 		this.lingua = corsoOriginale.getLingua();
 		this.tipoCorso = corsoOriginale.getTipoCorso();
 		this.frequenza = corsoOriginale.getFrequenza();
 		this.giorno = corsoOriginale.getGiorno();
 		this.orario = corsoOriginale.getOrario();
+		this.secondoGiorno = corsoOriginale.getSecondoGiorno();
+		this.secondoOrario = corsoOriginale.getSecondoOrario();
 		this.livello = corsoOriginale.getLivello();
 		this.insegnante = corsoOriginale.getInsegnante();
 		this.aula = corsoOriginale.getAula();
+		this.attivo = true;
 		this.studenti = nuoviStudenti;
 	}
 
->>>>>>> Stashed changes
+
 }

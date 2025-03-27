@@ -17,7 +17,7 @@ public class Spesa {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private CategoriaSpesa categoria;
+	private CategoriaSpesa categoria; // Enum con le categorie di spesa
 
 	@Column(nullable = false)
 	private double importo;
@@ -25,7 +25,7 @@ public class Spesa {
 	@Column(nullable = false)
 	private LocalDate dataSpesa;
 
-	private String descrizione;
+	private String descrizione; // Campo opzionale per dettagli aggiuntivi
 
 	// Enum per le categorie di spesa
 	public enum CategoriaSpesa {

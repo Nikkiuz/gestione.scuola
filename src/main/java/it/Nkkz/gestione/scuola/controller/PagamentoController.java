@@ -33,9 +33,6 @@ public class PagamentoController {
 		return pagamentoService.getTuttiIPagamenti();
 	}
 
-<<<<<<< Updated upstream
-	// ✅ Recupera i pagamenti di uno studente specifico (Solo Admin)
-=======
 	//Recupera un singolo pagamento tramite ID (Solo Admin)
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -45,7 +42,6 @@ public class PagamentoController {
 	}
 
 	//Recupera i pagamenti di uno studente specifico (Solo Admin)
->>>>>>> Stashed changes
 	@GetMapping("/studente/{studenteId}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.OK)
@@ -68,8 +64,6 @@ public class PagamentoController {
 	public void eliminaPagamento(@PathVariable Long pagamentoId) {
 		pagamentoService.eliminaPagamento(pagamentoId);
 	}
-<<<<<<< Updated upstream
-=======
 
 	//Aggiorna un pagamento esistente (Solo Admin)
 	@PutMapping("/{pagamentoId}")
@@ -81,5 +75,4 @@ public class PagamentoController {
 	) {
 		return pagamentoService.aggiornaPagamento(pagamentoId, requestDTO);
 	}
->>>>>>> Stashed changes
 }
