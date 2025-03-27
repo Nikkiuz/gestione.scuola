@@ -26,10 +26,10 @@ import java.util.List;
 public class StudenteController {
 
 	private final StudenteService studenteService;
+	private final StudenteRepository studenteRepository;
+	private final CorsoRepository corsoRepository;
+	private final PagamentoRepository pagamentoRepository;
 
-<<<<<<< Updated upstream
-	public StudenteController(StudenteService studenteService) {
-=======
 	//Costruttore per iniettare i repository e il service
 	public StudenteController(
 		StudenteService studenteService,
@@ -37,85 +37,52 @@ public class StudenteController {
 		CorsoRepository corsoRepository,
 		PagamentoRepository pagamentoRepository
 	) {
->>>>>>> Stashed changes
 		this.studenteService = studenteService;
 		this.studenteRepository = studenteRepository;
 		this.corsoRepository = corsoRepository;
 		this.pagamentoRepository = pagamentoRepository;
 	}
 
-<<<<<<< Updated upstream
-	// ✅ SOLO ADMIN - Recupera tutti gli studenti
-=======
 	//Recupera tutti gli studenti
->>>>>>> Stashed changes
 	@GetMapping
 	public ResponseEntity<List<StudenteResponseDTO>> getAllStudenti() {
 		return ResponseEntity.ok(studenteService.getAllStudenti());
 	}
 
-<<<<<<< Updated upstream
-	// ✅ SOLO ADMIN - Recupera uno studente per ID
-=======
 	//Recupera uno studente per ID
->>>>>>> Stashed changes
 	@GetMapping("/{id}")
 	public ResponseEntity<StudenteResponseDTO> getStudenteById(@PathVariable Long id) {
 		return ResponseEntity.ok(studenteService.getStudenteById(id));
 	}
 
-<<<<<<< Updated upstream
-	// ✅ SOLO ADMIN - Recupera studenti per lingua e livello iniziale
-=======
 	//Recupera studenti per lingua e livello iniziale (ORA SENZA STRINGHE)
->>>>>>> Stashed changes
 	@GetMapping("/filtra")
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByLinguaELivello(
 		@RequestParam String lingua,
-<<<<<<< Updated upstream
-		@RequestParam String livello) {
-		return ResponseEntity.ok(studenteService.getStudentiByLinguaELivello(lingua, livello));
-	}
-
-	// ✅ SOLO ADMIN - Recupera gli studenti di un insegnante specifico
-=======
-		@RequestParam Livello livello) {
+		@RequestParam Livello livello) { // ✅ Ora Livello è direttamente un ENUM
 		return ResponseEntity.ok(studenteService.getStudentiByLinguaELivello(lingua, livello));
 	}
 
 	//Recupera gli studenti di un insegnante specifico
->>>>>>> Stashed changes
 	@GetMapping("/insegnante/{id}")
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByInsegnante(@PathVariable Long id) {
 		return ResponseEntity.ok(studenteService.getStudentiByInsegnante(id));
 	}
 
-<<<<<<< Updated upstream
-	// ✅ SOLO ADMIN - Recupera studenti per tipo di corso (privato o di gruppo)
-=======
 	//Recupera studenti per tipo di corso (privato o di gruppo)
->>>>>>> Stashed changes
 	@GetMapping("/tipo-corso")
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByTipoCorso(@RequestParam boolean corsoPrivato) {
 		return ResponseEntity.ok(studenteService.getStudentiByTipoCorso(corsoPrivato));
 	}
 
-<<<<<<< Updated upstream
-	// ✅ SOLO ADMIN - Crea un nuovo studente
-=======
 	//Crea un nuovo studente
->>>>>>> Stashed changes
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public StudenteResponseDTO createStudente(@RequestBody StudenteRequestDTO studenteRequestDTO) {
 		return studenteService.createStudente(studenteRequestDTO);
 	}
 
-<<<<<<< Updated upstream
-	// ✅ SOLO ADMIN - Modifica uno studente
-=======
 	//Modifica uno studente
->>>>>>> Stashed changes
 	@PutMapping("/{id}")
 	public ResponseEntity<StudenteResponseDTO> updateStudente(
 		@PathVariable Long id,
@@ -127,18 +94,12 @@ public class StudenteController {
 		return ResponseEntity.ok(studenteService.updateStudente(id, studenteRequestDTO));
 	}
 
-<<<<<<< Updated upstream
-	// ✅ SOLO ADMIN - Elimina uno studente
-=======
 	//Elimina uno studente
->>>>>>> Stashed changes
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteStudente(@PathVariable Long id) {
 		studenteService.deleteStudente(id);
 	}
-<<<<<<< Updated upstream
-=======
 
 	//Recupera gli studenti senza corso
 	@GetMapping("/senza-corso")
@@ -203,5 +164,4 @@ public class StudenteController {
 		pagamentoRepository.save(nuovoPagamento);
 		return ResponseEntity.ok(nuovoPagamento);
 	}
->>>>>>> Stashed changes
 }

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -52,13 +53,19 @@ public class CorsoController {
 		return ResponseEntity.ok(corsoService.getCorsiByGiornoEOrario(giorno, orario));
 	}
 
-	//Recupera corsi per lingua e livello (ORA SENZA STRINGHE)
+	//Recupera corsi per lingua e livello
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/lingua-livello")
 	public ResponseEntity<List<CorsoResponseDTO>> getCorsiByLinguaELivello(
 		@RequestParam String lingua,
-		@RequestParam Livello livello) {
-		return ResponseEntity.ok(corsoService.getCorsiByLinguaELivello(lingua, livello));
+		@RequestParam String livello // <-- CAMBIATO QUI
+	) {
+		try {
+			Livello livelloEnum = Livello.valueOf(livello.toUpperCase());
+			return ResponseEntity.ok(corsoService.getCorsiByLinguaELivello(lingua, livelloEnum));
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(Collections.emptyList()); // Oppure un messaggio custom
+		}
 	}
 
 	//Recupera corsi per tipologia (privati o di gruppo)

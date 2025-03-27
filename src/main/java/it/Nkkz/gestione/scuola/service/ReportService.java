@@ -38,11 +38,7 @@ public class ReportService {
 	@Value("${spring.mail.username}")
 	private String adminEmail;
 
-<<<<<<< Updated upstream
-	// 🔹 Genera il report mensile per un mese specifico
-=======
 	//Genera il report mensile
->>>>>>> Stashed changes
 	public ReportDTO generaReportMensile(int anno, int mese) {
 		YearMonth yearMonth = YearMonth.of(anno, mese);
 		LocalDate startDate = yearMonth.atDay(1);
@@ -50,34 +46,18 @@ public class ReportService {
 		return generaReport(startDate, endDate, "Mensile");
 	}
 
-<<<<<<< Updated upstream
-	// 🔹 Genera il report annuale per un anno specifico
-=======
 	//Genera il report annuale
->>>>>>> Stashed changes
 	public ReportDTO generaReportAnnuale(int anno) {
 		LocalDate startDate = LocalDate.of(anno, 1, 1);
 		LocalDate endDate = LocalDate.of(anno, 12, 31);
 		return generaReport(startDate, endDate, "Annuale");
 	}
 
-<<<<<<< Updated upstream
-	// 🔹 Metodo generico per generare un report
-=======
 	//Metodo generico per generare un report
->>>>>>> Stashed changes
 	private ReportDTO generaReport(LocalDate startDate, LocalDate endDate, String periodo) {
 		ReportDTO report = new ReportDTO();
 		report.setPeriodo(periodo);
 
-<<<<<<< Updated upstream
-		// 🔹 Ore insegnate per insegnante
-		Map<String, Integer> oreInsegnate = calcolaOreInsegnateNelPeriodo(startDate, endDate);
-		report.setOreInsegnate(oreInsegnate);
-
-		// 🔹 Totale pagamenti ricevuti per metodo di pagamento
-		Map<String, Double> pagamentiRicevuti = pagamentoRepository.findByDataPagamentoBetween(startDate, endDate).stream()
-=======
 		//Ore insegnate per insegnante
 		Map<String, Integer> oreInsegnate = calcolaOreInsegnateNelPeriodo(startDate, endDate);
 		report.setOreInsegnate(oreInsegnate);
@@ -96,32 +76,22 @@ public class ReportService {
 
 
 		Map<String, Double> pagamentiRicevuti = pagamenti.stream()
->>>>>>> Stashed changes
 			.collect(Collectors.groupingBy(
 				p -> p.getMetodoPagamento().toString(),
 				Collectors.summingDouble(Pagamento::getImporto)
 			));
 		report.setPagamentiRicevuti(pagamentiRicevuti.isEmpty() ? Collections.emptyMap() : pagamentiRicevuti);
 
-<<<<<<< Updated upstream
-		// 🔹 Totale spese registrate per categoria
-		Map<String, Double> speseRegistrate = spesaRepository.findByDataSpesaBetween(startDate, endDate).stream()
-=======
 		//Uscite (filtrate per data)
 		List<Spesa> spese = spesaRepository.findByDataSpesaBetween(startDate, endDate);
 		Map<String, Double> speseRegistrate = spese.stream()
->>>>>>> Stashed changes
 			.collect(Collectors.groupingBy(
 				s -> s.getCategoria().toString(),
 				Collectors.summingDouble(Spesa::getImporto)
 			));
 		report.setSpeseRegistrate(speseRegistrate.isEmpty() ? Collections.emptyMap() : speseRegistrate);
 
-<<<<<<< Updated upstream
-		// 🔹 Calcolo bilancio (entrate - uscite)
-=======
 		//Totali
->>>>>>> Stashed changes
 		double totaleEntrate = pagamentiRicevuti.values().stream().mapToDouble(Double::doubleValue).sum();
 		double totaleUscite = speseRegistrate.values().stream().mapToDouble(Double::doubleValue).sum();
 
@@ -129,12 +99,6 @@ public class ReportService {
 		report.setTotaleUscite(totaleUscite);
 		report.setBilancio(totaleEntrate - totaleUscite);
 
-<<<<<<< Updated upstream
-		return report;
-	}
-
-	// 🔹 Calcola il numero di ore insegnate nel periodo
-=======
 		//Debug
 		System.out.println("📊 Report generato:");
 		System.out.println("💰 Totale Entrate: " + totaleEntrate);
@@ -146,7 +110,6 @@ public class ReportService {
 	}
 
 	//Calcola ore insegnate per insegnante nel periodo
->>>>>>> Stashed changes
 	private Map<String, Integer> calcolaOreInsegnateNelPeriodo(LocalDate startDate, LocalDate endDate) {
 		Map<String, Integer> oreInsegnate = new HashMap<>();
 		List<Corso> corsi = corsoRepository.findByAttivoTrue();
@@ -157,15 +120,6 @@ public class ReportService {
 			String chiaveInsegnante = corso.getInsegnante().getNome() + " " + corso.getInsegnante().getCognome();
 			int orePerSettimana = corso.getFrequenza().equals("2 volte a settimana") ? 6 : 3;
 
-			long settimaneNelPeriodo = startDate.datesUntil(endDate.plusDays(1))
-				.filter(date -> date.getDayOfWeek().toString().equalsIgnoreCase(corso.getGiorno()))
-				.count();
-
-<<<<<<< Updated upstream
-				int totaleOre = (int) (orePerSettimana * settimaneNelPeriodo);
-				oreInsegnate.put(chiaveInsegnante, oreInsegnate.getOrDefault(chiaveInsegnante, 0) + totaleOre);
-			}
-=======
 			long settimaneNelPeriodo = startDate.datesUntil(endDate.plusDays(1))
 				.filter(date -> date.getDayOfWeek().toString().equalsIgnoreCase(corso.getGiorno()))
 				.count();
@@ -197,16 +151,11 @@ public class ReportService {
 
 			int totaleOre = (int) (orePerSettimana * settimaneNelPeriodo);
 			oreInsegnate.put(chiaveInsegnante, oreInsegnate.getOrDefault(chiaveInsegnante, 0) + totaleOre);
->>>>>>> Stashed changes
 		}
 
 		return oreInsegnate;
 	}
 
-<<<<<<< Updated upstream
-	// 🔹 Genera e invia il report mensile via email
-	public void inviaReportMensile(int anno, int mese) {
-=======
 
 	//Utility per formattare una data in "marzo 2024" (lowercase)
 	private String formatMeseAnno(LocalDate data) {
@@ -216,7 +165,6 @@ public class ReportService {
 
 	//Genera e invia il report mensile via email
 	public String inviaReportMensile(int anno, int mese) {
->>>>>>> Stashed changes
 		ReportDTO report = generaReportMensile(anno, mese);
 
 		if (report.getOreInsegnate().isEmpty() &&
@@ -230,8 +178,6 @@ public class ReportService {
 		String body = "Ciao,\n\nIn allegato trovi il report mensile della scuola per " + mese + "/" + anno + ".\n\nSaluti,\nGestione Scuola";
 
 		emailService.sendEmailWithAttachment(adminEmail, subject, body, pdfBytes, "report_mensile_" + anno + "_" + mese + ".pdf");
-<<<<<<< Updated upstream
-=======
 
 		return "✅ Email con il report mensile inviata con successo!";
 	}
@@ -253,6 +199,5 @@ public class ReportService {
 		emailService.sendEmailWithAttachment(adminEmail, subject, body, pdfBytes, "report_annuale_" + anno + ".pdf");
 
 		return "✅ Email con il report annuale inviata con successo!";
->>>>>>> Stashed changes
 	}
 }

@@ -50,9 +50,6 @@ public class PagamentoService {
 			.collect(Collectors.toList());
 	}
 
-<<<<<<< Updated upstream
-	// ✅ Recupera i pagamenti di un singolo studente
-=======
 	//Recupera un singolo pagamento
 	public PagamentoResponseDTO getPagamentoById(Long id) {
 		// Recupera il pagamento dal repository o lancia un'eccezione se non trovato
@@ -64,7 +61,6 @@ public class PagamentoService {
 	}
 
 	//Recupera i pagamenti di un singolo studente
->>>>>>> Stashed changes
 	public List<PagamentoResponseDTO> getPagamentiByStudente(Long studenteId) {
 		return pagamentoRepository.findByStudenteId(studenteId).stream()
 			.map(this::convertToResponseDTO)
@@ -89,9 +85,6 @@ public class PagamentoService {
 		pagamentoRepository.delete(pagamento);
 	}
 
-<<<<<<< Updated upstream
-	// 🔹 Converte da Pagamento a PagamentoResponseDTO
-=======
 	//Aggiorna un pagamento esistente
 	@Transactional
 	public PagamentoResponseDTO aggiornaPagamento(Long pagamentoId, PagamentoRequestDTO requestDTO) {
@@ -116,7 +109,6 @@ public class PagamentoService {
 
 
 	//Converte da Pagamento a PagamentoResponseDTO
->>>>>>> Stashed changes
 	private PagamentoResponseDTO convertToResponseDTO(Pagamento pagamento) {
 		PagamentoResponseDTO dto = new PagamentoResponseDTO();
 		BeanUtils.copyProperties(pagamento, dto);

@@ -28,11 +28,7 @@ public class InsegnanteController {
 		return ResponseEntity.ok(insegnanteService.getAllInsegnanti());
 	}
 
-<<<<<<< Updated upstream
-	// ✅ ADMIN & INSEGNANTE - Recupera un insegnante per ID
-=======
 	//ADMIN - Recupera un insegnante per ID
->>>>>>> Stashed changes
 	@GetMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or #id == authentication.principal.id")
 	public ResponseEntity<InsegnanteResponseDTO> getInsegnanteById(@PathVariable Long id, Authentication authentication) {

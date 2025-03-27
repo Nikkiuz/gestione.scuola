@@ -42,10 +42,10 @@ public class SecurityConfig {
 			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/auth/**").permitAll()  // ✅ Permetti login e registrazione senza autenticazione
-				.requestMatchers("/api/studenti/**").hasRole("ADMIN")  // 🔒 SOLO Admin può gestire gli studenti
-				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()  // ✅ Swagger libero
-				.anyRequest().authenticated()  // 🔐 Tutto il resto richiede autenticazione!
+				.requestMatchers("/api/auth/**").permitAll()  // permetti login e registrazione senza autenticazione
+				.requestMatchers("/api/studenti/**").hasRole("ADMIN")  // SOLO Admin può gestire gli studenti
+				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()  // Swagger libero
+				.anyRequest().authenticated()  // Tutto il resto richiede autenticazione
 			)
 			.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -58,7 +58,7 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("http://localhost:5173")); // ⚠️ Usa la porta giusta
+		configuration.setAllowedOrigins(List.of("http://localhost:5173")); // ⚠Usa la porta giusta
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 		configuration.setAllowCredentials(true); // Consente credenziali come token di autenticazione
