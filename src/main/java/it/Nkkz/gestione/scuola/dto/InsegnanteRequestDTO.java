@@ -7,6 +7,8 @@ import java.util.Set;
 public class InsegnanteRequestDTO {
 	private String nome;
 	private String cognome;
+	private String email;
+	private String lingua;
 	private Set<String> giorniDisponibili;
 	private Set<String> fasceOrarieDisponibili;
 }

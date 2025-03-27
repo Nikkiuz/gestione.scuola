@@ -51,7 +51,8 @@ public class AppUser implements UserDetails {
         this(username, email, password, true, true, true, true, authorities);
     }
 
-    public AppUser(String username, String email, String password, boolean enabled, boolean accountNonExpired, boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
+    public AppUser(String username, String email, String password, boolean enabled, boolean accountNonExpired,
+                   boolean credentialsNonExpired, boolean accountNonLocked, Collection<? extends GrantedAuthority> authorities) {
         this.username = username;
         this.email = email;
         this.password = password;

@@ -27,13 +27,6 @@ public class ReportController {
 		return ResponseEntity.ok(reportService.generaReportMensile(anno, mese));
 	}
 
-	// Ottieni il report annuale per un anno specifico
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@GetMapping("/annuale")
-	public ResponseEntity<ReportDTO> getReportAnnuale(@RequestParam int anno) {
-		return ResponseEntity.ok(reportService.generaReportAnnuale(anno));
-	}
-
 	// Download del Report Mensile
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/mensile/pdf")

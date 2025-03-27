@@ -1,21 +1,20 @@
 package it.Nkkz.gestione.scuola.auth;
 
 import it.Nkkz.gestione.scuola.entity.app_users.AppUser;
-import it.Nkkz.gestione.scuola.service.AppUserService;
 import it.Nkkz.gestione.scuola.entity.app_users.Role;
+import it.Nkkz.gestione.scuola.service.AppUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-import java.util.Set;
 
 @Component
 public class AuthRunner implements ApplicationRunner {
 
     @Autowired
-    private AppUserService appUserService;  // DEVE ESSERE IMPORTATO CORRETTAMENTE
+    private AppUserService appUserService;
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
@@ -34,7 +33,8 @@ public class AuthRunner implements ApplicationRunner {
         Optional<AppUser> adminUser = appUserService.findByUsername("admin");
 >>>>>>> Stashed changes
         if (adminUser.isEmpty()) {
-            appUserService.registerUser("admin", "admin@mail.com", "adminpwd", Set.of(Role.ROLE_ADMIN));
+            appUserService.registerUser("admin", "admin@mail.com", "adminpwd", Role.ROLE_ADMIN);
+            System.out.println("✅ Utente Admin creato con successo!");
         }
 
 <<<<<<< Updated upstream
@@ -56,4 +56,5 @@ public class AuthRunner implements ApplicationRunner {
     }
      */
 }
+
 

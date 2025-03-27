@@ -26,14 +26,19 @@ public class PagamentoService {
 	//Registra un nuovo pagamento
 	@Transactional
 	public PagamentoResponseDTO registraPagamento(PagamentoRequestDTO requestDTO) {
+		// Verifica che lo studente esista
 		Studente studente = studenteRepository.findById(requestDTO.getStudenteId())
-			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato"));
+			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato con ID: " + requestDTO.getStudenteId()));
 
+		// Crea un nuovo pagamento
 		Pagamento pagamento = new Pagamento();
 		BeanUtils.copyProperties(requestDTO, pagamento);
 		pagamento.setStudente(studente);
-		pagamento.setNumeroRicevuta(UUID.randomUUID().toString()); // Genera un numero di ricevuta unico
 
+		// Non generare automaticamente il numero di ricevuta
+		// pagamento.setNumeroRicevuta(UUID.randomUUID().toString()); // Rimuovi questa linea
+
+		// Salva il pagamento
 		pagamentoRepository.save(pagamento);
 		return convertToResponseDTO(pagamento);
 	}
@@ -76,8 +81,11 @@ public class PagamentoService {
 	//Elimina un pagamento
 	@Transactional
 	public void eliminaPagamento(Long pagamentoId) {
+		// Verifica che il pagamento esista
 		Pagamento pagamento = pagamentoRepository.findById(pagamentoId)
-			.orElseThrow(() -> new EntityNotFoundException("Pagamento non trovato"));
+			.orElseThrow(() -> new EntityNotFoundException("Pagamento non trovato con ID: " + pagamentoId));
+
+		// Elimina il pagamento
 		pagamentoRepository.delete(pagamento);
 	}
 

@@ -2,7 +2,10 @@ package it.Nkkz.gestione.scuola.service;
 
 import it.Nkkz.gestione.scuola.dto.StudenteRequestDTO;
 import it.Nkkz.gestione.scuola.dto.StudenteResponseDTO;
+import it.Nkkz.gestione.scuola.entity.Insegnante;
+import it.Nkkz.gestione.scuola.entity.Livello;
 import it.Nkkz.gestione.scuola.entity.Studente;
+import it.Nkkz.gestione.scuola.repository.InsegnanteRepository;
 import it.Nkkz.gestione.scuola.repository.StudenteRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
@@ -67,9 +70,25 @@ public class StudenteService {
 
 	//Crea uno studente
 	public StudenteResponseDTO createStudente(StudenteRequestDTO studenteRequestDTO) {
+		System.out.println("📌 Studente ricevuto dal frontend: " + studenteRequestDTO);
+
 		Studente studente = new Studente();
-		BeanUtils.copyProperties(studenteRequestDTO, studente);
-		studenteRepository.save(studente);
+		BeanUtils.copyProperties(studenteRequestDTO, studente, "livello", "insegnanteId");
+
+		if (studenteRequestDTO.getLivello() != null) {
+			studente.setLivello(studenteRequestDTO.getLivello());
+		}
+
+		if (studenteRequestDTO.getInsegnanteId() != null) {
+			System.out.println("📌 Assegno Insegnante con ID: " + studenteRequestDTO.getInsegnanteId());
+			Insegnante insegnante = insegnanteRepository.findById(studenteRequestDTO.getInsegnanteId())
+				.orElseThrow(() -> new EntityNotFoundException("Insegnante non trovato con ID: " + studenteRequestDTO.getInsegnanteId()));
+			studente.setInsegnante(insegnante);
+		} else {
+			System.out.println("❌ Nessun insegnante assegnato!");
+		}
+
+		studente = studenteRepository.save(studente);
 		return convertToResponseDTO(studente);
 	}
 
@@ -78,10 +97,28 @@ public class StudenteService {
 	public StudenteResponseDTO updateStudente(Long id, StudenteRequestDTO studenteRequestDTO) {
 		Studente studente = studenteRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Studente non trovato con ID: " + id));
-		BeanUtils.copyProperties(studenteRequestDTO, studente);
-		studenteRepository.save(studente);
+
+		// Copia le proprietà dal DTO allo studente
+		BeanUtils.copyProperties(studenteRequestDTO, studente, "livello", "insegnanteId");
+
+		// ✅ Se il livello è presente, lo assegna direttamente
+		if (studenteRequestDTO.getLivello() != null) {
+			studente.setLivello(studenteRequestDTO.getLivello());
+		}
+
+		// ✅ Se il frontend ha inviato un insegnanteId, aggiornalo
+		if (studenteRequestDTO.getInsegnanteId() != null) {
+			Insegnante insegnante = insegnanteRepository.findById(studenteRequestDTO.getInsegnanteId())
+				.orElseThrow(() -> new EntityNotFoundException("Insegnante non trovato con ID: " + studenteRequestDTO.getInsegnanteId()));
+			studente.setInsegnante(insegnante);
+		}
+		// ⚠️ Se il frontend NON ha inviato insegnanteId, non lo azzeriamo!
+
+		// Salva lo studente aggiornato
+		studente = studenteRepository.save(studente);
 		return convertToResponseDTO(studente);
 	}
+
 
 	// ✅ Elimina uno studente
 =======
@@ -116,6 +153,9 @@ public class StudenteService {
 	//Elimina uno studente
 >>>>>>> Stashed changes
 	public void deleteStudente(Long id) {
+		if (!studenteRepository.existsById(id)) {
+			throw new EntityNotFoundException("❌ Studente non trovato con ID: " + id);
+		}
 		studenteRepository.deleteById(id);
 	}
 
@@ -151,4 +191,6 @@ public class StudenteService {
 >>>>>>> Stashed changes
 		return dto;
 	}
+
+
 }

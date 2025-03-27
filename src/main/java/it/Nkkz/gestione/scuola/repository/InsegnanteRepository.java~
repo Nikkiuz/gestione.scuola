@@ -1,4 +1,0 @@
-package it.Nkkz.gestione.scuola.repository;
-
-public interface InsegnanteRepository {
-}

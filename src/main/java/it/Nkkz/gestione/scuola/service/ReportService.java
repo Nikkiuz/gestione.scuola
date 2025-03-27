@@ -2,6 +2,8 @@ package it.Nkkz.gestione.scuola.service;
 
 import it.Nkkz.gestione.scuola.dto.ReportDTO;
 import it.Nkkz.gestione.scuola.entity.Corso;
+import it.Nkkz.gestione.scuola.entity.Pagamento;
+import it.Nkkz.gestione.scuola.entity.Spesa;
 import it.Nkkz.gestione.scuola.repository.CorsoRepository;
 import it.Nkkz.gestione.scuola.repository.PagamentoRepository;
 import it.Nkkz.gestione.scuola.repository.SpesaRepository;
@@ -11,9 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,7 +47,6 @@ public class ReportService {
 		YearMonth yearMonth = YearMonth.of(anno, mese);
 		LocalDate startDate = yearMonth.atDay(1);
 		LocalDate endDate = yearMonth.atEndOfMonth();
-
 		return generaReport(startDate, endDate, "Mensile");
 	}
 
@@ -58,7 +58,6 @@ public class ReportService {
 	public ReportDTO generaReportAnnuale(int anno) {
 		LocalDate startDate = LocalDate.of(anno, 1, 1);
 		LocalDate endDate = LocalDate.of(anno, 12, 31);
-
 		return generaReport(startDate, endDate, "Annuale");
 	}
 
@@ -100,9 +99,9 @@ public class ReportService {
 >>>>>>> Stashed changes
 			.collect(Collectors.groupingBy(
 				p -> p.getMetodoPagamento().toString(),
-				Collectors.summingDouble(p -> p.getImporto())
+				Collectors.summingDouble(Pagamento::getImporto)
 			));
-		report.setPagamentiRicevuti(pagamentiRicevuti);
+		report.setPagamentiRicevuti(pagamentiRicevuti.isEmpty() ? Collections.emptyMap() : pagamentiRicevuti);
 
 <<<<<<< Updated upstream
 		// 🔹 Totale spese registrate per categoria
@@ -114,9 +113,9 @@ public class ReportService {
 >>>>>>> Stashed changes
 			.collect(Collectors.groupingBy(
 				s -> s.getCategoria().toString(),
-				Collectors.summingDouble(s -> s.getImporto())
+				Collectors.summingDouble(Spesa::getImporto)
 			));
-		report.setSpeseRegistrate(speseRegistrate);
+		report.setSpeseRegistrate(speseRegistrate.isEmpty() ? Collections.emptyMap() : speseRegistrate);
 
 <<<<<<< Updated upstream
 		// 🔹 Calcolo bilancio (entrate - uscite)
@@ -125,6 +124,9 @@ public class ReportService {
 >>>>>>> Stashed changes
 		double totaleEntrate = pagamentiRicevuti.values().stream().mapToDouble(Double::doubleValue).sum();
 		double totaleUscite = speseRegistrate.values().stream().mapToDouble(Double::doubleValue).sum();
+
+		report.setTotaleEntrate(totaleEntrate);
+		report.setTotaleUscite(totaleUscite);
 		report.setBilancio(totaleEntrate - totaleUscite);
 
 <<<<<<< Updated upstream
@@ -147,19 +149,17 @@ public class ReportService {
 >>>>>>> Stashed changes
 	private Map<String, Integer> calcolaOreInsegnateNelPeriodo(LocalDate startDate, LocalDate endDate) {
 		Map<String, Integer> oreInsegnate = new HashMap<>();
-
-		List<Corso> corsi = corsoRepository.findAll();
+		List<Corso> corsi = corsoRepository.findByAttivoTrue();
 
 		for (Corso corso : corsi) {
-			// Se il corso è attivo e si svolge nel periodo considerato
-			if (corso.isAttivo()) {
-				String chiaveInsegnante = corso.getInsegnante().getNome() + " " + corso.getInsegnante().getCognome();
-				int orePerSettimana = corso.getFrequenza().equals("2 volte a settimana") ? 6 : 3;
+			if (corso.getInsegnante() == null) continue;
 
-				// Calcoliamo quante settimane ci sono nel periodo
-				long settimaneNelPeriodo = startDate.datesUntil(endDate.plusDays(1))
-					.filter(date -> date.getDayOfWeek().toString().equalsIgnoreCase(corso.getGiorno()))
-					.count();
+			String chiaveInsegnante = corso.getInsegnante().getNome() + " " + corso.getInsegnante().getCognome();
+			int orePerSettimana = corso.getFrequenza().equals("2 volte a settimana") ? 6 : 3;
+
+			long settimaneNelPeriodo = startDate.datesUntil(endDate.plusDays(1))
+				.filter(date -> date.getDayOfWeek().toString().equalsIgnoreCase(corso.getGiorno()))
+				.count();
 
 <<<<<<< Updated upstream
 				int totaleOre = (int) (orePerSettimana * settimaneNelPeriodo);
@@ -218,8 +218,14 @@ public class ReportService {
 	public String inviaReportMensile(int anno, int mese) {
 >>>>>>> Stashed changes
 		ReportDTO report = generaReportMensile(anno, mese);
-		byte[] pdfBytes = pdfReportService.generateReportPdf(report);
 
+		if (report.getOreInsegnate().isEmpty() &&
+			report.getPagamentiRicevuti().isEmpty() &&
+			report.getSpeseRegistrate().isEmpty()) {
+			return "⚠️ Nessun dato disponibile per il report mensile di " + mese + "/" + anno;
+		}
+
+		byte[] pdfBytes = pdfReportService.generateReportPdf(report);
 		String subject = "📊 Report Mensile - " + mese + "/" + anno;
 		String body = "Ciao,\n\nIn allegato trovi il report mensile della scuola per " + mese + "/" + anno + ".\n\nSaluti,\nGestione Scuola";
 

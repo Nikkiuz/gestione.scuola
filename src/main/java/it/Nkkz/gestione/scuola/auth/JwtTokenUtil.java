@@ -3,6 +3,7 @@ package it.Nkkz.gestione.scuola.auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import it.Nkkz.gestione.scuola.entity.app_users.AppUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +24,7 @@ public class JwtTokenUtil {
     @Value("${jwt.expiration}")
     private long jwtExpirationInMs;
 
-    // Estrae il nome utente dal token JWT
+    // Estrae il nome utente (email) dal token JWT
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
@@ -42,9 +43,9 @@ public class JwtTokenUtil {
     // Estrae tutti i claims dal token JWT
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser()
-                .setSigningKey(secret)
-                .parseClaimsJws(token)
-                .getBody();
+            .setSigningKey(secret)
+            .parseClaimsJws(token)
+            .getBody();
     }
 
     // Verifica se il token JWT è scaduto
@@ -54,11 +55,10 @@ public class JwtTokenUtil {
     }
 
     // Genera un token JWT per l'utente, includendo i ruoli
-    public String generateToken(UserDetails userDetails) {
-        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-        List<String> roles = authorities.stream()
-                                        .map(GrantedAuthority::getAuthority)
-                                        .collect(Collectors.toList());
+    public String generateToken(AppUser user) {
+        List<String> roles = user.getRoles() != null ?
+            user.getRoles().stream().map(Enum::name).collect(Collectors.toList()) :
+            List.of(); // Se roles è null, usa una lista vuota
 
 <<<<<<< Updated upstream
         return Jwts.builder()
@@ -80,6 +80,8 @@ public class JwtTokenUtil {
 >>>>>>> Stashed changes
     }
 
+
+
     // Estrae i ruoli dal token JWT
     public List<String> getRolesFromToken(String token) {
         Claims claims = getAllClaimsFromToken(token);
@@ -91,4 +93,6 @@ public class JwtTokenUtil {
         final String username = getUsernameFromToken(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
+
 }
+

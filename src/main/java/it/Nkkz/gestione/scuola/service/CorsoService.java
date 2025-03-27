@@ -1,17 +1,16 @@
 package it.Nkkz.gestione.scuola.service;
 
-import it.Nkkz.gestione.scuola.dto.CorsoRequestDTO;
-import it.Nkkz.gestione.scuola.dto.CorsoResponseDTO;
-import it.Nkkz.gestione.scuola.entity.Aula;
-import it.Nkkz.gestione.scuola.entity.Corso;
-import it.Nkkz.gestione.scuola.entity.Studente;
+import it.Nkkz.gestione.scuola.dto.*;
+import it.Nkkz.gestione.scuola.entity.*;
 import it.Nkkz.gestione.scuola.repository.AulaRepository;
 import it.Nkkz.gestione.scuola.repository.CorsoRepository;
+import it.Nkkz.gestione.scuola.repository.InsegnanteRepository;
 import it.Nkkz.gestione.scuola.repository.StudenteRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -110,11 +109,11 @@ public class CorsoService {
 >>>>>>> Stashed changes
 		Corso corso = new Corso();
 		BeanUtils.copyProperties(request, corso);
+		corso.setSecondoGiorno(request.getSecondoGiorno());
+		corso.setSecondoOrario(request.getSecondoOrario());
+		corso.setAula(aula);
 		corso.setStudenti(studenteRepository.findAllById(request.getStudentiIds()));
 		corso.setAttivo(true);
-
-		Optional<Aula> aulaDisponibile = aulaRepository.findById(request.getAulaId());
-		aulaDisponibile.ifPresent(corso::setAula);
 
 		corsoRepository.save(corso);
 		return convertToResponseDTO(corso);
@@ -151,6 +150,9 @@ public class CorsoService {
 
 >>>>>>> Stashed changes
 		BeanUtils.copyProperties(request, corso, "id");
+		corso.setSecondoGiorno(request.getSecondoGiorno());
+		corso.setSecondoOrario(request.getSecondoOrario());
+		corso.setAula(aula);
 		corso.setStudenti(studenteRepository.findAllById(request.getStudentiIds()));
 
 		corsoRepository.save(corso);
@@ -179,12 +181,6 @@ public class CorsoService {
 	public void eliminaCorso(Long id) {
 		Corso corso = corsoRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
-
-		// Libera gli orari e l'aula del corso eliminato
-		if (corso.getAula() != null) {
-			corso.getAula().getDisponibilita().remove(corso.getGiorno());
-			aulaRepository.save(corso.getAula());
-		}
 
 		corsoRepository.deleteById(id);
 	}
@@ -222,32 +218,13 @@ public class CorsoService {
 			throw new IllegalArgumentException("Impossibile dividere un corso con meno di 2 studenti.");
 		}
 
-		int numeroStudentiPrimoGruppo = studenti.size() / 2;
+		int metà = studenti.size() / 2;
 
-		List<Studente> primoGruppo = new ArrayList<>(studenti.subList(0, numeroStudentiPrimoGruppo));
-		List<Studente> secondoGruppo = new ArrayList<>(studenti.subList(numeroStudentiPrimoGruppo, studenti.size()));
+		List<Studente> primoGruppo = new ArrayList<>(studenti.subList(0, metà));
+		List<Studente> secondoGruppo = new ArrayList<>(studenti.subList(metà, studenti.size()));
 
-		Corso corso1 = new Corso();
-		corso1.setLingua(corso.getLingua());
-		corso1.setTipoCorso(corso.getTipoCorso());
-		corso1.setFrequenza(corso.getFrequenza());
-		corso1.setGiorno(corso.getGiorno());
-		corso1.setOrario(corso.getOrario());
-		corso1.setLivello(corso.getLivello());
-		corso1.setInsegnante(corso.getInsegnante());
-		corso1.setStudenti(primoGruppo);
-		corso1.setAttivo(true);
-
-		Corso corso2 = new Corso();
-		corso2.setLingua(corso.getLingua());
-		corso2.setTipoCorso(corso.getTipoCorso());
-		corso2.setFrequenza(corso.getFrequenza());
-		corso2.setGiorno(corso.getGiorno());
-		corso2.setOrario(corso.getOrario());
-		corso2.setLivello(corso.getLivello());
-		corso2.setInsegnante(corso.getInsegnante());
-		corso2.setStudenti(secondoGruppo);
-		corso2.setAttivo(true);
+		Corso corso1 = new Corso(corso, primoGruppo);
+		Corso corso2 = new Corso(corso, secondoGruppo);
 
 		corsoRepository.save(corso1);
 		corsoRepository.save(corso2);
@@ -262,27 +239,117 @@ public class CorsoService {
 		System.out.println("Posto extra aggiunto al corso " + corso.getLingua());
 	}
 
-	// ✅ **Genera corsi automaticamente**
 	public void generaCorsiAutomaticamente() {
-		List<Studente> studenti = studenteRepository.findAll();
+		System.out.println("✅ Inizio generazione automatica corsi...");
 
-		Map<String, List<Studente>> gruppi = studenti.stream()
-			.collect(Collectors.groupingBy(s -> s.getLinguaDaImparare() + "-" + s.getLivello() + "-" + (s.getEta() / 3)));
+		List<Studente> studentiDisponibili = new ArrayList<>(
+			studenteRepository.findStudentiSenzaCorso().stream()
+				.filter(s -> !s.isCorsoPrivato())
+				.toList()
+		);
 
-		for (Map.Entry<String, List<Studente>> entry : gruppi.entrySet()) {
-			List<Studente> gruppoStudenti = new ArrayList<>(entry.getValue());
+		System.out.println("Studenti disponibili: " + studentiDisponibili.size());
 
-			while (gruppoStudenti.size() >= 3) {
-				List<Studente> corsoStudenti = new ArrayList<>(gruppoStudenti.subList(0, Math.min(gruppoStudenti.size(), 9)));
-				gruppoStudenti.removeAll(corsoStudenti);
+		if (studentiDisponibili.isEmpty()) {
+			System.out.println("⚠️ Nessuno studente disponibile per la generazione dei corsi.");
+			return;
+		}
+
+		List<Corso> nuoviCorsi = new ArrayList<>();
+		List<Corso> corsiEsistenti = corsoRepository.findByAttivoTrue();
+		List<Set<Studente>> listaDiAttesa = new ArrayList<>();
+
+		while (!studentiDisponibili.isEmpty()) {
+			Studente studente = studentiDisponibili.get(0);
+
+			Optional<String> giornoCompatibile = studente.getGiorniPreferiti().stream().findFirst();
+			Optional<String> orarioCompatibile = studente.getFasceOrariePreferite().stream().findFirst();
+
+			System.out.println("Giorno compatibile: " + giornoCompatibile.orElse("Nessuno"));
+			System.out.println("Orario compatibile: " + orarioCompatibile.orElse("Nessuno"));
+
+			if (giornoCompatibile.isEmpty() || orarioCompatibile.isEmpty()) {
+				studentiDisponibili.remove(studente);
+				continue;
+			}
+
+			List<Studente> gruppoCompatibile = studentiDisponibili.stream()
+				.filter(s -> s.getLinguaDaImparare().equalsIgnoreCase(studente.getLinguaDaImparare()))
+				.filter(s -> s.getLivello() == studente.getLivello())
+				.filter(s -> Math.abs(s.getEta() - studente.getEta()) <= 2)
+				.filter(s -> Objects.equals(s.getTipoCorsoGruppo(), studente.getTipoCorsoGruppo()))
+				.filter(s -> s.getGiorniPreferiti().contains(giornoCompatibile.get()))
+				.filter(s -> {
+					boolean match = s.getFasceOrariePreferite().contains(orarioCompatibile.get());
+					if (!match) {
+						boolean orarioSimile = s.getFasceOrariePreferite().stream()
+							.anyMatch(o -> o.length() >= 5 && orarioCompatibile.get().startsWith(o.substring(0, 5)));
+						return orarioSimile;
+					}
+					return true;
+				})
+				.collect(Collectors.toList());
+
+			gruppoCompatibile.add(studente);
+			Set<Studente> gruppoUnico = new HashSet<>(gruppoCompatibile);
+
+			if (gruppoUnico.size() < 3) {
+				System.out.println("⚠️ Gruppo troppo piccolo, aggiunto alla lista di attesa.");
+				listaDiAttesa.add(gruppoUnico);
+				studentiDisponibili.removeAll(gruppoUnico);
+				continue;
+			}
+
+			List<Studente> listaGruppo = new ArrayList<>(gruppoUnico);
+			int index = 0;
+
+			while (index < listaGruppo.size()) {
+				Optional<Aula> aulaDisponibile = aulaRepository.findAll().stream()
+					.filter(a -> a.getCapienzaMax() >= listaGruppo.size())
+					.filter(a -> corsiEsistenti.stream().noneMatch(c ->
+						c.getAula() != null &&
+							c.getAula().getId().equals(a.getId()) &&
+							(
+								(c.getGiorno().equals(giornoCompatibile.get()) && c.getOrario().equals(orarioCompatibile.get())) ||
+									("2 volte a settimana".equalsIgnoreCase(studente.getTipoCorsoGruppo()) &&
+										c.getSecondoGiorno() != null && c.getSecondoOrario() != null &&
+										c.getSecondoGiorno().equals(giornoCompatibile.get()) &&
+										c.getSecondoOrario().equals(orarioCompatibile.get()))
+							)
+					))
+					.findFirst();
+
+				if (aulaDisponibile.isEmpty()) {
+					System.out.println("⚠️ Nessuna aula disponibile per questo orario.");
+					index = listaGruppo.size();
+					continue;
+				}
+
+				int capienzaMassima = aulaDisponibile.map(Aula::getCapienzaMax).orElse(10);
+				int fine = Math.min(index + capienzaMassima, listaGruppo.size());
+				List<Studente> sottoGruppo = listaGruppo.subList(index, fine);
+
+				Optional<Insegnante> insegnanteOpt = (studente.getInsegnante() != null)
+					? insegnanteRepository.findById(studente.getInsegnante().getId())
+					: insegnanteRepository.findAll().stream()
+					.filter(i -> i.getLingua().equalsIgnoreCase(studente.getLinguaDaImparare()))
+					.findFirst();
+
+				if (insegnanteOpt.isEmpty()) {
+					index = fine;
+					continue;
+				}
 
 				Corso corso = new Corso();
-				corso.setLingua(entry.getKey().split("-")[0]);
+				corso.setLingua(studente.getLinguaDaImparare());
+				corso.setLivello(studente.getLivello());
 				corso.setTipoCorso("GRUPPO");
-				corso.setFrequenza("1 volta a settimana");
-				corso.setGiorno("Lunedì");
-				corso.setOrario("16:00-18:00");
-				corso.setStudenti(corsoStudenti);
+				corso.setFrequenza(studente.getTipoCorsoGruppo());
+				corso.setGiorno(giornoCompatibile.get());
+				corso.setOrario(orarioCompatibile.get());
+				corso.setInsegnante(insegnanteOpt.get());
+				corso.setAula(aulaDisponibile.get());
+				corso.setStudenti(new ArrayList<>(sottoGruppo));
 				corso.setAttivo(true);
 
 				corsoRepository.save(corso);
@@ -401,4 +468,5 @@ public class CorsoService {
 >>>>>>> Stashed changes
 		return dto;
 	}
+
 }

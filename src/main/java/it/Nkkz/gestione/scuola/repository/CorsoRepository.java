@@ -1,11 +1,11 @@
 package it.Nkkz.gestione.scuola.repository;
 
 import it.Nkkz.gestione.scuola.entity.Corso;
+import it.Nkkz.gestione.scuola.entity.Livello;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Repository
@@ -32,10 +32,10 @@ public interface CorsoRepository extends JpaRepository<Corso, Long> {
 	// ✅ Trova i corsi per giorno e orario (per liberare un orario)
 	List<Corso> findByGiornoAndOrarioAndAttivoTrue(String giorno, String orario);
 
-	// ✅ Query per contare le ore totali insegnate da un docente in un periodo
-	@Query("SELECT COUNT(c) FROM Corso c WHERE c.insegnante.id = :insegnanteId AND c.attivo = true")
-	int countOreInsegnateByInsegnante(Long insegnanteId);
+	// ✅ Trova i corsi programmati in un determinato giorno della settimana
+	List<Corso> findByGiornoAndAttivoTrue(String giorno);
 
+	// ✅ Trova corsi per tipologia
 	List<Corso> findByTipoCorsoAndAttivoTrue(String tipoCorso);
 =======
 	//Trova i corsi per giorno e orario

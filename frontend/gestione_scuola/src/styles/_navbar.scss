@@ -1,0 +1,75 @@
+.navbar {
+  background-color: $colore-verde-intenso;
+  padding: 8px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1030;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  transition: background-color 0.3s ease;
+
+  .container {
+    padding-left: 0;
+  }
+
+  .navbar-brand {
+    letter-spacing: 1px;
+    font-size: 1.3rem;
+    color: $colore-sabbia;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.1);
+    font-weight: 700;
+  }
+
+  .nav-link {
+    color: $colore-sabbia;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: color 0.25s ease;
+
+    &:hover,
+    &:focus {
+      color: $colore-marrone;
+    }
+  }
+
+  .navbar-toggler {
+    border-color: $colore-marrone;
+    background-color: lighten($colore-verde-intenso, 10%);
+    transition: all 0.2s ease;
+
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(204, 156, 119, 0.3);
+    }
+  }
+
+  .navbar-nav {
+    @media (min-width: 992px) {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      gap: 20px;
+    }
+
+    @media (max-width: 991px) {
+      background-color: $colore-verde-intenso;
+      width: 100%;
+      padding: 15px;
+
+      .btn-outline-danger {
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin-top: 15px;
+        border-color: $colore-marrone;
+        color: $colore-marrone;
+
+        &:hover {
+          background-color: $colore-marrone;
+          color: white;
+          border-color: $colore-marrone;
+        }
+      }
+    }
+  }
+}

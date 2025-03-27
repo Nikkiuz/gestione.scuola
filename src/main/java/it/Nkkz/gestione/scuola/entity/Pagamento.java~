@@ -27,7 +27,7 @@ public class Pagamento {
 	private double importo; // Importo pagato
 
 	@Column(nullable = false)
-	private String mensilitàSaldata; // Mensilità a cui si riferisce il pagamento (es. "Febbraio 2025")
+	private String mensilitaSaldata; // Mensilità a cui si riferisce il pagamento (es. "Febbraio 2025")
 
 	@Column(nullable = false, unique = true)
 	private String numeroRicevuta; // Numero ricevuta/fattura univoco

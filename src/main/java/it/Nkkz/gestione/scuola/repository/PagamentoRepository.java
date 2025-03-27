@@ -2,6 +2,7 @@ package it.Nkkz.gestione.scuola.repository;
 
 import it.Nkkz.gestione.scuola.entity.Pagamento;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
 	List<Pagamento> findByDataPagamentoBetween(LocalDate start, LocalDate end);
 
-
+	@Query("SELECT COALESCE(SUM(p.importo), 0) FROM Pagamento p")
+	double getTotalePagamenti();
 
 }

@@ -60,4 +60,5 @@ public class InsegnanteService {
 		BeanUtils.copyProperties(insegnante, dto);
 		return dto;
 	}
+
 }

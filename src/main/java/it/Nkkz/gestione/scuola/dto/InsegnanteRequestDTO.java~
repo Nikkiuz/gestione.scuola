@@ -1,4 +1,0 @@
-package it.Nkkz.gestione.scuola.dto;
-
-public class InsegnanteRequestDTO {
-}

@@ -1,0 +1,46 @@
+.modal-content {
+  background-color: $colore-sabbia;
+  color: $colore-verde-scuro;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease-in-out;
+}
+
+.modal-header {
+  background-color: $colore-verde-intenso;
+  color: $colore-sabbia;
+  border-bottom: none;
+  padding: 1rem 1.5rem;
+
+  .btn-close {
+    filter: brightness(0.9);
+    &:hover {
+      filter: brightness(1.2);
+    }
+  }
+}
+
+.modal-title {
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  border-top: none;
+  padding: 1rem 1.5rem;
+
+  .btn {
+    min-width: 100px;
+    transition: box-shadow 0.2s;
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(72, 98, 88, 0.25);
+    }
+  }
+}

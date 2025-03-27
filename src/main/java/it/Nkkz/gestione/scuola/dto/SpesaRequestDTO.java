@@ -8,6 +8,6 @@ import java.time.LocalDate;
 public class SpesaRequestDTO {
 	private CategoriaSpesa categoria;
 	private double importo;
-	private LocalDate data;
+	private LocalDate dataSpesa;
 	private String descrizione;
 }

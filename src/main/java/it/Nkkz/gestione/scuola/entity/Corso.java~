@@ -29,8 +29,9 @@ public class Corso {
 	@Column(nullable = false)
 	private String orario;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private String livello;
+	private Livello livello;
 
 	@ManyToOne
 	@JoinColumn(name = "insegnante_id")
@@ -47,4 +48,21 @@ public class Corso {
 		inverseJoinColumns = @JoinColumn(name = "studente_id")
 	)
 	private List<Studente> studenti;
+
+	@Column(nullable = false)
+	private boolean attivo = true; // Indica se il corso è attivo o interrotto
+
+	// ✅ Costruttore per clonare un corso e assegnare nuovi studenti
+	public Corso(Corso corsoOriginale, List<Studente> nuoviStudenti) {
+		this.lingua = corsoOriginale.getLingua();
+		this.tipoCorso = corsoOriginale.getTipoCorso();
+		this.frequenza = corsoOriginale.getFrequenza();
+		this.giorno = corsoOriginale.getGiorno();
+		this.orario = corsoOriginale.getOrario();
+		this.livello = corsoOriginale.getLivello();
+		this.insegnante = corsoOriginale.getInsegnante();
+		this.aula = corsoOriginale.getAula();
+		this.studenti = nuoviStudenti;
+	}
+
 }

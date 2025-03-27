@@ -11,8 +11,9 @@ public class PagamentoResponseDTO {
 	private Long id; // ID del pagamento
 	private String studenteNome; // Nome e cognome dello studente
 	private LocalDate dataPagamento; // Data del pagamento
-	private BigDecimal importo; // Importo pagato
-	private String mensilitàSaldata; // Esempio: "Gennaio 2025"
+	private double importo; // Importo pagato
+	private String mensilitaSaldata; // Esempio: "Gennaio 2025"
 	private MetodoPagamento metodoPagamento; // Bonifico / Carta
 	private String numeroRicevuta; // Numero univoco di ricevuta/fattura
+	private String note;
 }

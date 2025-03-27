@@ -10,4 +10,7 @@ public class ReportDTO {
 	private Map<String, Double> speseRegistrate; // Categoria Spesa -> Totale €
 	private double bilancio; // Entrate - Uscite
 	private String periodo; // "Mensile" o "Annuale"
+	private double totaleEntrate;
+	private double totaleUscite;
+	private int totaleOreInsegnate;
 }

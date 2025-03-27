@@ -3,6 +3,8 @@ package it.Nkkz.gestione.scuola.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 @Entity

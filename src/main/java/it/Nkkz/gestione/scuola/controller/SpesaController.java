@@ -2,6 +2,7 @@ package it.Nkkz.gestione.scuola.controller;
 
 import it.Nkkz.gestione.scuola.dto.SpesaRequestDTO;
 import it.Nkkz.gestione.scuola.dto.SpesaResponseDTO;
+import it.Nkkz.gestione.scuola.entity.Spesa;
 import it.Nkkz.gestione.scuola.service.SpesaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,5 +55,15 @@ public class SpesaController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteSpesa(@PathVariable Long id) {
 		spesaService.deleteSpesa(id);
+	}
+
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@GetMapping("/filtrate")
+	public List<SpesaResponseDTO> getSpeseFiltrate(
+		@RequestParam(required = false) Integer anno,
+		@RequestParam(required = false) Integer mese,
+		@RequestParam(required = false) Spesa.CategoriaSpesa categoria
+	) {
+		return spesaService.getSpeseFiltrate(anno, mese, categoria);
 	}
 }

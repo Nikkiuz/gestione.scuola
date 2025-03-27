@@ -1,17 +1,28 @@
 package it.Nkkz.gestione.scuola.controller;
 
+import it.Nkkz.gestione.scuola.dto.PagamentoRequestDTO;
 import it.Nkkz.gestione.scuola.dto.StudenteRequestDTO;
 import it.Nkkz.gestione.scuola.dto.StudenteResponseDTO;
+import it.Nkkz.gestione.scuola.entity.Corso;
+import it.Nkkz.gestione.scuola.entity.Livello;
+import it.Nkkz.gestione.scuola.entity.Pagamento;
+import it.Nkkz.gestione.scuola.entity.Studente;
+import it.Nkkz.gestione.scuola.repository.CorsoRepository;
+import it.Nkkz.gestione.scuola.repository.PagamentoRepository;
+import it.Nkkz.gestione.scuola.repository.StudenteRepository;
 import it.Nkkz.gestione.scuola.service.StudenteService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/studenti")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class StudenteController {
 
 	private final StudenteService studenteService;
@@ -28,6 +39,9 @@ public class StudenteController {
 	) {
 >>>>>>> Stashed changes
 		this.studenteService = studenteService;
+		this.studenteRepository = studenteRepository;
+		this.corsoRepository = corsoRepository;
+		this.pagamentoRepository = pagamentoRepository;
 	}
 
 <<<<<<< Updated upstream
@@ -36,7 +50,6 @@ public class StudenteController {
 	//Recupera tutti gli studenti
 >>>>>>> Stashed changes
 	@GetMapping
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<StudenteResponseDTO>> getAllStudenti() {
 		return ResponseEntity.ok(studenteService.getAllStudenti());
 	}
@@ -47,7 +60,6 @@ public class StudenteController {
 	//Recupera uno studente per ID
 >>>>>>> Stashed changes
 	@GetMapping("/{id}")
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<StudenteResponseDTO> getStudenteById(@PathVariable Long id) {
 		return ResponseEntity.ok(studenteService.getStudenteById(id));
 	}
@@ -58,7 +70,6 @@ public class StudenteController {
 	//Recupera studenti per lingua e livello iniziale (ORA SENZA STRINGHE)
 >>>>>>> Stashed changes
 	@GetMapping("/filtra")
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByLinguaELivello(
 		@RequestParam String lingua,
 <<<<<<< Updated upstream
@@ -75,7 +86,6 @@ public class StudenteController {
 	//Recupera gli studenti di un insegnante specifico
 >>>>>>> Stashed changes
 	@GetMapping("/insegnante/{id}")
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByInsegnante(@PathVariable Long id) {
 		return ResponseEntity.ok(studenteService.getStudentiByInsegnante(id));
 	}
@@ -86,7 +96,6 @@ public class StudenteController {
 	//Recupera studenti per tipo di corso (privato o di gruppo)
 >>>>>>> Stashed changes
 	@GetMapping("/tipo-corso")
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<List<StudenteResponseDTO>> getStudentiByTipoCorso(@RequestParam boolean corsoPrivato) {
 		return ResponseEntity.ok(studenteService.getStudentiByTipoCorso(corsoPrivato));
 	}
@@ -97,7 +106,6 @@ public class StudenteController {
 	//Crea un nuovo studente
 >>>>>>> Stashed changes
 	@PostMapping
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public StudenteResponseDTO createStudente(@RequestBody StudenteRequestDTO studenteRequestDTO) {
 		return studenteService.createStudente(studenteRequestDTO);
@@ -109,10 +117,13 @@ public class StudenteController {
 	//Modifica uno studente
 >>>>>>> Stashed changes
 	@PutMapping("/{id}")
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<StudenteResponseDTO> updateStudente(
 		@PathVariable Long id,
 		@RequestBody StudenteRequestDTO studenteRequestDTO) {
+
+		System.out.println("📌 updateStudente CHIAMATO con ID: " + id);
+		System.out.println("📌 Dati ricevuti: " + studenteRequestDTO);
+
 		return ResponseEntity.ok(studenteService.updateStudente(id, studenteRequestDTO));
 	}
 
@@ -122,7 +133,6 @@ public class StudenteController {
 	//Elimina uno studente
 >>>>>>> Stashed changes
 	@DeleteMapping("/{id}")
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deleteStudente(@PathVariable Long id) {
 		studenteService.deleteStudente(id);

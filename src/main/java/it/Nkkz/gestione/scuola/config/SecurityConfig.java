@@ -2,18 +2,26 @@ package it.Nkkz.gestione.scuola.config;
 
 import it.Nkkz.gestione.scuola.auth.JwtAuthenticationEntryPoint;
 import it.Nkkz.gestione.scuola.auth.JwtRequestFilter;
+import it.Nkkz.gestione.scuola.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -31,20 +39,46 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
-			.csrf(csrf -> csrf.disable()) // 🔴 Disabilitiamo CSRF perché usiamo JWT
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/auth/**").permitAll() // ✅ Accesso libero a login e registrazione
-				.requestMatchers("/api/admin/**").hasRole("ADMIN") // 🔐 Solo Admin può gestire tutto
-				.requestMatchers("/api/insegnante/me").hasRole("INSEGNANTE") // 🔐 Un insegnante può modificare SOLO il proprio profilo
-				.requestMatchers("/api/insegnante/miei-corsi").hasRole("INSEGNANTE") // 🔐 Un insegnante può vedere i suoi corsi
-				.requestMatchers("/api/insegnante/change-password").hasRole("INSEGNANTE") // 🔐 Un insegnante può cambiare la password
-				.anyRequest().authenticated() // 🔒 Tutti gli altri endpoint richiedono autenticazione
+				.requestMatchers("/api/auth/**").permitAll()  // ✅ Permetti login e registrazione senza autenticazione
+				.requestMatchers("/api/studenti/**").hasRole("ADMIN")  // 🔒 SOLO Admin può gestire gli studenti
+				.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()  // ✅ Swagger libero
+				.anyRequest().authenticated()  // 🔐 Tutto il resto richiede autenticazione!
 			)
-			.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)) // 🔐 Gestione errori di autenticazione
-			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ❌ Disabilitiamo sessioni
-			.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class); // ✅ Aggiungiamo il filtro JWT
+			.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+
 
 		return http.build();
+	}
+
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOrigins(List.of("http://localhost:5173")); // ⚠️ Usa la porta giusta
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+		configuration.setAllowCredentials(true); // Consente credenziali come token di autenticazione
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
+	}
+
+	@Bean
+	public UserDetailsService userDetailsService(CustomUserDetailsService customUserDetailsService) {
+		return customUserDetailsService;
+	}
+
+	@Bean
+	public DaoAuthenticationProvider authenticationProvider(CustomUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+		authProvider.setUserDetailsService(userDetailsService);
+		authProvider.setPasswordEncoder(passwordEncoder);
+		return authProvider;
 	}
 
 	@Bean
@@ -54,6 +88,6 @@ public class SecurityConfig {
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder(); // 🔐 Usiamo BCrypt per criptare le password
+		return new BCryptPasswordEncoder();
 	}
 }

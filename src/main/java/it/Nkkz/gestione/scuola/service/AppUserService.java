@@ -1,8 +1,10 @@
 package it.Nkkz.gestione.scuola.service;
 
+import it.Nkkz.gestione.scuola.auth.LoginRequest;
+import it.Nkkz.gestione.scuola.auth.LoginResponse;
 import it.Nkkz.gestione.scuola.entity.app_users.AppUser;
-import it.Nkkz.gestione.scuola.repository.AppUserRepository;
 import it.Nkkz.gestione.scuola.entity.app_users.Role;
+import it.Nkkz.gestione.scuola.repository.AppUserRepository;
 import it.Nkkz.gestione.scuola.auth.JwtTokenUtil;
 import jakarta.persistence.EntityExistsException;
 import org.slf4j.Logger;
@@ -10,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -39,10 +43,7 @@ public class AppUserService {
     @Value("${spring.mail.username}")
     private String adminEmail;
 
-    public AppUser registerUser(String username, String email, String password, Set<Role> roles) {
-        if (appUserRepository.existsByUsername(username)) {
-            throw new EntityExistsException("Username già in uso");
-        }
+    public AppUser registerUser(String username, String email, String password, Role role) {
         if (appUserRepository.existsByEmail(email)) {
             throw new EntityExistsException("Email già in uso");
         }
@@ -51,7 +52,7 @@ public class AppUserService {
         appUser.setUsername(username);
         appUser.setEmail(email);
         appUser.setPassword(passwordEncoder.encode(password));
-        appUser.setRoles(roles);
+        appUser.setRoles(Set.of(role));
 
         // Salva utente
         appUserRepository.save(appUser);

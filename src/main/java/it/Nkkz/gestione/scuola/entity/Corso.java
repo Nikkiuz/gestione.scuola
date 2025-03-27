@@ -29,8 +29,16 @@ public class Corso {
 	@Column(nullable = false)
 	private String orario;
 
+	@Column
+	private String secondoGiorno;
+
+	@Column
+	private String secondoOrario;
+
+
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private String livello;
+	private Livello livello;
 
 	@ManyToOne
 	@JoinColumn(name = "insegnante_id")

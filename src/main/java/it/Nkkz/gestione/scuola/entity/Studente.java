@@ -3,6 +3,8 @@ package it.Nkkz.gestione.scuola.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -28,8 +30,9 @@ public class Studente {
 	@Column(nullable = false)
 	private String linguaDaImparare;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private String livello;  // Inserito manualmente dall'admin
+	private Livello livello;
 
 	@ElementCollection
 	private Set<String> giorniPreferiti;
@@ -44,15 +47,19 @@ public class Studente {
 
 	private String tipoCorsoGruppo;
 
+	@ManyToMany(mappedBy = "studenti")
+	private List<Corso> corsi = new ArrayList<>();
+
 	@ManyToOne
 	@JoinColumn(name = "insegnante_id")
-	private Insegnante insegnante;  // 🔥 ORA È GIUSTO! `Insegnante` è un'entità separata
+	private Insegnante insegnante;  //
 
 	@Column(nullable = false)
-	private String tipologiaPagamento;  // Ex "Tipo di iscrizione"
+	private String tipologiaIscrizione;
 
 	//Metodo per ottenere i giorni disponibili
 	public Set<String> getGiorniDisponibili() {
 		return giorniPreferiti;
 	}
+
 }
