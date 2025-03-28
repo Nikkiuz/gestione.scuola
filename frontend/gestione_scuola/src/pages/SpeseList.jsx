@@ -162,6 +162,7 @@ const handleSubmit = async (e) => {
         ) : error ? (
           <div className="alert alert-danger">{error}</div>
         ) : (
+          <div className="table-responsive-wrapper">
           <table className="table table-striped">
             <thead>
               <tr>
@@ -205,6 +206,7 @@ const handleSubmit = async (e) => {
               )}
             </tbody>
           </table>
+          </div>
         )}
 
         {/* Modale di Aggiunta Spesa */}

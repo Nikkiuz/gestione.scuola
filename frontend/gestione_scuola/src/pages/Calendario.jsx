@@ -171,7 +171,9 @@ return (
         >
           ⬅️ Settimana Precedente
         </button>
-        <h5>
+        <h5
+        className='text-center fs-5 mt-3'
+        >
           {settimana.startOf('isoWeek').format('DD MMMM YYYY')} -{' '}
           {settimana.endOf('isoWeek').format('DD MMMM YYYY')}
         </h5>
@@ -189,6 +191,7 @@ return (
       ) : error ? (
         <div className="alert alert-danger">{error}</div>
       ) : (
+        <div className="table-responsive-wrapper">
         <table
           id="calendario-pdf"
           className="table table-bordered calendario-table"
@@ -252,6 +255,7 @@ return (
             ))}
           </tbody>
         </table>
+        </div>
       )}
 
       <div className="text-center mb-3">

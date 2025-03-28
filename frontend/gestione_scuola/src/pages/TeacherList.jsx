@@ -243,6 +243,7 @@ const TeacherList = () => {
 
         {/* 📌 Tabella Insegnanti */}
         {!loading && !error && (
+          <div className="table-responsive-wrapper">
           <table className="table table-striped">
             <thead>
               <tr>
@@ -278,6 +279,7 @@ const TeacherList = () => {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </>
