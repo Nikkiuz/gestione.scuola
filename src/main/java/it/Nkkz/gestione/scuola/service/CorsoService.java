@@ -231,7 +231,7 @@ public class CorsoService {
 			}
 
 			List<Studente> gruppoCompatibile = studentiDisponibili.stream()
-				.filter(s -> s.getLinguaDaImparare().equalsIgnoreCase(studente.getLinguaDaImparare()))
+				.filter(s -> s.getLinguaDaImparare().equals(studente.getLinguaDaImparare()))
 				.filter(s -> s.getLivello() == studente.getLivello())
 				.filter(s -> Math.abs(s.getEta() - studente.getEta()) <= 2)
 				.filter(s -> Objects.equals(s.getTipoCorsoGruppo(), studente.getTipoCorsoGruppo()))
@@ -289,7 +289,7 @@ public class CorsoService {
 				Optional<Insegnante> insegnanteOpt = (studente.getInsegnante() != null)
 					? insegnanteRepository.findById(studente.getInsegnante().getId())
 					: insegnanteRepository.findAll().stream()
-					.filter(i -> i.getLingua().equalsIgnoreCase(studente.getLinguaDaImparare()))
+					.filter(i -> i.getLingua().equals(studente.getLinguaDaImparare()))
 					.findFirst();
 
 				if (insegnanteOpt.isEmpty()) {

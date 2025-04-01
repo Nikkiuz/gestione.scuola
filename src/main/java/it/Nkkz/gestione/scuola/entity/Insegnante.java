@@ -25,7 +25,8 @@ public class Insegnante {
 	private String email;
 
 	@Column(nullable = false)
-	private String lingua;
+	@Enumerated(EnumType.STRING)
+	private Lingua lingua;
 
 	@ElementCollection
 	private Set<String> giorniDisponibili;

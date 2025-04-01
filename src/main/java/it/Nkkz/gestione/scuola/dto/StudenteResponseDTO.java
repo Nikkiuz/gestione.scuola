@@ -1,5 +1,6 @@
 package it.Nkkz.gestione.scuola.dto;
 
+import it.Nkkz.gestione.scuola.entity.Lingua;
 import it.Nkkz.gestione.scuola.entity.Livello;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +15,7 @@ public class StudenteResponseDTO {
 	private String nome;
 	private String cognome;
 	private int eta;
-	private String linguaDaImparare;
+	private Lingua linguaDaImparare;
 	private Livello livello;
 	private Set<String> giorniPreferiti;
 	private Set<String> fasceOrariePreferite;

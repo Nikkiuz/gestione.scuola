@@ -199,17 +199,13 @@ public class CorsoService {
 	public void generaCorsiAutomaticamente() {
 		System.out.println("✅ Inizio generazione automatica corsi...");
 
-		// 1. Recupera studenti disponibili con logging migliorato
 		List<Studente> studentiDisponibili = new ArrayList<>(
 			studenteRepository.findStudentiSenzaCorso().stream()
 				.filter(s -> !s.isCorsoPrivato())
 				.toList()
 		);
 
-		// Log studenti per lingua
-		Map<String, Long> conteggioPerLingua = studentiDisponibili.stream()
-			.collect(Collectors.groupingBy(Studente::getLinguaDaImparare, Collectors.counting()));
-		System.out.println("Studenti disponibili per lingua: " + conteggioPerLingua);
+		System.out.println("Studenti disponibili: " + studentiDisponibili.size());
 
 		if (studentiDisponibili.isEmpty()) {
 			System.out.println("⚠️ Nessuno studente disponibile per la generazione dei corsi.");
@@ -220,31 +216,22 @@ public class CorsoService {
 		List<Corso> corsiEsistenti = corsoRepository.findByAttivoTrue();
 		List<Set<Studente>> listaDiAttesa = new ArrayList<>();
 
-		// 2. Precarica insegnanti e aule per performance
-		List<Insegnante> tuttiInsegnanti = insegnanteRepository.findAll();
-		List<Aula> tutteAule = aulaRepository.findAll();
-
 		while (!studentiDisponibili.isEmpty()) {
 			Studente studente = studentiDisponibili.get(0);
-			System.out.println("\nElaborazione studente: " + studente.getNome() + " " + studente.getCognome() +
-				" - Lingua: " + studente.getLinguaDaImparare() +
-				" - Livello: " + studente.getLivello());
 
-			// 3. Trova il primo giorno/orario compatibile con logging migliorato
 			Optional<String> giornoCompatibile = studente.getGiorniPreferiti().stream().findFirst();
 			Optional<String> orarioCompatibile = studente.getFasceOrariePreferite().stream().findFirst();
 
+			System.out.println("Giorno compatibile: " + giornoCompatibile.orElse("Nessuno"));
+			System.out.println("Orario compatibile: " + orarioCompatibile.orElse("Nessuno"));
+
 			if (giornoCompatibile.isEmpty() || orarioCompatibile.isEmpty()) {
-				System.out.println("⚠️ Student senza giorni/orari preferiti - Skippato: " + studente.getId());
 				studentiDisponibili.remove(studente);
 				continue;
 			}
 
-			System.out.println("Tentativo creazione corso per: " + giornoCompatibile.get() + " " + orarioCompatibile.get());
-
-			// 4. Trova gruppo compatibile con tolleranza migliorata
 			List<Studente> gruppoCompatibile = studentiDisponibili.stream()
-				.filter(s -> s.getLinguaDaImparare().equalsIgnoreCase(studente.getLinguaDaImparare()))
+				.filter(s -> s.getLinguaDaImparare().equals(studente.getLinguaDaImparare()))
 				.filter(s -> s.getLivello() == studente.getLivello())
 				.filter(s -> Math.abs(s.getEta() - studente.getEta()) <= 2)
 				.filter(s -> Objects.equals(s.getTipoCorsoGruppo(), studente.getTipoCorsoGruppo()))
@@ -252,13 +239,9 @@ public class CorsoService {
 				.filter(s -> {
 					boolean match = s.getFasceOrariePreferite().contains(orarioCompatibile.get());
 					if (!match) {
-						// Match più flessibile per orari simili (es. 16:00-18:00 e 16:30-18:30)
-						return s.getFasceOrariePreferite().stream()
-							.anyMatch(o -> {
-								String oraInizioStudente = orarioCompatibile.get().substring(0, 5);
-								String oraInizioO = o.substring(0, 5);
-								return oraInizioStudente.equals(oraInizioO);
-							});
+						boolean orarioSimile = s.getFasceOrariePreferite().stream()
+							.anyMatch(o -> o.length() >= 5 && orarioCompatibile.get().startsWith(o.substring(0, 5)));
+						return orarioSimile;
 					}
 					return true;
 				})
@@ -268,32 +251,25 @@ public class CorsoService {
 			Set<Studente> gruppoUnico = new HashSet<>(gruppoCompatibile);
 
 			if (gruppoUnico.size() < 3) {
-				System.out.println("⚠️ Gruppo troppo piccolo (" + gruppoUnico.size() + " studenti), aggiunto alla lista di attesa per " +
-					studente.getLinguaDaImparare() + " " + studente.getLivello());
+				System.out.println("⚠️ Gruppo troppo piccolo, aggiunto alla lista di attesa.");
 				listaDiAttesa.add(gruppoUnico);
 				studentiDisponibili.removeAll(gruppoUnico);
 				continue;
 			}
 
-			System.out.println("Gruppo compatibile trovato: " + gruppoUnico.size() + " studenti per " +
-				studente.getLinguaDaImparare() + " " + studente.getLivello());
-
 			List<Studente> listaGruppo = new ArrayList<>(gruppoUnico);
 			int index = 0;
 
 			while (index < listaGruppo.size()) {
-				// 5. Trova aula disponibile con query ottimizzata
-				Optional<Aula> aulaDisponibile = tutteAule.stream()
+				Optional<Aula> aulaDisponibile = aulaRepository.findAll().stream()
 					.filter(a -> a.getCapienzaMax() >= listaGruppo.size())
 					.filter(a -> corsiEsistenti.stream().noneMatch(c ->
 						c.getAula() != null &&
 							c.getAula().getId().equals(a.getId()) &&
 							(
-								(c.getGiorno().equals(giornoCompatibile.get()) &&
-									c.getOrario().equals(orarioCompatibile.get())) ||
+								(c.getGiorno().equals(giornoCompatibile.get()) && c.getOrario().equals(orarioCompatibile.get())) ||
 									("2 volte a settimana".equalsIgnoreCase(studente.getTipoCorsoGruppo()) &&
-										c.getSecondoGiorno() != null &&
-										c.getSecondoOrario() != null &&
+										c.getSecondoGiorno() != null && c.getSecondoOrario() != null &&
 										c.getSecondoGiorno().equals(giornoCompatibile.get()) &&
 										c.getSecondoOrario().equals(orarioCompatibile.get()))
 							)
@@ -301,7 +277,7 @@ public class CorsoService {
 					.findFirst();
 
 				if (aulaDisponibile.isEmpty()) {
-					System.out.println("⚠️ Nessuna aula disponibile per " + giornoCompatibile.get() + " " + orarioCompatibile.get());
+					System.out.println("⚠️ Nessuna aula disponibile per questo orario.");
 					index = listaGruppo.size();
 					continue;
 				}
@@ -310,23 +286,17 @@ public class CorsoService {
 				int fine = Math.min(index + capienzaMassima, listaGruppo.size());
 				List<Studente> sottoGruppo = listaGruppo.subList(index, fine);
 
-				// 6. Assegnazione insegnante migliorata
-				Optional<Insegnante> insegnanteOpt = Optional.ofNullable(studente.getInsegnante())
-					.map(i -> insegnanteRepository.findById(i.getId()).orElse(null))
-					.or(() -> tuttiInsegnanti.stream()
-						.filter(i -> i.getLingua().equalsIgnoreCase(studente.getLinguaDaImparare()))
-						.filter(i -> i.getGiorniDisponibili() != null && i.getGiorniDisponibili().contains(giornoCompatibile.get()))
-						.filter(i -> i.getFasceOrarieDisponibili() != null && i.getFasceOrarieDisponibili().contains(orarioCompatibile.get()))
-						.findFirst());
+				Optional<Insegnante> insegnanteOpt = (studente.getInsegnante() != null)
+					? insegnanteRepository.findById(studente.getInsegnante().getId())
+					: insegnanteRepository.findAll().stream()
+					.filter(i -> i.getLingua().equalsIgnoreCase(studente.getLinguaDaImparare()))
+					.findFirst();
 
 				if (insegnanteOpt.isEmpty()) {
-					System.out.println("⚠️ Nessun insegnante disponibile per " + studente.getLinguaDaImparare() +
-						" il " + giornoCompatibile.get() + " alle " + orarioCompatibile.get());
 					index = fine;
 					continue;
 				}
 
-				// 7. Creazione corso
 				Corso corso = new Corso();
 				corso.setLingua(studente.getLinguaDaImparare());
 				corso.setLivello(studente.getLivello());
@@ -339,7 +309,7 @@ public class CorsoService {
 				corso.setStudenti(new ArrayList<>(sottoGruppo));
 				corso.setAttivo(true);
 
-				// Gestione corsi bisettimanali
+				// 💡 Imposta secondo giorno e orario
 				if ("2 volte a settimana".equalsIgnoreCase(corso.getFrequenza())) {
 					List<String> altriGiorni = studente.getGiorniPreferiti().stream()
 						.filter(g -> !g.equals(giornoCompatibile.get()))
@@ -353,16 +323,19 @@ public class CorsoService {
 						String secondoGiorno = altriGiorni.get(0);
 						String secondoOrario = altriOrari.get(0);
 
+						// Verifica che l'aula sia disponibile anche nel secondo slot
 						boolean aulaLiberaSecondoSlot = corsiEsistenti.stream()
 							.noneMatch(c ->
 								c.getAula() != null &&
 									c.getAula().getId().equals(aulaDisponibile.get().getId()) &&
-									((c.getGiorno().equals(secondoGiorno) && c.getOrario().equals(secondoOrario)) ||
-										("2 volte a settimana".equalsIgnoreCase(c.getFrequenza()) &&
-											c.getSecondoGiorno() != null &&
-											c.getSecondoOrario() != null &&
-											c.getSecondoGiorno().equals(secondoGiorno) &&
-											c.getSecondoOrario().equals(secondoOrario)))
+									(
+										(c.getGiorno().equals(secondoGiorno) && c.getOrario().equals(secondoOrario)) ||
+											("2 volte a settimana".equalsIgnoreCase(c.getFrequenza()) &&
+												c.getSecondoGiorno() != null &&
+												c.getSecondoOrario() != null &&
+												c.getSecondoGiorno().equals(secondoGiorno) &&
+												c.getSecondoOrario().equals(secondoOrario))
+									)
 							);
 
 						if (aulaLiberaSecondoSlot) {
@@ -370,15 +343,12 @@ public class CorsoService {
 							corso.setSecondoOrario(secondoOrario);
 							System.out.println("📆 Seconda lezione: " + secondoGiorno + " " + secondoOrario);
 						} else {
-							System.out.println("⚠️ Aula non disponibile per la seconda lezione, corso convertito a 1 volta/settimana");
-							corso.setFrequenza("1 volta a settimana");
+							System.out.println("⚠️ Aula non disponibile per la seconda lezione.");
 						}
 					}
 				}
 
 				nuoviCorsi.add(corso);
-				System.out.println("✅ Creato corso per " + corso.getLingua() + " " + corso.getLivello() +
-					" con " + sottoGruppo.size() + " studenti");
 				index = fine;
 			}
 
@@ -390,105 +360,12 @@ public class CorsoService {
 			System.out.println("✅ Creati " + nuoviCorsi.size() + " nuovi corsi.");
 			if (!listaDiAttesa.isEmpty()) {
 				System.out.println("🔄 Tentativo di unire gruppi in lista di attesa...");
-				gestisciListaDiAttesa(listaDiAttesa);
 			}
 		} else {
 			System.out.println("⚠️ Nessun corso creato.");
 		}
 	}
 
-	private void gestisciListaDiAttesa(List<Set<Studente>> listaDiAttesa) {
-		System.out.println("\n🔄 Inizio gestione lista di attesa (" + listaDiAttesa.size() + " gruppi)");
-
-		List<Corso> nuoviCorsiDaLista = new ArrayList<>();
-		List<Corso> corsiEsistenti = corsoRepository.findByAttivoTrue();
-
-		// Raggruppa gli studenti in lista d'attesa per lingua, livello e tipo corso
-		Map<String, List<Studente>> studentiPerLinguaLivello = listaDiAttesa.stream()
-			.flatMap(Set::stream)
-			.collect(Collectors.groupingBy(
-				s -> s.getLinguaDaImparare() + "_" + s.getLivello() + "_" + s.getTipoCorsoGruppo(),
-				Collectors.toList()
-			));
-
-		studentiPerLinguaLivello.forEach((key, studenti) -> {
-			if (studenti.size() >= 3) {
-				System.out.println("🔍 Tentativo di creare corso da lista attesa: " + key + " (" + studenti.size() + " studenti)");
-
-				// Trova giorni/orari comuni
-				Map<String, Long> giorniComuni = studenti.stream()
-					.flatMap(s -> s.getGiorniPreferiti().stream())
-					.collect(Collectors.groupingBy(g -> g, Collectors.counting()));
-
-				Map<String, Long> orariComuni = studenti.stream()
-					.flatMap(s -> s.getFasceOrariePreferite().stream())
-					.collect(Collectors.groupingBy(o -> o, Collectors.counting()));
-
-				Optional<String> giornoOttimale = giorniComuni.entrySet().stream()
-					.max(Map.Entry.comparingByValue())
-					.map(Map.Entry::getKey);
-
-				Optional<String> orarioOttimale = orariComuni.entrySet().stream()
-					.max(Map.Entry.comparingByValue())
-					.map(Map.Entry::getKey);
-
-				if (giornoOttimale.isPresent() && orarioOttimale.isPresent()) {
-					System.out.println("📅 Giorno ottimale: " + giornoOttimale.get());
-					System.out.println("⏰ Orario ottimale: " + orarioOttimale.get());
-
-					// Trova aula disponibile
-					Optional<Aula> aulaDisponibile = aulaRepository.findAll().stream()
-						.filter(a -> a.getCapienzaMax() >= studenti.size())
-						.filter(a -> corsiEsistenti.stream().noneMatch(c ->
-							c.getAula() != null &&
-								c.getAula().getId().equals(a.getId()) &&
-								c.getGiorno().equals(giornoOttimale.get()) &&
-								c.getOrario().equals(orarioOttimale.get())
-						))
-						.findFirst();
-
-					// Trova insegnante disponibile
-					Optional<Insegnante> insegnanteDisponibile = insegnanteRepository.findAll().stream()
-						.filter(i -> i.getLingua().equalsIgnoreCase(studenti.get(0).getLinguaDaImparare()))
-						.filter(i -> i.getGiorniDisponibili().contains(giornoOttimale.get()))
-						.filter(i -> i.getFasceOrarieDisponibili().contains(orarioOttimale.get()))
-						.findFirst();
-
-					if (aulaDisponibile.isPresent() && insegnanteDisponibile.isPresent()) {
-						Corso corso = new Corso();
-						corso.setLingua(studenti.get(0).getLinguaDaImparare());
-						corso.setLivello(studenti.get(0).getLivello());
-						corso.setTipoCorso("GRUPPO");
-						corso.setFrequenza(studenti.get(0).getTipoCorsoGruppo());
-						corso.setGiorno(giornoOttimale.get());
-						corso.setOrario(orarioOttimale.get());
-						corso.setInsegnante(insegnanteDisponibile.get());
-						corso.setAula(aulaDisponibile.get());
-						corso.setStudenti(new ArrayList<>(studenti));
-						corso.setAttivo(true);
-
-						nuoviCorsiDaLista.add(corso);
-						System.out.println("✅ Creato corso dalla lista d'attesa per " + key + " con " + studenti.size() + " studenti");
-					} else {
-						System.out.println("⚠️ Impossibile creare corso per " + key +
-							" - Aula disponibile: " + aulaDisponibile.isPresent() +
-							", Insegnante disponibile: " + insegnanteDisponibile.isPresent());
-					}
-				} else {
-					System.out.println("⚠️ Nessun giorno/orario comune sufficiente per " + key);
-				}
-			} else {
-				System.out.println("ℹ️ Gruppo in lista d'attesa troppo piccolo (" + studenti.size() + " studenti) per " + key);
-			}
-		});
-
-		if (!nuoviCorsiDaLista.isEmpty()) {
-			corsoRepository.saveAll(nuoviCorsiDaLista);
-			System.out.println("✅ Creati " + nuoviCorsiDaLista.size() + " nuovi corsi dalla lista d'attesa");
-		} else {
-			System.out.println("⚠️ Nessun corso creato dalla lista d'attesa");
-		}
-	}
 	//Metodo per ottenere tutti i corsi non attivi
 	public List<CorsoResponseDTO> getCorsiDisattivati() {
 		List<Corso> corsi = corsoRepository.findByAttivoFalse();

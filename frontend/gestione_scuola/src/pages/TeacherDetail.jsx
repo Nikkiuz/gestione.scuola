@@ -159,16 +159,18 @@ const TeacherDetail = () => {
             />
           </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Lingua</Form.Label>
-            <Form.Control
-              type="text"
-              name="lingua"
-              value={dati.lingua || ''}
-              onChange={handleChange}
-              disabled={!isEditing}
-            />
-          </Form.Group>
+            <Form.Select
+                        name="linguaDaImparare"
+                        value={dati.lingua || ''}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="">Seleziona una lingua</option>
+                        <option value="INGLESE">Inglese</option>
+                        <option value="FRANCESE">Francese</option>
+                        <option value="SPAGNOLO">Spagnolo</option>
+                      </Form.Select>
+          
 
           {/* Giorni Disponibili - Checkbox */}
           <Form.Group className="mb-3">

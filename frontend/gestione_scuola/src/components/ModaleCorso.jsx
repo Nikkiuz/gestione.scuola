@@ -161,17 +161,18 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
           <CustomSpinner message="Salvataggio corso in corso..." />
         ) : (
           <Form onSubmit={handleSalva}>
-            <Form.Group className="mb-3">
-              <Form.Label>Lingua</Form.Label>
-              <Form.Control
-                type="text"
-                name="lingua"
-                value={formCorso.lingua}
-                onChange={handleChange}
-                required
-                placeholder="Es. Inglese, Spagnolo..."
-              />
-            </Form.Group>
+              <Form.Select
+                          name="linguaDaImparare"
+                          value={formCorso.lingua || ''}
+                          onChange={handleChange}
+                          required
+                        >
+                          <option value="">Seleziona una lingua</option>
+                          <option value="INGLESE">Inglese</option>
+                          <option value="FRANCESE">Francese</option>
+                          <option value="SPAGNOLO">Spagnolo</option>
+                        </Form.Select>
+            
 
             <Form.Group className="mb-3">
               <Form.Label>Livello</Form.Label>

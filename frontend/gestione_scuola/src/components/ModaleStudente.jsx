@@ -113,17 +113,18 @@ const ModaleStudente = ({
                 required
               />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Lingua da imparare</Form.Label>
-              <Form.Control
-                type="text"
-                name="linguaDaImparare"
-                value={formStudente.linguaDaImparare || ''}
-                onChange={handleChange}
-                placeholder="Es. Inglese, Francese..."
-                required
-              />
-            </Form.Group>
+            <Form.Select
+              name="linguaDaImparare"
+              value={formStudente.linguaDaImparare || ''}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Seleziona una lingua</option>
+              <option value="INGLESE">Inglese</option>
+              <option value="FRANCESE">Francese</option>
+              <option value="SPAGNOLO">Spagnolo</option>
+            </Form.Select>
+
             <Form.Group className="mb-3">
               <Form.Label>Livello Iniziale</Form.Label>
               <Form.Select
