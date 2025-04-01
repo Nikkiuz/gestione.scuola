@@ -113,6 +113,8 @@ const ModaleStudente = ({
                 required
               />
             </Form.Group>
+      
+            <Form.Label>Lingua da imparare</Form.Label>
             <Form.Select
               name="linguaDaImparare"
               value={formStudente.linguaDaImparare || ''}
@@ -125,7 +127,7 @@ const ModaleStudente = ({
               <option value="SPAGNOLO">Spagnolo</option>
             </Form.Select>
 
-            <Form.Group className="mb-3">
+            <Form.Group className="mt-3 mb-3">
               <Form.Label>Livello Iniziale</Form.Label>
               <Form.Select
                 name="livello"
