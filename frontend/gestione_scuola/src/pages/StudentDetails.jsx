@@ -16,7 +16,21 @@ import OverlaySpinner from '../components/OverlaySpinner'
 
 registerLocale('it', it)
 
-const LIVELLI = ['BASE', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+const LIVELLI = [
+  'STARTERS',
+  'KIDS_BOX1',
+  'KIDS_BOX2',
+  'KIDS_BOX3',
+  'KET_CAMBRIDGE',
+  'PET_CAMBRIDGE',
+  'FIRST_CAMBRIDGE',
+  'ADVANCED_CAMBRIDGE',
+  'A2_ADULTI',
+  'B1_ADULTI',
+  'B2_ADULTI',
+  'C1_ADULTI',
+  'C2_ADULTI',
+]
 
 const StudentDetail = () => {
   const { id } = useParams()
@@ -41,7 +55,7 @@ const StudentDetail = () => {
     cognome: '',
     eta: '',
     linguaDaImparare: '',
-    livello: 'BASE',
+    livello: 'STARTERS',
     tipologiaIscrizione: '',
     giorniPreferiti: [],
     fasceOrariePreferite: [],
@@ -94,7 +108,7 @@ const fetchDatiStudente = async () => {
     alert('⚠️ Token mancante, non puoi salvare le modifiche!')
     return
   }
-
+  
   setSalvataggioStudenteLoading(true)
 
   try {
@@ -146,7 +160,7 @@ const handleChangeStudente = () => {
       ? String(studente.insegnanteId)
       : studente.insegnante
       ? String(studente.insegnante.id)
-      : '', // 🔥 Ora prende `insegnante.id` se `insegnanteId` è undefined
+      : '', 
   })
 
   setShowEditModal(true)
