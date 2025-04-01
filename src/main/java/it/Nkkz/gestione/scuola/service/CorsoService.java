@@ -222,37 +222,26 @@ public class CorsoService {
 			Optional<String> giornoCompatibile = studente.getGiorniPreferiti().stream().findFirst();
 			Optional<String> orarioCompatibile = studente.getFasceOrariePreferite().stream().findFirst();
 
-			System.out.println("Giorno compatibile: " + giornoCompatibile.orElse("Nessuno"));
-			System.out.println("Orario compatibile: " + orarioCompatibile.orElse("Nessuno"));
-
 			if (giornoCompatibile.isEmpty() || orarioCompatibile.isEmpty()) {
 				studentiDisponibili.remove(studente);
 				continue;
 			}
 
-			List<Studente> gruppoCompatibile = studentiDisponibili.stream()
-				.filter(s -> s.getLinguaDaImparare().equals(studente.getLinguaDaImparare()))
-				.filter(s -> s.getLivello() == studente.getLivello())
-				.filter(s -> Math.abs(s.getEta() - studente.getEta()) <= 2)
-				.filter(s -> Objects.equals(s.getTipoCorsoGruppo(), studente.getTipoCorsoGruppo()))
-				.filter(s -> s.getGiorniPreferiti().contains(giornoCompatibile.get()))
-				.filter(s -> {
-					boolean match = s.getFasceOrariePreferite().contains(orarioCompatibile.get());
-					if (!match) {
-						boolean orarioSimile = s.getFasceOrariePreferite().stream()
-							.anyMatch(o -> o.length() >= 5 && orarioCompatibile.get().startsWith(o.substring(0, 5)));
-						return orarioSimile;
-					}
-					return true;
-				})
-				.collect(Collectors.toList());
+			List<Studente> gruppoCompatibile = new ArrayList<>(
+				studentiDisponibili.stream()
+					.filter(s -> s.getLinguaDaImparare().equals(studente.getLinguaDaImparare()))
+					.filter(s -> s.getLivello() == studente.getLivello())
+					.filter(s -> Objects.equals(s.getTipoCorsoGruppo(), studente.getTipoCorsoGruppo()))
+					.filter(s -> s.getGiorniPreferiti().contains(giornoCompatibile.get()))
+					.filter(s -> s.getFasceOrariePreferite().contains(orarioCompatibile.get()))
+					.toList()
+			);
 
 			gruppoCompatibile.add(studente);
 			Set<Studente> gruppoUnico = new HashSet<>(gruppoCompatibile);
 
 			if (gruppoUnico.size() < 3) {
-				System.out.println("⚠️ Gruppo troppo piccolo, aggiunto alla lista di attesa.");
-				listaDiAttesa.add(gruppoUnico);
+				listaDiAttesa.add(new HashSet<>(gruppoUnico));
 				studentiDisponibili.removeAll(gruppoUnico);
 				continue;
 			}
@@ -266,14 +255,13 @@ public class CorsoService {
 					.filter(a -> corsiEsistenti.stream().noneMatch(c ->
 						c.getAula() != null &&
 							c.getAula().getId().equals(a.getId()) &&
-							(
-								(c.getGiorno().equals(giornoCompatibile.get()) && c.getOrario().equals(orarioCompatibile.get())) ||
-									("2 volte a settimana".equalsIgnoreCase(studente.getTipoCorsoGruppo()) &&
-										c.getSecondoGiorno() != null && c.getSecondoOrario() != null &&
-										c.getSecondoGiorno().equals(giornoCompatibile.get()) &&
-										c.getSecondoOrario().equals(orarioCompatibile.get()))
-							)
-					))
+							((c.getGiorno().equals(giornoCompatibile.get()) && c.getOrario().equals(orarioCompatibile.get())) ||
+								("2 volte a settimana".equalsIgnoreCase(studente.getTipoCorsoGruppo()) &&
+									c.getSecondoGiorno() != null &&
+									c.getSecondoOrario() != null &&
+									c.getSecondoGiorno().equals(giornoCompatibile.get()) &&
+									c.getSecondoOrario().equals(orarioCompatibile.get()))))
+					)
 					.findFirst();
 
 				if (aulaDisponibile.isEmpty()) {
@@ -297,59 +285,77 @@ public class CorsoService {
 					continue;
 				}
 
-				Corso corso = new Corso();
-				corso.setLingua(studente.getLinguaDaImparare());
-				corso.setLivello(studente.getLivello());
-				corso.setTipoCorso("GRUPPO");
-				corso.setFrequenza(studente.getTipoCorsoGruppo());
-				corso.setGiorno(giornoCompatibile.get());
-				corso.setOrario(orarioCompatibile.get());
-				corso.setInsegnante(insegnanteOpt.get());
-				corso.setAula(aulaDisponibile.get());
-				corso.setStudenti(new ArrayList<>(sottoGruppo));
-				corso.setAttivo(true);
-
-				// 💡 Imposta secondo giorno e orario
-				if ("2 volte a settimana".equalsIgnoreCase(corso.getFrequenza())) {
-					List<String> altriGiorni = studente.getGiorniPreferiti().stream()
-						.filter(g -> !g.equals(giornoCompatibile.get()))
-						.toList();
-
-					List<String> altriOrari = studente.getFasceOrariePreferite().stream()
-						.filter(o -> !o.equals(orarioCompatibile.get()))
-						.toList();
-
-					if (!altriGiorni.isEmpty() && !altriOrari.isEmpty()) {
-						String secondoGiorno = altriGiorni.get(0);
-						String secondoOrario = altriOrari.get(0);
-
-						// Verifica che l'aula sia disponibile anche nel secondo slot
-						boolean aulaLiberaSecondoSlot = corsiEsistenti.stream()
-							.noneMatch(c ->
-								c.getAula() != null &&
-									c.getAula().getId().equals(aulaDisponibile.get().getId()) &&
-									(
-										(c.getGiorno().equals(secondoGiorno) && c.getOrario().equals(secondoOrario)) ||
-											("2 volte a settimana".equalsIgnoreCase(c.getFrequenza()) &&
-												c.getSecondoGiorno() != null &&
-												c.getSecondoOrario() != null &&
-												c.getSecondoGiorno().equals(secondoGiorno) &&
-												c.getSecondoOrario().equals(secondoOrario))
-									)
-							);
-
-						if (aulaLiberaSecondoSlot) {
-							corso.setSecondoGiorno(secondoGiorno);
-							corso.setSecondoOrario(secondoOrario);
-							System.out.println("📆 Seconda lezione: " + secondoGiorno + " " + secondoOrario);
-						} else {
-							System.out.println("⚠️ Aula non disponibile per la seconda lezione.");
-						}
+				// 🔁 Calcolo secondo slot se necessario
+				if ("2 volte a settimana".equalsIgnoreCase(studente.getTipoCorsoGruppo())) {
+					Set<String> giorniComuni = new HashSet<>(sottoGruppo.get(0).getGiorniPreferiti());
+					for (Studente s : sottoGruppo) {
+						giorniComuni.retainAll(new HashSet<>(s.getGiorniPreferiti()));
 					}
-				}
 
-				nuoviCorsi.add(corso);
-				index = fine;
+					Set<String> orariComuni = new HashSet<>(sottoGruppo.get(0).getFasceOrariePreferite());
+					for (Studente s : sottoGruppo) {
+						orariComuni.retainAll(new HashSet<>(s.getFasceOrariePreferite()));
+					}
+
+					giorniComuni.remove(giornoCompatibile.get());
+					orariComuni.remove(orarioCompatibile.get());
+
+					if (giorniComuni.isEmpty() || orariComuni.isEmpty()) {
+						System.out.println("❌ Corso 2 volte a settimana non generato: nessun secondo slot disponibile");
+						studentiDisponibili.removeAll(gruppoUnico);
+						break;
+					}
+
+					String secondoGiorno = giorniComuni.iterator().next();
+					String secondoOrario = orariComuni.iterator().next();
+
+					boolean aulaLiberaSecondoSlot = corsiEsistenti.stream()
+						.noneMatch(c ->
+							c.getAula() != null &&
+								c.getAula().getId().equals(aulaDisponibile.get().getId()) &&
+								((c.getGiorno().equals(secondoGiorno) && c.getOrario().equals(secondoOrario)) ||
+									("2 volte a settimana".equalsIgnoreCase(c.getFrequenza()) &&
+										secondoGiorno.equals(c.getSecondoGiorno()) && secondoOrario.equals(c.getSecondoOrario()))));
+
+					if (!aulaLiberaSecondoSlot) {
+						System.out.println("❌ Corso 2 volte a settimana non generato: aula occupata nel secondo slot");
+						studentiDisponibili.removeAll(gruppoUnico);
+						break;
+					}
+
+					Corso corso = new Corso();
+					corso.setLingua(studente.getLinguaDaImparare());
+					corso.setLivello(studente.getLivello());
+					corso.setTipoCorso("GRUPPO");
+					corso.setFrequenza(studente.getTipoCorsoGruppo());
+					corso.setGiorno(giornoCompatibile.get());
+					corso.setOrario(orarioCompatibile.get());
+					corso.setSecondoGiorno(secondoGiorno);
+					corso.setSecondoOrario(secondoOrario);
+					corso.setInsegnante(insegnanteOpt.get());
+					corso.setAula(aulaDisponibile.get());
+					corso.setStudenti(new ArrayList<>(sottoGruppo));
+					corso.setAttivo(true);
+
+					nuoviCorsi.add(corso);
+					index = fine;
+
+				} else {
+					Corso corso = new Corso();
+					corso.setLingua(studente.getLinguaDaImparare());
+					corso.setLivello(studente.getLivello());
+					corso.setTipoCorso("GRUPPO");
+					corso.setFrequenza(studente.getTipoCorsoGruppo());
+					corso.setGiorno(giornoCompatibile.get());
+					corso.setOrario(orarioCompatibile.get());
+					corso.setInsegnante(insegnanteOpt.get());
+					corso.setAula(aulaDisponibile.get());
+					corso.setStudenti(new ArrayList<>(sottoGruppo));
+					corso.setAttivo(true);
+
+					nuoviCorsi.add(corso);
+					index = fine;
+				}
 			}
 
 			studentiDisponibili.removeAll(gruppoUnico);
@@ -358,13 +364,32 @@ public class CorsoService {
 		if (!nuoviCorsi.isEmpty()) {
 			corsoRepository.saveAll(nuoviCorsi);
 			System.out.println("✅ Creati " + nuoviCorsi.size() + " nuovi corsi.");
+			for (Corso c : nuoviCorsi) {
+				System.out.println("🧩 Corso " + c.getLingua() + " " + c.getLivello() + " - " + c.getGiorno() + " " + c.getOrario());
+				if (c.getSecondoGiorno() != null) {
+					System.out.println("📅 + " + c.getSecondoGiorno() + " " + c.getSecondoOrario());
+				}
+				System.out.println("👥 Studenti: " + c.getStudenti().stream().map(Studente::getNome).toList());
+			}
 			if (!listaDiAttesa.isEmpty()) {
 				System.out.println("🔄 Tentativo di unire gruppi in lista di attesa...");
+
+				Set<Studente> studentiUnione = listaDiAttesa.stream()
+					.flatMap(Set::stream)
+					.collect(Collectors.toSet());
+
+				if (studentiUnione.size() >= 3) {
+					System.out.println("🆕 Tentativo forzato con lista d'attesa: " + studentiUnione.size() + " studenti");
+					studentiDisponibili.addAll(studentiUnione);
+					listaDiAttesa.clear();
+					generaCorsiAutomaticamente();
+				}
 			}
 		} else {
 			System.out.println("⚠️ Nessun corso creato.");
 		}
 	}
+
 
 	//Metodo per ottenere tutti i corsi non attivi
 	public List<CorsoResponseDTO> getCorsiDisattivati() {

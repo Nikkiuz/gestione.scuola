@@ -29,7 +29,7 @@ const Calendario = () => {
 
   const fetchCorsi = async () => {
     setLoading(true)
-    const giornoParam = settimana.startOf('isoWeek').format('YYYY-MM-DD')
+    const giornoParam = 'settimana'
 
     console.log('📅 Parametri invio API:', {
       giorno: giornoParam,

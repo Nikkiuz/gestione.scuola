@@ -97,229 +97,244 @@ const CourseList = () => {
   const apriModaleNuovoCorso = () => {
     setShowModale(true)
   }
-
-  return (
-    <>
-      <AdminNavbar />
-      <div className="container pt-5 mt-5">
-        <h2 className="text-center mb-4">📚 Gestione Corsi</h2>
-
-        <div className="d-flex justify-content-between mb-3">
-          <button className="btn btn-success" onClick={apriModaleNuovoCorso}>
-            ➕ Crea Nuovo Corso
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={generaCorsiAutomaticamente}
-            disabled={generazioneInCorso}
-          >
-            ⚙️{' '}
-            {generazioneInCorso
-              ? 'Generazione in corso...'
-              : 'Genera Corsi Automaticamente'}
-          </button>
-        </div>
-
-       {loading && <OverlaySpinner />}
-
-{!loading && error && (
-  <div className="alert alert-danger">{error}</div>
-)}
-
-{!loading && !error && (
-          <>
-            <h4>📌 Corsi di Gruppo</h4>
-            {corsiGruppo.length === 0 ? (
-              <p>Nessun corso di gruppo disponibile.</p>
-            ) : (
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Insegnante</th>
-                    <th>Lingua</th>
-                    <th>Livello</th>
-                    <th>Giorno</th>
-                    <th>Orario</th>
-                    <th>Azioni</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {corsiGruppo.map((corso) => (
-                    <tr key={corso.id}>
-                      <td>
-                        {corso.insegnante?.nome} {corso.insegnante?.cognome}
-                      </td>
-                      <td>{corso.lingua}</td>
-                      <td>
-                        <strong>{corso.livello || 'N/A'}</strong>
-                      </td>
-                      <td>{corso.giorno}</td>
-                      <td>{corso.orario}</td>
-                      <td>
-                        <button
-                          className="btn btn-primary btn-sm me-2"
-                          onClick={() => navigate(`/corsi/${corso.id}`)}
-                        >
-                          📄 Dettagli
-                        </button>
-                        <button
-                          className="btn btn-warning btn-sm me-2"
-                          onClick={() => disattivaCorso(corso.id)}
-                        >
-                          ⛔ Disattiva
-                        </button>
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => eliminaCorso(corso.id)}
-                        >
-                          🗑️ Elimina
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            <h4>📌 Corsi Privatisti</h4>
-            {corsiPrivati.length === 0 ? (
-              <p>Nessun corso privatista disponibile.</p>
-            ) : (
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Insegnante</th>
-                    <th>Lingua</th>
-                    <th>Livello</th>
-                    <th>Giorno</th>
-                    <th>Orario</th>
-                    <th>Azioni</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {corsiPrivati.map((corso) => (
-                    <tr key={corso.id}>
-                      <td>
-                        {corso.insegnante?.nome} {corso.insegnante?.cognome}
-                      </td>
-                      <td>{corso.lingua}</td>
-                      <td>
-                        <strong>{corso.livello || 'N/A'}</strong>
-                      </td>
-                      <td>{corso.giorno}</td>
-                      <td>{corso.orario}</td>
-                      <td>
-                        <button
-                          className="btn btn-primary btn-sm me-2"
-                          onClick={() => navigate(`/corsi/${corso.id}`)}
-                        >
-                          📄 Dettagli
-                        </button>
-                        <button
-                          className="btn btn-warning btn-sm me-2"
-                          onClick={() => disattivaCorso(corso.id)}
-                        >
-                          ⛔ Disattiva
-                        </button>
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => eliminaCorso(corso.id)}
-                        >
-                          🗑️ Elimina
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            <h4>📌 Corsi Disattivati</h4>
-            {corsiDisattivati.length === 0 ? (
-              <p>Nessun corso disattivato.</p>
-            ) : (
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Insegnante</th>
-                    <th>Lingua</th>
-                    <th>Livello</th>
-                    <th>Giorno</th>
-                    <th>Orario</th>
-                    <th>Azioni</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {corsiDisattivati.map((corso) => (
-                    <tr key={corso.id}>
-                      <td>
-                        {corso.insegnante?.nome} {corso.insegnante?.cognome}
-                      </td>
-                      <td>{corso.lingua}</td>
-                      <td>
-                        <strong>{corso.livello || 'N/A'}</strong>
-                      </td>
-                      <td>{corso.giorno}</td>
-                      <td>{corso.orario}</td>
-                      <td>
-                        <button
-                          className="btn btn-info btn-sm me-2"
-                          onClick={() => navigate(`/corsi/${corso.id}`)}
-                        >
-                          📄 Dettagli
-                        </button>
-                        <button
-                          className="btn btn-success btn-sm"
-                          onClick={() => riattivaCorso(corso.id)}
-                        >
-                          ✅ Riattiva
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            <h4>📌 Lista di Attesa</h4>
-            {studentiInListaAttesa.length === 0 ? (
-              <p>Nessuno studente in lista di attesa.</p>
-            ) : (
-              <table className="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Nome</th>
-                    <th>Cognome</th>
-                    <th>Lingua</th>
-                    <th>Livello</th>
-                    <th>Età</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {studentiInListaAttesa.map((studente) => (
-                    <tr key={studente.id}>
-                      <td>{studente.nome}</td>
-                      <td>{studente.cognome}</td>
-                      <td>{studente.linguaDaImparare}</td>
-                      <td>{studente.livello}</td>
-                      <td>{studente.eta}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </>
-        )}
-
-        <ModaleCorso
-          show={showModale}
-          onHide={() => setShowModale(false)}
-          corso={null}
-          refresh={fetchCorsi}
-        />
+return (
+  <>
+    {loading && (
+      <div className="fullscreen-spinner d-flex flex-column justify-content-center align-items-center text-white">
+        <div className="spinner-border" role="status" />
+        <span className="mt-3 fs-5">Caricamento corsi...</span>
       </div>
-    </>
-  )
+    )}
+
+    <AdminNavbar />
+
+    <div className="container pt-5 mt-5 position-relative">
+      {generazioneInCorso && (
+        <div className="overlay-spinner d-flex flex-column justify-content-center align-items-center">
+          <div className="spinner-border text-primary" role="status" />
+          <span className="mt-3">Generazione corsi in corso...</span>
+        </div>
+      )}
+
+      {!loading && error && <div className="alert alert-danger">{error}</div>}
+
+      {!loading && !error && (
+        <>
+          <h2 className="text-center mb-4">📚 Gestione Corsi</h2>
+
+          <div className="d-flex justify-content-between mb-3">
+            <button className="btn btn-success" onClick={apriModaleNuovoCorso}>
+              ➕ Crea Nuovo Corso
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={generaCorsiAutomaticamente}
+              disabled={generazioneInCorso}
+            >
+              ⚙️{' '}
+              {generazioneInCorso
+                ? 'Generazione in corso...'
+                : 'Genera Corsi Automaticamente'}
+            </button>
+          </div>
+
+          {/* Corsi di gruppo */}
+          <h4>📌 Corsi di Gruppo</h4>
+          {corsiGruppo.length === 0 ? (
+            <p>Nessun corso di gruppo disponibile.</p>
+          ) : (
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Insegnante</th>
+                  <th>Lingua</th>
+                  <th>Livello</th>
+                  <th>Giorno</th>
+                  <th>Orario</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody>
+                {corsiGruppo.map((corso) => (
+                  <tr key={corso.id}>
+                    <td>
+                      {corso.insegnante?.nome} {corso.insegnante?.cognome}
+                    </td>
+                    <td>{corso.lingua}</td>
+                    <td>
+                      <strong>{corso.livello || 'N/A'}</strong>
+                    </td>
+                    <td>{corso.giorno}</td>
+                    <td>{corso.orario}</td>
+                    <td>
+                      <button
+                        className="btn btn-primary btn-sm me-2"
+                        onClick={() => navigate(`/corsi/${corso.id}`)}
+                      >
+                        📄 Dettagli
+                      </button>
+                      <button
+                        className="btn btn-warning btn-sm me-2"
+                        onClick={() => disattivaCorso(corso.id)}
+                      >
+                        ⛔ Disattiva
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => eliminaCorso(corso.id)}
+                      >
+                        🗑️ Elimina
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {/* Corsi privati */}
+          <h4>📌 Corsi Privatisti</h4>
+          {corsiPrivati.length === 0 ? (
+            <p>Nessun corso privatista disponibile.</p>
+          ) : (
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Insegnante</th>
+                  <th>Lingua</th>
+                  <th>Livello</th>
+                  <th>Giorno</th>
+                  <th>Orario</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody>
+                {corsiPrivati.map((corso) => (
+                  <tr key={corso.id}>
+                    <td>
+                      {corso.insegnante?.nome} {corso.insegnante?.cognome}
+                    </td>
+                    <td>{corso.lingua}</td>
+                    <td>
+                      <strong>{corso.livello || 'N/A'}</strong>
+                    </td>
+                    <td>{corso.giorno}</td>
+                    <td>{corso.orario}</td>
+                    <td>
+                      <button
+                        className="btn btn-primary btn-sm me-2"
+                        onClick={() => navigate(`/corsi/${corso.id}`)}
+                      >
+                        📄 Dettagli
+                      </button>
+                      <button
+                        className="btn btn-warning btn-sm me-2"
+                        onClick={() => disattivaCorso(corso.id)}
+                      >
+                        ⛔ Disattiva
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => eliminaCorso(corso.id)}
+                      >
+                        🗑️ Elimina
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {/* Corsi disattivati */}
+          <h4>📌 Corsi Disattivati</h4>
+          {corsiDisattivati.length === 0 ? (
+            <p>Nessun corso disattivato.</p>
+          ) : (
+            <table className="table table-striped">
+              <thead>
+                <tr>
+                  <th>Insegnante</th>
+                  <th>Lingua</th>
+                  <th>Livello</th>
+                  <th>Giorno</th>
+                  <th>Orario</th>
+                  <th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody>
+                {corsiDisattivati.map((corso) => (
+                  <tr key={corso.id}>
+                    <td>
+                      {corso.insegnante?.nome} {corso.insegnante?.cognome}
+                    </td>
+                    <td>{corso.lingua}</td>
+                    <td>
+                      <strong>{corso.livello || 'N/A'}</strong>
+                    </td>
+                    <td>{corso.giorno}</td>
+                    <td>{corso.orario}</td>
+                    <td>
+                      <button
+                        className="btn btn-info btn-sm me-2"
+                        onClick={() => navigate(`/corsi/${corso.id}`)}
+                      >
+                        📄 Dettagli
+                      </button>
+                      <button
+                        className="btn btn-success btn-sm"
+                        onClick={() => riattivaCorso(corso.id)}
+                      >
+                        ✅ Riattiva
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {/* Lista di attesa */}
+          <h4>📌 Lista di Attesa</h4>
+          {studentiInListaAttesa.length === 0 ? (
+            <p>Nessuno studente in lista di attesa.</p>
+          ) : (
+            <table className="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Cognome</th>
+                  <th>Lingua</th>
+                  <th>Livello</th>
+                  <th>Età</th>
+                </tr>
+              </thead>
+              <tbody>
+                {studentiInListaAttesa.map((studente) => (
+                  <tr key={studente.id}>
+                    <td>{studente.nome}</td>
+                    <td>{studente.cognome}</td>
+                    <td>{studente.linguaDaImparare}</td>
+                    <td>{studente.livello}</td>
+                    <td>{studente.eta}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </>
+      )}
+
+      <ModaleCorso
+        show={showModale}
+        onHide={() => setShowModale(false)}
+        corso={null}
+        refresh={fetchCorsi}
+      />
+    </div>
+  </>
+)
+
 }
 
 export default CourseList

@@ -97,6 +97,15 @@ const CourseDetails = () => {
       <div className="container pt-5 mt-5 mb-5">
         <h2 className="text-center mb-4">📚 Dettagli Corso</h2>
 
+        <div className="mb-4 text-start">
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate('/corsi')}
+          >
+            🔙 Torna alla Lista Corsi
+          </button>
+        </div>
+
         {successMessage && (
           <div className="alert alert-success">{successMessage}</div>
         )}
@@ -169,9 +178,18 @@ const CourseDetails = () => {
                 {corso?.studenti?.map((studente) => (
                   <li
                     key={studente.id}
-                    className="list-group-item d-flex align-items-center"
+                    className="list-group-item d-flex justify-content-between align-items-center"
                   >
-                    {studente.nome} {studente.cognome}
+                    <span className="fw-semibold">
+                      {studente.nome} {studente.cognome}
+                    </span>
+
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => navigate(`/studenti/${studente.id}`)}
+                    >
+                      📄 Dettagli
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -189,13 +207,24 @@ const CourseDetails = () => {
                     key={studente.id}
                     className="list-group-item d-flex justify-content-between align-items-center"
                   >
-                    {studente.nome} {studente.cognome}
-                    <button
-                      className="btn btn-outline-success btn-sm"
-                      onClick={() => assegnaStudente(studente.id)}
-                    >
-                      ➕ Assegna
-                    </button>
+                    <span className="fw-semibold">
+                      {studente.nome} {studente.cognome}
+                    </span>
+
+                    <div className="d-flex gap-2">
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => navigate(`/studenti/${studente.id}`)}
+                      >
+                        📄 Dettagli
+                      </button>
+                      <button
+                        className="btn btn-outline-success btn-sm"
+                        onClick={() => assegnaStudente(studente.id)}
+                      >
+                        ➕ Assegna
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
