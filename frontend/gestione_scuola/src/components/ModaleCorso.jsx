@@ -162,7 +162,7 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
         ) : (
           <Form onSubmit={handleSalva}>
               <Form.Select
-                          name="linguaDaImparare"
+                          name="lingua"
                           value={formCorso.lingua || ''}
                           onChange={handleChange}
                           required
