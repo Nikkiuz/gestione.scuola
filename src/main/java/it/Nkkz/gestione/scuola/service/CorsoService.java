@@ -73,19 +73,22 @@ public class CorsoService {
 			.collect(Collectors.toList());
 	}
 
-	//Crea un nuovo corso
 	public CorsoResponseDTO creaCorso(CorsoRequestDTO request) {
 		Optional<Aula> aulaOpt = aulaRepository.findById(request.getAulaId());
 		if (aulaOpt.isEmpty()) {
 			throw new EntityNotFoundException("Aula non trovata con ID: " + request.getAulaId());
 		}
-
 		Aula aula = aulaOpt.get();
 
-		// ⚠️ Controlla se l'aula è già occupata per giorno e orario
+		Optional<Insegnante> insegnanteOpt = insegnanteRepository.findById(request.getInsegnanteId());
+		if (insegnanteOpt.isEmpty()) {
+			throw new EntityNotFoundException("Insegnante non trovato con ID: " + request.getInsegnanteId());
+		}
+		Insegnante insegnante = insegnanteOpt.get();
+
+		// Controllo aula occupata
 		List<Corso> corsiEsistenti = corsoRepository.findByAulaIdAndGiornoAndOrarioAndAttivoTrue(
 			aula.getId(), request.getGiorno(), request.getOrario());
-
 		if (!corsiEsistenti.isEmpty()) {
 			throw new IllegalStateException("L'aula è già occupata per il giorno " + request.getGiorno() +
 				" alle " + request.getOrario());
@@ -96,6 +99,7 @@ public class CorsoService {
 		corso.setSecondoGiorno(request.getSecondoGiorno());
 		corso.setSecondoOrario(request.getSecondoOrario());
 		corso.setAula(aula);
+		corso.setInsegnante(insegnante); // ✅ Assegna insegnante
 		corso.setStudenti(studenteRepository.findAllById(request.getStudentiIds()));
 		corso.setAttivo(true);
 
@@ -115,13 +119,17 @@ public class CorsoService {
 		}
 		Aula aula = aulaOpt.get();
 
-		// ⚠️ Controlla che non ci siano altri corsi nella stessa aula, giorno e orario
+		Optional<Insegnante> insegnanteOpt = insegnanteRepository.findById(request.getInsegnanteId());
+		if (insegnanteOpt.isEmpty()) {
+			throw new EntityNotFoundException("Insegnante non trovato con ID: " + request.getInsegnanteId());
+		}
+		Insegnante insegnante = insegnanteOpt.get();
+
+		// Controllo aula occupata
 		List<Corso> corsiEsistenti = corsoRepository.findByAulaIdAndGiornoAndOrarioAndAttivoTrue(
 			aula.getId(), request.getGiorno(), request.getOrario());
-
 		boolean sovrapposto = corsiEsistenti.stream()
-			.anyMatch(c -> !c.getId().equals(corso.getId())); // Ignora se stesso
-
+			.anyMatch(c -> !c.getId().equals(corso.getId()));
 		if (sovrapposto) {
 			throw new IllegalStateException("Impossibile modificare: l'aula è già occupata per quel giorno/orario.");
 		}
@@ -130,11 +138,13 @@ public class CorsoService {
 		corso.setSecondoGiorno(request.getSecondoGiorno());
 		corso.setSecondoOrario(request.getSecondoOrario());
 		corso.setAula(aula);
+		corso.setInsegnante(insegnante); // ✅ Assegna insegnante
 		corso.setStudenti(studenteRepository.findAllById(request.getStudentiIds()));
 
 		corsoRepository.save(corso);
 		return convertToResponseDTO(corso);
 	}
+
 
 
 	//Interrompi un corso (senza eliminarlo)
