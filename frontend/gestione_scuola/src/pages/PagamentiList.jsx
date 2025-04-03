@@ -141,8 +141,22 @@ const eliminaPagamento = async (id) => {
       <div className="container pt-5 mt-5">
         <h2 className="text-center mb-4">💳 Lista Pagamenti</h2>
 
-        {loading && <CustomSpinner message="Caricamento pagamenti in corso..." />}
+        {loading && (
+          <CustomSpinner message="Caricamento pagamenti in corso..." />
+        )}
         {error && <div className="alert alert-danger">{error}</div>}
+
+        <div className="mb-3 text-start">
+          <button
+            className="btn btn-success"
+            onClick={() => {
+              resetFormData()
+              setShowModal(true)
+            }}
+          >
+            ➕ Aggiungi Pagamento
+          </button>
+        </div>
 
         <div className="row mb-3">
           <div className="col-md-6">
@@ -175,57 +189,45 @@ const eliminaPagamento = async (id) => {
           </div>
         </div>
 
-        <div className="mb-3 text-start">
-          <button
-            className="btn btn-success"
-            onClick={() => {
-              resetFormData()
-              setShowModal(true)
-            }}
-          >
-            ➕ Aggiungi Pagamento
-          </button>
-        </div>
-
-        <div className="table-responsive-wrapper">  
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Importo</th>
-              <th>Studente</th>
-              <th>Mensilità</th>
-              <th>Metodo</th>
-              <th>Azioni</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pagamenti.map((pagamento) => (
-              <tr key={pagamento.id}>
-                <td>{pagamento.dataPagamento}</td>
-                <td>€ {pagamento.importo}</td>
-                <td>{pagamento.studenteNome}</td>
-                <td>{pagamento.mensilitaSaldata}</td>
-                <td>{pagamento.metodoPagamento}</td>
-                <td>
-                  {/* Pulsante per visualizzare i dettagli del pagamento */}
-                  <button
-                    className="btn btn-primary btn-sm me-2"
-                    onClick={() => navigate(`/pagamenti/${pagamento.id}`)} // Reindirizza alla pagina dei dettagli
-                  >
-                    📄 Dettagli
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => eliminaPagamento(pagamento.id)}
-                  >
-                    🗑 Elimina
-                  </button>
-                </td>
+        <div className="table-responsive-wrapper">
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Importo</th>
+                <th>Studente</th>
+                <th>Mensilità</th>
+                <th>Metodo</th>
+                <th>Azioni</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {pagamenti.map((pagamento) => (
+                <tr key={pagamento.id}>
+                  <td>{pagamento.dataPagamento}</td>
+                  <td>€ {pagamento.importo}</td>
+                  <td>{pagamento.studenteNome}</td>
+                  <td>{pagamento.mensilitaSaldata}</td>
+                  <td>{pagamento.metodoPagamento}</td>
+                  <td>
+                    {/* Pulsante per visualizzare i dettagli del pagamento */}
+                    <button
+                      className="btn btn-primary btn-sm me-2"
+                      onClick={() => navigate(`/pagamenti/${pagamento.id}`)} // Reindirizza alla pagina dei dettagli
+                    >
+                      📄 Dettagli
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => eliminaPagamento(pagamento.id)}
+                    >
+                      🗑 Elimina
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         <ModalePagamento

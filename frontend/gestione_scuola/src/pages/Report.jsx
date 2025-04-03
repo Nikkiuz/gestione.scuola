@@ -262,7 +262,7 @@ const Report = () => {
                   {report.totaleOreInsegnate > 0 ? (
                     <h2>{report.totaleOreInsegnate} ore</h2>
                   ) : (
-                    <p className="text-muted">Nessuna ora registrata</p>
+                    <h2>0</h2>
                   )}
                 </div>
               </div>
@@ -376,7 +376,7 @@ const Report = () => {
       )}
 
       {/* Ore Insegnate per Insegnante - DA IMPLEMENTARE CON REGISTRO ELETTRONICO*/}
-      {report?.oreInsegnate && (
+      {report?.oreInsegnate && Object.keys(report.oreInsegnate).length > 0 && (
         <div className="container grafico-final">
           <h4 className="mb-4 text-start">🧑‍🏫 Ore Insegnate per Insegnante</h4>
           <ResponsiveContainer width="100%" height={300}>
