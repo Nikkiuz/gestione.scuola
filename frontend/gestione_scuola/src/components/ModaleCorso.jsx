@@ -19,6 +19,16 @@ const LIVELLI = [
   'C2_ADULTI',
 ]
 
+const GIORNI = ['LUNEDI', 'MARTEDI', 'MERCOLEDI', 'GIOVEDI', 'VENERDI']
+
+const LABEL_GIORNI = {
+  LUNEDI: 'Lunedì',
+  MARTEDI: 'Martedì',
+  MERCOLEDI: 'Mercoledì',
+  GIOVEDI: 'Giovedì',
+  VENERDI: 'Venerdì',
+}
+
 const FREQUENZE = ['1 volta a settimana', '2 volte a settimana']
 const TIPI_CORSO = ['GRUPPO', 'PRIVATO']
 
@@ -229,14 +239,19 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
 
             <Form.Group className="mb-3">
               <Form.Label>Giorno</Form.Label>
-              <Form.Control
-                type="text"
+              <Form.Select
                 name="giorno"
                 value={formCorso.giorno}
                 onChange={handleChange}
                 required
-                placeholder="Es. Lunedì"
-              />
+              >
+                <option value="">Seleziona giorno</option>
+                {GIORNI.map((g) => (
+                  <option key={g} value={g}>
+                    {LABEL_GIORNI[g]}
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -255,14 +270,19 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
               <>
                 <Form.Group className="mb-3">
                   <Form.Label>Secondo Giorno</Form.Label>
-                  <Form.Control
-                    type="text"
+                  <Form.Select
                     name="secondoGiorno"
                     value={formCorso.secondoGiorno}
                     onChange={handleChange}
                     required
-                    placeholder="Es. Mercoledì"
-                  />
+                  >
+                    <option value="">Seleziona secondo giorno</option>
+                    {GIORNI.map((g) => (
+                      <option key={g} value={g}>
+                        {LABEL_GIORNI[g]}
+                      </option>
+                    ))}
+                  </Form.Select>
                 </Form.Group>
 
                 <Form.Group className="mb-3">

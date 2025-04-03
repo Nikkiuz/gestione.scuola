@@ -46,6 +46,10 @@ public class CalendarioService {
 		corsoRepository.save(corso);
 	}
 
+	private String normalizza(String input) {
+		return input == null ? "" : input.toLowerCase().replace("ì", "i").replace("é", "e");
+	}
+
 	private boolean giornoMatch(String giornoBase, Giorno giornoEnum) {
 		if (giornoBase == null || giornoBase.isBlank()
 			|| giornoBase.equalsIgnoreCase("settimana")

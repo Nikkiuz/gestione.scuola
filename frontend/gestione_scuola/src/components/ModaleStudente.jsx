@@ -20,6 +20,17 @@ const LIVELLI = [
   'C2_ADULTI',
 ]
 
+const GIORNI = ['LUNEDI', 'MARTEDI', 'MERCOLEDI', 'GIOVEDI', 'VENERDI']
+
+const LABEL_GIORNI = {
+  LUNEDI: 'Lunedì',
+  MARTEDI: 'Martedì',
+  MERCOLEDI: 'Mercoledì',
+  GIOVEDI: 'Giovedì',
+  VENERDI: 'Venerdì',
+};
+
+
 const ModaleStudente = ({
   show,
   onHide,
@@ -124,7 +135,7 @@ const ModaleStudente = ({
                 required
               />
             </Form.Group>
-      
+
             <Form.Label>Lingua da imparare</Form.Label>
             <Form.Select
               name="linguaDaImparare"
@@ -170,23 +181,19 @@ const ModaleStudente = ({
             <Form.Group className="mb-3">
               <Form.Label>Giorni Preferiti</Form.Label>
               <div className="d-flex flex-wrap">
-                {['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'].map(
-                  (giorno) => (
-                    <Form.Check
-                      key={giorno}
-                      type="checkbox"
-                      label={giorno}
-                      value={giorno}
-                      checked={
-                        formStudente.giorniPreferiti?.includes(giorno) || false
-                      }
-                      onChange={(e) =>
-                        handleCheckboxChange(e, 'giorniPreferiti')
-                      }
-                      className="me-3"
-                    />
-                  )
-                )}
+                {Object.entries(LABEL_GIORNI).map(([value, label]) => (
+                  <Form.Check
+                    key={value}
+                    type="checkbox"
+                    label={label}
+                    value={value}
+                    checked={
+                      formStudente.giorniPreferiti?.includes(value) || false
+                    }
+                    onChange={(e) => handleCheckboxChange(e, 'giorniPreferiti')}
+                    className="me-3"
+                  />
+                ))}
               </div>
             </Form.Group>
             <Form.Group className="mb-3">

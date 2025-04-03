@@ -1,7 +1,16 @@
 import { Modal, Form, Button } from 'react-bootstrap'
 
 const LINGUE = ['INGLESE', 'FRANCESE', 'SPAGNOLO']
-const GIORNI = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì']
+
+const GIORNI = ['LUNEDI', 'MARTEDI', 'MERCOLEDI', 'GIOVEDI', 'VENERDI']
+const LABEL_GIORNI = {
+  LUNEDI: 'Lunedì',
+  MARTEDI: 'Martedì',
+  MERCOLEDI: 'Mercoledì',
+  GIOVEDI: 'Giovedì',
+  VENERDI: 'Venerdì',
+}
+
 const FASCE_ORARIE = [
   '08:00-10:00',
   '10:00-12:00',
@@ -92,7 +101,7 @@ const ModaleInsegnante = ({
                 <Form.Check
                   key={giorno}
                   type="checkbox"
-                  label={giorno}
+                  label={LABEL_GIORNI[giorno]} 
                   value={giorno}
                   checked={(insegnante.giorniDisponibili || []).includes(
                     giorno
@@ -103,6 +112,7 @@ const ModaleInsegnante = ({
               ))}
             </div>
           </Form.Group>
+
           <Form.Group className="mb-3">
             <Form.Label>Fasce Orarie Disponibili</Form.Label>
             <div className="d-flex flex-wrap">

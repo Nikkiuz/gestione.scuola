@@ -79,17 +79,23 @@ const Calendario = () => {
     setSettimana(settimana.clone().add(direzione, 'weeks'))
   }
 
-  const giorniSettimana = [
-    'Lunedì',
-    'Martedì',
-    'Mercoledì',
-    'Giovedì',
-    'Venerdì',
-    'Sabato',
-  ]
+ const GIORNI = [
+   'LUNEDI',
+   'MARTEDI',
+   'MERCOLEDI',
+   'GIOVEDI',
+   'VENERDI',
+   'SABATO',
+ ]
 
-  const normalizza = (str) =>
-    str?.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+ const LABEL_GIORNI = {
+   LUNEDI: 'Lunedì',
+   MARTEDI: 'Martedì',
+   MERCOLEDI: 'Mercoledì',
+   GIOVEDI: 'Giovedì',
+   VENERDI: 'Venerdì',
+   SABATO: 'Sabato',
+ }
 
   const generaPDF = () => {
     const calendario = document.getElementById('calendario-pdf')
@@ -171,9 +177,7 @@ return (
         >
           ⬅️ Settimana Precedente
         </button>
-        <h5
-        className='text-center fs-5 mt-3'
-        >
+        <h5 className="text-center fs-5 mt-3">
           {settimana.startOf('isoWeek').format('DD MMMM YYYY')} -{' '}
           {settimana.endOf('isoWeek').format('DD MMMM YYYY')}
         </h5>
@@ -192,69 +196,74 @@ return (
         <div className="alert alert-danger">{error}</div>
       ) : (
         <div className="table-responsive-wrapper">
-        <table
-          id="calendario-pdf"
-          className="table table-bordered calendario-table"
-        >
-          <thead>
-            <tr>
-              <th>Ora</th>
-              {giorniSettimana.map((giorno) => (
-                <th key={giorno}>{giorno}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              '08:00-10:00',
-              '10:00-12:00',
-              '12:00-14:00',
-              '14:00-16:00',
-              '16:00-18:00',
-              '18:00-20:00',
-            ].map((orario) => (
-              <tr key={orario}>
-                <td className="fw-bold align-middle text-center">{orario}</td>
-                {giorniSettimana.map((giorno) => {
-                  const corsiInSlot = corsi.filter(
-                    (c) =>
-                      normalizza(c.giorno) === normalizza(giorno) &&
-                      c.orario === orario
-                  )
-                  return (
-                    <td key={giorno + orario}>
-                      {corsiInSlot.length ? (
-                        corsiInSlot.map((corso) => (
-                          <div
-                            key={corso.corsoId}
-                            onClick={() => navigate(`/corsi/${corso.corsoId}`)}
-                            className={`calendario-cella-piena ${
-                              corso.tipoCorso?.toUpperCase().includes('PRIVATO')
-                                ? 'corso-privato'
-                                : 'corso-gruppo'
-                            }`}
-                          >
-                            <strong>
-                              {corso.lingua} ({corso.tipoCorso})
-                            </strong>
-                            <span className={`badge-livello ${corso.livello}`}>
-                              🎯 {corso.livello}
-                            </span>
-                            <span>📆 {corso.frequenza}</span>
-                            <span>🏫 {corso.aula || 'N/A'}</span>
-                            <span>👨‍🏫 {corso.insegnante || 'N/A'}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="calendario-cella-vuota">-</div>
-                      )}
-                    </td>
-                  )
-                })}
+          <table
+            id="calendario-pdf"
+            className="table table-bordered calendario-table"
+          >
+            <thead>
+              <tr>
+                <th>Ora</th>
+                {GIORNI.map((giorno) => (
+                  <th key={giorno}>{LABEL_GIORNI[giorno]}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {[
+                '08:00-10:00',
+                '10:00-12:00',
+                '12:00-14:00',
+                '14:00-16:00',
+                '16:00-18:00',
+                '18:00-20:00',
+              ].map((orario) => (
+                <tr key={orario}>
+                  <td className="fw-bold align-middle text-center">{orario}</td>
+                  {GIORNI.map((giorno) => {
+                    const corsiInSlot = corsi.filter(
+                      (c) => c.giorno === giorno && c.orario === orario
+                    )
+
+                    return (
+                      <td key={giorno + orario}>
+                        {corsiInSlot.length ? (
+                          corsiInSlot.map((corso) => (
+                            <div
+                              key={corso.corsoId}
+                              onClick={() =>
+                                navigate(`/corsi/${corso.corsoId}`)
+                              }
+                              className={`calendario-cella-piena ${
+                                corso.tipoCorso
+                                  ?.toUpperCase()
+                                  .includes('PRIVATO')
+                                  ? 'corso-privato'
+                                  : 'corso-gruppo'
+                              }`}
+                            >
+                              <strong>
+                                {corso.lingua} ({corso.tipoCorso})
+                              </strong>
+                              <span
+                                className={`badge-livello ${corso.livello}`}
+                              >
+                                🎯 {corso.livello}
+                              </span>
+                              <span>📆 {corso.frequenza}</span>
+                              <span>🏫 {corso.aula || 'N/A'}</span>
+                              <span>👨‍🏫 {corso.insegnante || 'N/A'}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="calendario-cella-vuota">-</div>
+                        )}
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
