@@ -10,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/report")
 public class ReportController {
@@ -63,19 +61,9 @@ public class ReportController {
 		return reportService.generaReportAnnuale(anno);
 	}
 
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@GetMapping("/iscrizioni-mensili")
-	public ResponseEntity<Map<String, Long>> getIscrizioniMensili() {
-		return ResponseEntity.ok(reportService.getIscrizioniMensili());
-	}
-
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@GetMapping("/iscrizioni-annuali")
-	public ResponseEntity<Map<String, Long>> getIscrizioniAnnuali() {
-		return ResponseEntity.ok(reportService.getIscrizioniAnnuali());
-	}
 
 
+	
 	// Invia il report annuale via email
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/annuale/{anno}/email")

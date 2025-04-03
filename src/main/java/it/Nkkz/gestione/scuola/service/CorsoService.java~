@@ -53,7 +53,7 @@ public class CorsoService {
 
 
 	//Recupera corsi per giorno e orario
-	public List<CorsoResponseDTO> getCorsiByGiornoEOrario(String giorno, String orario) {
+	public List<CorsoResponseDTO> getCorsiByGiornoEOrario(Giorno giorno, String orario) {
 		return corsoRepository.findByGiornoAndOrarioAndAttivoTrue(giorno, orario).stream()
 			.map(this::convertToResponseDTO)
 			.collect(Collectors.toList());
@@ -74,32 +74,27 @@ public class CorsoService {
 	}
 
 	public CorsoResponseDTO creaCorso(CorsoRequestDTO request) {
-		Optional<Aula> aulaOpt = aulaRepository.findById(request.getAulaId());
-		if (aulaOpt.isEmpty()) {
-			throw new EntityNotFoundException("Aula non trovata con ID: " + request.getAulaId());
-		}
-		Aula aula = aulaOpt.get();
+		Aula aula = aulaRepository.findById(request.getAulaId())
+			.orElseThrow(() -> new EntityNotFoundException("Aula non trovata con ID: " + request.getAulaId()));
 
-		Optional<Insegnante> insegnanteOpt = insegnanteRepository.findById(request.getInsegnanteId());
-		if (insegnanteOpt.isEmpty()) {
-			throw new EntityNotFoundException("Insegnante non trovato con ID: " + request.getInsegnanteId());
-		}
-		Insegnante insegnante = insegnanteOpt.get();
+		Insegnante insegnante = insegnanteRepository.findById(request.getInsegnanteId())
+			.orElseThrow(() -> new EntityNotFoundException("Insegnante non trovato con ID: " + request.getInsegnanteId()));
 
-		// Controllo aula occupata
 		List<Corso> corsiEsistenti = corsoRepository.findByAulaIdAndGiornoAndOrarioAndAttivoTrue(
 			aula.getId(), request.getGiorno(), request.getOrario());
+
 		if (!corsiEsistenti.isEmpty()) {
 			throw new IllegalStateException("L'aula è già occupata per il giorno " + request.getGiorno() +
 				" alle " + request.getOrario());
 		}
 
 		Corso corso = new Corso();
-		BeanUtils.copyProperties(request, corso);
+		BeanUtils.copyProperties(request, corso, "giorno", "secondoGiorno", "aulaId", "insegnanteId", "studentiIds");
+
+		corso.setGiorno(request.getGiorno());
 		corso.setSecondoGiorno(request.getSecondoGiorno());
-		corso.setSecondoOrario(request.getSecondoOrario());
 		corso.setAula(aula);
-		corso.setInsegnante(insegnante); // ✅ Assegna insegnante
+		corso.setInsegnante(insegnante);
 		corso.setStudenti(studenteRepository.findAllById(request.getStudentiIds()));
 		corso.setAttivo(true);
 
@@ -111,29 +106,32 @@ public class CorsoService {
 	//Modifica un corso esistente
 	public CorsoResponseDTO modificaCorso(Long id, CorsoRequestDTO request) {
 		Corso corso = corsoRepository.findById(id)
-			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato"));
+			.orElseThrow(() -> new EntityNotFoundException("Corso non trovato con ID: " + id));
 
-		Optional<Aula> aulaOpt = aulaRepository.findById(request.getAulaId());
-		if (aulaOpt.isEmpty()) {
-			throw new EntityNotFoundException("Aula non trovata con ID: " + request.getAulaId());
-		}
-		Aula aula = aulaOpt.get();
+		Aula aula = aulaRepository.findById(request.getAulaId())
+			.orElseThrow(() -> new EntityNotFoundException("Aula non trovata con ID: " + request.getAulaId()));
 
-		// ⚠️ Controlla che non ci siano altri corsi nella stessa aula, giorno e orario
+		Insegnante insegnante = insegnanteRepository.findById(request.getInsegnanteId())
+			.orElseThrow(() -> new EntityNotFoundException("Insegnante non trovato con ID: " + request.getInsegnanteId()));
+
+		// ✅ Query aggiornata con enum Giorno
 		List<Corso> corsiEsistenti = corsoRepository.findByAulaIdAndGiornoAndOrarioAndAttivoTrue(
 			aula.getId(), request.getGiorno(), request.getOrario());
 
 		boolean sovrapposto = corsiEsistenti.stream()
-			.anyMatch(c -> !c.getId().equals(corso.getId())); // Ignora se stesso
-
+			.anyMatch(c -> !c.getId().equals(corso.getId()));
 		if (sovrapposto) {
 			throw new IllegalStateException("Impossibile modificare: l'aula è già occupata per quel giorno/orario.");
 		}
 
-		BeanUtils.copyProperties(request, corso, "id");
+		BeanUtils.copyProperties(request, corso, "id", "giorno", "secondoGiorno", "aulaId", "insegnanteId", "studentiIds");
+
+		// ✅ Assegna correttamente i campi enum e relazionali
+		corso.setGiorno(request.getGiorno());
 		corso.setSecondoGiorno(request.getSecondoGiorno());
 		corso.setSecondoOrario(request.getSecondoOrario());
 		corso.setAula(aula);
+		corso.setInsegnante(insegnante);
 		corso.setStudenti(studenteRepository.findAllById(request.getStudentiIds()));
 
 		corsoRepository.save(corso);
@@ -223,7 +221,7 @@ public class CorsoService {
 		while (!studentiDisponibili.isEmpty()) {
 			Studente studente = studentiDisponibili.get(0);
 
-			Optional<String> giornoCompatibile = studente.getGiorniPreferiti().stream().findFirst();
+			Optional<Giorno> giornoCompatibile = studente.getGiorniPreferiti().stream().findFirst();
 			Optional<String> orarioCompatibile = studente.getFasceOrariePreferite().stream().findFirst();
 
 			if (giornoCompatibile.isEmpty() || orarioCompatibile.isEmpty()) {
@@ -291,10 +289,11 @@ public class CorsoService {
 
 				// 🔁 Calcolo secondo slot se necessario
 				if ("2 volte a settimana".equalsIgnoreCase(studente.getTipoCorsoGruppo())) {
-					Set<String> giorniComuni = new HashSet<>(sottoGruppo.get(0).getGiorniPreferiti());
+					Set<Giorno> giorniComuni = new HashSet<>(sottoGruppo.get(0).getGiorniPreferiti());
 					for (Studente s : sottoGruppo) {
-						giorniComuni.retainAll(new HashSet<>(s.getGiorniPreferiti()));
+						giorniComuni.retainAll(s.getGiorniPreferiti());
 					}
+
 
 					Set<String> orariComuni = new HashSet<>(sottoGruppo.get(0).getFasceOrariePreferite());
 					for (Studente s : sottoGruppo) {
@@ -310,7 +309,7 @@ public class CorsoService {
 						break;
 					}
 
-					String secondoGiorno = giorniComuni.iterator().next();
+					Giorno secondoGiorno = giorniComuni.iterator().next();
 					String secondoOrario = orariComuni.iterator().next();
 
 					boolean aulaLiberaSecondoSlot = corsiEsistenti.stream()

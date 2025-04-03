@@ -66,10 +66,10 @@ const ModaleStudente = ({
 
       setFormStudente((prev) => ({
         ...prev,
-        insegnanteId: prev.insegnanteId ? String(prev.insegnanteId) : '', //  Forza il valore come stringa per il Select
+        insegnanteId: prev.insegnanteId ? String(prev.insegnanteId) : '', 
       }))
     }
-  }, [show]) // Attiva il reset solo quando il modale si apre
+  }, [show]) 
 
   return (
     <div className="position-relative">
@@ -110,6 +110,17 @@ const ModaleStudente = ({
                 value={formStudente.eta || ''}
                 onChange={handleChange}
                 placeholder="Es. 25"
+                required
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Data di iscrizione</Form.Label>
+              <Form.Control
+                type="date"
+                name="dataIscrizione"
+                value={formStudente.dataIscrizione || ''}
+                onChange={handleChange}
                 required
               />
             </Form.Group>

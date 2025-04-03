@@ -24,14 +24,16 @@ public class Corso {
 	@Column(nullable = false)
 	private String frequenza;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private String giorno;
+	private Giorno giorno;
 
 	@Column(nullable = false)
 	private String orario;
 
+	@Enumerated(EnumType.STRING)
 	@Column
-	private String secondoGiorno;
+	private Giorno secondoGiorno;
 
 	@Column
 	private String secondoOrario;

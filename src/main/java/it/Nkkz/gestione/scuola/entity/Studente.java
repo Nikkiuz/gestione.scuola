@@ -3,6 +3,7 @@ package it.Nkkz.gestione.scuola.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +29,9 @@ public class Studente {
 	private int eta;
 
 	@Column(nullable = false)
+	private LocalDate dataIscrizione;
+
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private Lingua linguaDaImparare;
 
@@ -35,8 +39,12 @@ public class Studente {
 	@Column(nullable = false)
 	private Livello livello;
 
-	@ElementCollection
-	private Set<String> giorniPreferiti;  // Es. ["Lunedì", "Mercoledì"]
+	@ElementCollection(targetClass = Giorno.class)
+	@Enumerated(EnumType.STRING)
+	@CollectionTable(name = "studente_giorni", joinColumns = @JoinColumn(name = "studente_id"))
+	@Column(name = "giorno")
+	private Set<Giorno> giorniPreferiti;
+
 
 	@ElementCollection
 	private Set<String> fasceOrariePreferite;  // Es. ["16:00-18:00", "18:00-20:00"]
@@ -59,7 +67,7 @@ public class Studente {
 	private String tipologiaIscrizione;
 
 	//Metodo per ottenere i giorni disponibili
-	public Set<String> getGiorniDisponibili() {
+	public Set<Giorno> getGiorniDisponibili() {
 		return giorniPreferiti;
 	}
 

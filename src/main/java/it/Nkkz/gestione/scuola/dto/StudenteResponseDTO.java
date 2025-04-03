@@ -1,11 +1,13 @@
 package it.Nkkz.gestione.scuola.dto;
 
+import it.Nkkz.gestione.scuola.entity.Giorno;
 import it.Nkkz.gestione.scuola.entity.Lingua;
 import it.Nkkz.gestione.scuola.entity.Livello;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -15,9 +17,10 @@ public class StudenteResponseDTO {
 	private String nome;
 	private String cognome;
 	private int eta;
+	private LocalDate dataIscrizione;
 	private Lingua linguaDaImparare;
 	private Livello livello;
-	private Set<String> giorniPreferiti;
+	private Set<Giorno> giorniPreferiti;
 	private Set<String> fasceOrariePreferite;
 	private boolean corsoPrivato;
 	private Integer frequenzaCorsoPrivato;

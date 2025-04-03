@@ -64,9 +64,7 @@ public class ReportService {
 
 		//Ore insegnate per insegnante
 		Map<String, Integer> oreInsegnate = calcolaOreInsegnateNelPeriodo(startDate, endDate);
-		Map<String, Integer> oreOrdinato = new TreeMap<>(oreInsegnate);
-		report.setOreInsegnate(oreOrdinato);
-
+		report.setOreInsegnate(oreInsegnate);
 
 		//Totale ore insegnate
 		int totaleOreInsegnate = oreInsegnate.values().stream().mapToInt(Integer::intValue).sum();

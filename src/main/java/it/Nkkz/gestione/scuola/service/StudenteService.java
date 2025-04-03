@@ -11,8 +11,11 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.LocalDate;
 
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,7 +64,6 @@ public class StudenteService {
 
 	// Crea uno studente
 	public StudenteResponseDTO createStudente(StudenteRequestDTO studenteRequestDTO) {
-		System.out.println("📌 Studente ricevuto dal frontend: " + studenteRequestDTO);
 
 		Studente studente = new Studente();
 		BeanUtils.copyProperties(studenteRequestDTO, studente, "livello", "insegnanteId");
@@ -71,12 +73,17 @@ public class StudenteService {
 		}
 
 		if (studenteRequestDTO.getInsegnanteId() != null) {
-			System.out.println("📌 Assegno Insegnante con ID: " + studenteRequestDTO.getInsegnanteId());
 			Insegnante insegnante = insegnanteRepository.findById(studenteRequestDTO.getInsegnanteId())
 				.orElseThrow(() -> new EntityNotFoundException("Insegnante non trovato con ID: " + studenteRequestDTO.getInsegnanteId()));
 			studente.setInsegnante(insegnante);
 		} else {
 			System.out.println("❌ Nessun insegnante assegnato!");
+		}
+
+		if (studenteRequestDTO.getDataIscrizione() != null) {
+			studente.setDataIscrizione(studenteRequestDTO.getDataIscrizione());
+		} else {
+			studente.setDataIscrizione(LocalDate.now());
 		}
 
 		studente = studenteRepository.save(studente);
@@ -103,7 +110,10 @@ public class StudenteService {
 				.orElseThrow(() -> new EntityNotFoundException("Insegnante non trovato con ID: " + studenteRequestDTO.getInsegnanteId()));
 			studente.setInsegnante(insegnante);
 		}
-		// ⚠️ Se il frontend NON ha inviato insegnanteId, non lo azzeriamo!
+
+		if (studenteRequestDTO.getDataIscrizione() != null) {
+			studente.setDataIscrizione(studenteRequestDTO.getDataIscrizione());
+		}
 
 		// Salva lo studente aggiornato
 		studente = studenteRepository.save(studente);
@@ -143,6 +153,27 @@ public class StudenteService {
 		}
 
 		return dto;
+	}
+
+
+	public Map<YearMonth, Long> getIscrizioniMensili() {
+		List<Studente> studenti = studenteRepository.findAll();
+		return studenti.stream()
+			.filter(s -> s.getDataIscrizione() != null)
+			.collect(Collectors.groupingBy(
+				s -> YearMonth.from(s.getDataIscrizione()),
+				Collectors.counting()
+			));
+	}
+
+	public Map<Integer, Long> getIscrizioniAnnuali() {
+		List<Studente> studenti = studenteRepository.findAll();
+		return studenti.stream()
+			.filter(s -> s.getDataIscrizione() != null)
+			.collect(Collectors.groupingBy(
+				s -> s.getDataIscrizione().getYear(),
+				Collectors.counting()
+			));
 	}
 
 

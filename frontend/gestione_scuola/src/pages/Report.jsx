@@ -30,6 +30,7 @@ const Report = () => {
   const [insegnante, setInsegnante] = useState('tutti')
   const [listaInsegnanti, setListaInsegnanti] = useState([])
   const [mode, setMode] = useState('mensile')
+  const [iscrizioniData, setIscrizioniData] = useState([])
 
   const anno = selectedDate.getFullYear()
   const mese = selectedDate.getMonth() + 1
@@ -97,6 +98,7 @@ const Report = () => {
 
   useEffect(() => {
     fetchReport()
+    fetchIscrizioniData()
   }, [anno, mese, mode])
 
   useEffect(() => {
@@ -113,6 +115,26 @@ const Report = () => {
   ]
 
   const nomeSelezionato = getNomeInsegnanteById(insegnante)
+
+  const fetchIscrizioniData = async () => {
+    try {
+      const endpoint =
+        mode === 'annuale'
+          ? '/report/iscrizioni-annuali'
+          : '/report/iscrizioni-mensili'
+      const response = await apiClient.get(endpoint)
+      const transformed = Object.entries(response.data).map(
+        ([periodo, iscritti]) => ({
+          periodo,
+          iscritti,
+        })
+      )
+      setIscrizioniData(transformed)
+    } catch (error) {
+      console.error('Errore nel recupero delle iscrizioni', error)
+    }
+  }
+
 
   // DA IMPLEMENTARE
   // const scaricaOreInsegnante = async () => {
@@ -233,12 +255,14 @@ const Report = () => {
                   <h2>€ {(report.totaleUscite ?? 0).toFixed(2)}</h2>
                 </div>
               </div>
+              
               <div className="col-md-3">
                 <div className="card p-4 text-center shadow">
                   <h5>🕒 Ore Insegnate</h5>
                   <h2>{report.totaleOreInsegnate ?? 0} ore</h2>
                 </div>
               </div>
+
               <div className="col-md-3">
                 <div
                   className={`card p-4 text-center shadow ${
@@ -329,6 +353,23 @@ const Report = () => {
           <p>Nessun dato disponibile per il periodo selezionato.</p>
         )}
       </div>
+
+      {iscrizioniData.length > 0 && (
+        <div className="container grafico-final mt-5">
+          <h4 className="mb-4 text-start">
+            📅 Iscrizioni {mode === 'annuale' ? 'Annuali' : 'Mensili'}
+          </h4>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={iscrizioniData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="periodo" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Bar dataKey="iscritti" fill="#CC9C77" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {/* Ore Insegnate per Insegnante - DA IMPLEMENTARE CON REGISTRO ELETTRONICO*/}
       {report?.oreInsegnate && (

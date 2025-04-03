@@ -1,5 +1,6 @@
 package it.Nkkz.gestione.scuola.dto;
 
+import it.Nkkz.gestione.scuola.entity.Giorno;
 import it.Nkkz.gestione.scuola.entity.Lingua;
 import it.Nkkz.gestione.scuola.entity.Livello;
 import lombok.Data;
@@ -12,9 +13,9 @@ public class CorsoRequestDTO {
 	private String tipoCorso;
 	private String tipoCorsoGruppo;
 	private String frequenza;
-	private String giorno;
+	private Giorno giorno;
 	private String orario;
-	private String secondoGiorno;
+	private Giorno secondoGiorno;
 	private String secondoOrario;
 	private Long insegnanteId;
 	private Long aulaId;

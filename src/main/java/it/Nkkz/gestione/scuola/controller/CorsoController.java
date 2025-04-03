@@ -4,6 +4,7 @@ import it.Nkkz.gestione.scuola.dto.CorsoRequestDTO;
 import it.Nkkz.gestione.scuola.dto.CorsoResponseDTO;
 import it.Nkkz.gestione.scuola.dto.StudenteRequestDTO;
 import it.Nkkz.gestione.scuola.dto.StudenteResponseDTO;
+import it.Nkkz.gestione.scuola.entity.Giorno;
 import it.Nkkz.gestione.scuola.entity.Livello;
 import it.Nkkz.gestione.scuola.service.CorsoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class CorsoController {
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/giorno-orario")
 	public ResponseEntity<List<CorsoResponseDTO>> getCorsiByGiornoEOrario(
-		@RequestParam String giorno,
+		@RequestParam Giorno giorno,
 		@RequestParam String orario) {
 		return ResponseEntity.ok(corsoService.getCorsiByGiornoEOrario(giorno, orario));
 	}

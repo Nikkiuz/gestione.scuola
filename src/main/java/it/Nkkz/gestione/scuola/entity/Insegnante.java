@@ -28,15 +28,19 @@ public class Insegnante {
 	@Enumerated(EnumType.STRING)
 	private Lingua lingua;
 
-	@ElementCollection
-	private Set<String> giorniDisponibili;
+	@ElementCollection(targetClass = Giorno.class)
+	@Enumerated(EnumType.STRING)
+	@CollectionTable(name = "insegnante_giorni", joinColumns = @JoinColumn(name = "insegnante_id"))
+	@Column(name = "giorno")
+	private Set<Giorno> giorniDisponibili;
+
 
 	@ElementCollection
 	private Set<String> fasceOrarieDisponibili;
 
 
-
-	public boolean isDisponibile(String giorno, String orario) {
+	public boolean isDisponibile(Giorno giorno, String orario) {
 		return giorniDisponibili.contains(giorno) && fasceOrarieDisponibili.contains(orario);
 	}
+
 }
