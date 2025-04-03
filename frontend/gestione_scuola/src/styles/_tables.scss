@@ -1,0 +1,66 @@
+// =======================
+// 📊 TABELLE
+// =======================
+
+.table {
+  background-color: #fff;
+  color: $colore-verde-scuro;
+  border-radius: 12px;
+  overflow: hidden;
+
+  thead {
+    background-color: $colore-sfondo;
+  }
+
+  &.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #fdf9f1;
+  }
+
+  &.table-bordered td,
+  &.table-bordered th {
+    border-color: $colore-marrone;
+  }
+
+  th,
+  td {
+    vertical-align: middle;
+    text-align: center;
+    white-space: nowrap; // evita che il testo vada a capo
+  }
+
+  thead th {
+    font-weight: 700;
+    background-color: $colore-sfondo;
+    color: $colore-verde-scuro;
+    border-bottom: 2px solid $colore-marrone;
+  }
+
+  tbody td {
+    padding: 12px;
+  }
+
+  .btn {
+    white-space: nowrap;
+  }
+}
+
+// 🔄 WRAPPER PER RESPONSIVE
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 1rem;
+  border-radius: 12px;
+
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $colore-marrone;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: lighten($colore-verde-intenso, 15%);
+  }
+}

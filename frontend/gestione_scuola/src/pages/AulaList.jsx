@@ -230,6 +230,7 @@ const AulaList = () => {
         </Modal>
 
         {/* Tabella Aule */}
+        <div className="table-responsive-wrapper">
         <table className="table table-striped">
           <thead>
             <tr>
@@ -261,6 +262,7 @@ const AulaList = () => {
             ))}
           </tbody>
         </table>
+      </div>
       </div>
     </>
   )

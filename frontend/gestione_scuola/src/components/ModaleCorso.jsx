@@ -65,7 +65,7 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
         // Reset se è nuovo
         setFormCorso({
           lingua: '',
-          livello: 'BASE',
+          livello: 'STARTERS',
           tipoCorso: 'GRUPPO',
           frequenza: '',
           giorno: '',
@@ -128,6 +128,8 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
 
     const payload = {
       ...formCorso,
+      insegnanteId: parseInt(formCorso.insegnanteId),
+      aulaId: parseInt(formCorso.aulaId),
       studentiIds: studentiAssegnati.map((s) => s.id),
     }
 
@@ -163,14 +165,17 @@ const ModaleCorso = ({ show, onHide, corso = null, refresh }) => {
           <Form onSubmit={handleSalva}>
             <Form.Group className="mb-3">
               <Form.Label>Lingua</Form.Label>
-              <Form.Control
-                type="text"
+              <Form.Select
                 name="lingua"
                 value={formCorso.lingua}
                 onChange={handleChange}
                 required
-                placeholder="Es. Inglese, Spagnolo..."
-              />
+              >
+                <option value="">Seleziona una lingua</option>
+                <option value="INGLESE">Inglese</option>
+                <option value="FRANCESE">Francese</option>
+                <option value="SPAGNOLO">Spagnolo</option>
+              </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-3">

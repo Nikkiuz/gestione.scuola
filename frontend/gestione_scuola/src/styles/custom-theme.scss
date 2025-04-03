@@ -11,20 +11,6 @@ $colore-gruppo: #2f4f7a;
 $colore-tasto: #eceb88;
 
 // =======================
-// ✨ BASE
-// =======================
-body {
-  font-family: 'Cabin Condensed', sans-serif;
-  background-color: $colore-sfondo;
-  color: $colore-verde-scuro;
-}
-
-h1, h2, h3, h4, h5 {
-  color: $colore-verde-scuro;
-  font-weight: 700;
-}
-
-// =======================
 // 🛍️ NAVBAR
 // =======================
 @import 'navbar';
@@ -39,6 +25,38 @@ h1, h2, h3, h4, h5 {
 // =======================
 @import 'forms';
 
+
+// =======================
+// 📊 TABELLE
+// =======================
+@import 'tables';
+
+// =======================
+// 🔘 BOTTONI
+// =======================
+@import 'buttons';
+
+// =======================
+// 🗕 CALENDARIO
+// =======================
+@import 'calendar';
+
+
+// =======================
+// ✨ BASE
+// =======================
+body {
+  font-family: 'Cabin Condensed', sans-serif;
+  background-color: $colore-sfondo;
+  color: $colore-verde-scuro;
+}
+
+
+h1, h2, h3, h4, h5 {
+  color: $colore-verde-scuro;
+  font-weight: 700;
+}
+
 // =======================
 // 📋 CARD
 // =======================
@@ -51,45 +69,6 @@ h1, h2, h3, h4, h5 {
 
   &:hover {
     transform: translateY(-4px);
-  }
-}
-
-// =======================
-// 📊 TABELLE
-// =======================
-.table {
-  background-color: #fff;
-  color: $colore-verde-scuro;
-  border-radius: 12px;
-  overflow: hidden;
-
-  thead {
-    background-color: $colore-sfondo;
-  }
-
-  &.table-striped tbody tr:nth-of-type(odd) {
-    background-color: #fdf9f1;
-  }
-
-  &.table-bordered td,
-  &.table-bordered th {
-    border-color: $colore-marrone;
-  }
-
-  th, td {
-    vertical-align: middle;
-    text-align: center;
-  }
-
-  thead th {
-    font-weight: 700;
-    background-color: $colore-sfondo;
-    color: $colore-verde-scuro;
-    border-bottom: 2px solid $colore-marrone;
-  }
-
-  tbody td {
-    padding: 12px;
   }
 }
 
@@ -109,16 +88,6 @@ h1, h2, h3, h4, h5 {
   color: $colore-verde-scuro;
   font-weight: 500;
 }
-
-// =======================
-// 🔘 BOTTONI
-// =======================
-@import 'buttons';
-
-// =======================
-// 🗕 CALENDARIO
-// =======================
-@import 'calendar';
 
 // =======================
 // 📈 GRAFICO FINALE

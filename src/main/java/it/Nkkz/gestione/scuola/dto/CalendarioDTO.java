@@ -1,5 +1,6 @@
 package it.Nkkz.gestione.scuola.dto;
 
+import it.Nkkz.gestione.scuola.entity.Lingua;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class CalendarioDTO {
 	private Long corsoId;
-	private String lingua;
+	private Lingua lingua;
 	private String tipoCorso;
 	private String frequenza;
 	private String giorno;

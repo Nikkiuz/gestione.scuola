@@ -17,14 +17,27 @@ const StudentList = () => {
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
-  const LIVELLI = ['BASE', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'] // 🔥 Enum dei livelli
-
+ const LIVELLI = [
+   'STARTERS',
+   'KIDS_BOX1',
+   'KIDS_BOX2',
+   'KIDS_BOX3',
+   'KET_CAMBRIDGE',
+   'PET_CAMBRIDGE',
+   'FIRST_CAMBRIDGE',
+   'ADVANCED_CAMBRIDGE',
+   'A2_ADULTI',
+   'B1_ADULTI',
+   'B2_ADULTI',
+   'C1_ADULTI',
+   'C2_ADULTI',
+ ]
   const [formData, setFormData] = useState({
     nome: '',
     cognome: '',
     eta: '',
     linguaDaImparare: '',
-    livello: 'BASE', 
+    livello: 'STARTERS', 
     tipologiaIscrizione: '',
     giorniPreferiti: [],
     fasceOrariePreferite: [],
@@ -40,7 +53,7 @@ const StudentList = () => {
       cognome: '',
       eta: '',
       linguaDaImparare: '',
-      livello: 'BASE',
+      livello: 'STARTERS',
       tipologiaIscrizione: '',
       giorniPreferiti: [],
       fasceOrariePreferite: [],
@@ -127,168 +140,172 @@ const StudentList = () => {
   }
 
   return (
-  <>
-    <AdminNavbar />
-    <div className="container pt-5 mt-5">
-      <h2 className="text-center mb-4">🎓 Gestione Studenti</h2>
+    <>
+      <AdminNavbar />
+      <div className="container pt-5 mt-5">
+        <h2 className="text-center mb-4">🎓 Gestione Studenti</h2>
 
-      <button
-        className="btn btn-success mb-3"
-        onClick={() => setShowModal(true)}
-      >
-        ➕ Aggiungi Studente
-      </button>
+        <button
+          className="btn btn-success mb-3"
+          onClick={() => setShowModal(true)}
+        >
+          ➕ Aggiungi Studente
+        </button>
 
-      <ModaleStudente
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        formStudente={formData}
-        setFormStudente={setFormData}
-        handleSalvaModificheStudente={handleSubmit}
-        insegnanti={insegnanti}
-      />
+        <ModaleStudente
+          show={showModal}
+          onHide={() => setShowModal(false)}
+          formStudente={formData}
+          setFormStudente={setFormData}
+          handleSalvaModificheStudente={handleSubmit}
+          insegnanti={insegnanti}
+        />
 
-      {/* Filtro Studenti */}
-      <div className="row mb-3">
-        <div className="col-md-4">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Filtra per nome"
-            value={filtroNome}
-            onChange={(e) => setFiltroNome(e.target.value)}
-          />
+        {/* Filtro Studenti */}
+        <div className="row mb-3">
+          <div className="col-md-4">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Filtra per nome"
+              value={filtroNome}
+              onChange={(e) => setFiltroNome(e.target.value)}
+            />
+          </div>
+          <div className="col-md-4">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Filtra per cognome"
+              value={filtroCognome}
+              onChange={(e) => setFiltroCognome(e.target.value)}
+            />
+          </div>
+          <div className="col-md-4">
+            <select
+              className="form-control"
+              value={filtroLivello}
+              onChange={(e) => setFiltroLivello(e.target.value)}
+            >
+              <option value="">Tutti i livelli</option>
+              {LIVELLI.map((liv) => (
+                <option key={liv} value={liv}>
+                  {liv}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        <div className="col-md-4">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Filtra per cognome"
-            value={filtroCognome}
-            onChange={(e) => setFiltroCognome(e.target.value)}
-          />
-        </div>
-        <div className="col-md-4">
-          <select
-            className="form-control"
-            value={filtroLivello}
-            onChange={(e) => setFiltroLivello(e.target.value)}
-          >
-            <option value="">Tutti i livelli</option>
-            {LIVELLI.map((liv) => (
-              <option key={liv} value={liv}>
-                {liv}
-              </option>
-            ))}
-          </select>
+
+        {/* Spinner su sezione tabelle */}
+        <div className="position-relative">
+          {loading && <OverlaySpinner message="Caricamento studenti..." />}
+
+          {/* Studenti con Corso */}
+          <h4>📌 Studenti con Corso</h4>
+          <table className="table table-striped table-hover align-middle w-100">
+            <colgroup>
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '15%' }} />
+              <col style={{ width: '15%' }} />
+              <col style={{ width: '30%' }} />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Cognome</th>
+                <th>Lingua</th>
+                <th>Livello</th>
+                <th>Età</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtraStudenti(studenti).map((studente) => (
+                <tr key={studente.id}>
+                  <td>{studente.nome}</td>
+                  <td>{studente.cognome}</td>
+                  <td>{studente.linguaDaImparare}</td>
+                  <td className="text-center">
+                    <span className={`badge-livello ${studente.livello}`}>
+                      {studente.livello}
+                    </span>
+                  </td>
+                  <td>{studente.eta}</td>
+                  <td className="d-flex justify-content-center gap-2">
+                    <button
+                      className="btn btn-primary btn-sm me-2"
+                      onClick={() => navigate(`/studenti/${studente.id}`)}
+                    >
+                      📄 Dettagli
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => eliminaStudente(studente.id)}
+                    >
+                      🗑 Elimina
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Studenti Senza Corso */}
+          <h4 className="mt-4">⚠️ Studenti Senza Corso</h4>
+          <table className="table table-striped table-hover align-middle w-100">
+            <colgroup>
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '15%' }} />
+              <col style={{ width: '15%' }} />
+              <col style={{ width: '30%' }} />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Cognome</th>
+                <th>Lingua</th>
+                <th>Livello</th>
+                <th>Età</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtraStudenti(studentiSenzaCorso).map((studente) => (
+                <tr key={studente.id}>
+                  <td>{studente.nome}</td>
+                  <td>{studente.cognome}</td>
+                  <td>{studente.linguaDaImparare}</td>
+                  <td className="text-center">
+                    <span className={`badge-livello ${studente.livello}`}>
+                      {studente.livello}
+                    </span>
+                  </td>
+                  <td>{studente.eta}</td>
+                  <td className="d-flex justify-content-center gap-2">
+                    <button
+                      className="btn btn-primary btn-sm me-2"
+                      onClick={() => navigate(`/studenti/${studente.id}`)}
+                    >
+                      📄 Dettagli
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => eliminaStudente(studente.id)}
+                    >
+                      🗑 Elimina
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
-
-      {/* Spinner su sezione tabelle */}
-      <div className="position-relative">
-        {loading && <OverlaySpinner message="Caricamento studenti..." />}
-
-        {/* Studenti con Corso */}
-        <h4>📌 Studenti con Corso</h4>
-        <table className="table table-striped table-hover align-middle w-100">
-          <colgroup>
-            <col style={{ width: '20%' }} />
-            <col style={{ width: '20%' }} />
-            <col style={{ width: '15%' }} />
-            <col style={{ width: '15%' }} />
-            <col style={{ width: '30%' }} />
-          </colgroup>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Cognome</th>
-              <th>Livello</th>
-              <th>Età</th>
-              <th>Azioni</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtraStudenti(studenti).map((studente) => (
-              <tr key={studente.id}>
-                <td>{studente.nome}</td>
-                <td>{studente.cognome}</td>
-                <td className="text-center">
-                  <span className={`badge-livello ${studente.livello}`}>
-                    {studente.livello}
-                  </span>
-                </td>
-                <td>{studente.eta}</td>
-                <td className="d-flex justify-content-center gap-2">
-                  <button
-                    className="btn btn-primary btn-sm me-2"
-                    onClick={() => navigate(`/studenti/${studente.id}`)}
-                  >
-                    📄 Dettagli
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => eliminaStudente(studente.id)}
-                  >
-                    🗑 Elimina
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {/* Studenti Senza Corso */}
-        <h4 className="mt-4">⚠️ Studenti Senza Corso</h4>
-        <table className="table table-striped table-hover align-middle w-100">
-          <colgroup>
-            <col style={{ width: '20%' }} />
-            <col style={{ width: '20%' }} />
-            <col style={{ width: '15%' }} />
-            <col style={{ width: '15%' }} />
-            <col style={{ width: '30%' }} />
-          </colgroup>
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Cognome</th>
-              <th>Livello</th>
-              <th>Età</th>
-              <th>Azioni</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtraStudenti(studentiSenzaCorso).map((studente) => (
-              <tr key={studente.id}>
-                <td>{studente.nome}</td>
-                <td>{studente.cognome}</td>
-                <td className="text-center">
-                  <span className={`badge-livello ${studente.livello}`}>
-                    {studente.livello}
-                  </span>
-                </td>
-                <td>{studente.eta}</td>
-                <td className="d-flex justify-content-center gap-2">
-                  <button
-                    className="btn btn-primary btn-sm me-2"
-                    onClick={() => navigate(`/studenti/${studente.id}`)}
-                  >
-                    📄 Dettagli
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => eliminaStudente(studente.id)}
-                  >
-                    🗑 Elimina
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </>
-)
+    </>
+  )
 }
 
 export default StudentList

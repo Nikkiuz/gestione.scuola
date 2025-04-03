@@ -28,8 +28,7 @@ public class Studente {
 	private int eta;
 
 	@Column(nullable = false)
-	@Enumerated(EnumType.STRING)
-	private Lingua linguaDaImparare;
+	private String linguaDaImparare;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)

@@ -187,6 +187,7 @@ const eliminaPagamento = async (id) => {
           </button>
         </div>
 
+        <div className="table-responsive-wrapper">  
         <table className="table table-striped">
           <thead>
             <tr>
@@ -225,6 +226,7 @@ const eliminaPagamento = async (id) => {
             ))}
           </tbody>
         </table>
+        </div>
 
         <ModalePagamento
           show={showModal}

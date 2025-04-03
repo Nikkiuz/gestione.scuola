@@ -15,8 +15,7 @@ public class Corso {
 	private Long id;
 
 	@Column(nullable = false)
-	@Enumerated(EnumType.STRING)
-	private Lingua lingua;
+	private String lingua;
 
 	@Column(nullable = false)
 	private String tipoCorso;
