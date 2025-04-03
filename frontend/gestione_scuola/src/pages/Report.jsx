@@ -255,11 +255,15 @@ const Report = () => {
                   <h2>€ {(report.totaleUscite ?? 0).toFixed(2)}</h2>
                 </div>
               </div>
-              
+
               <div className="col-md-3">
                 <div className="card p-4 text-center shadow">
                   <h5>🕒 Ore Insegnate</h5>
-                  <h2>{report.totaleOreInsegnate ?? 0} ore</h2>
+                  {report.totaleOreInsegnate > 0 ? (
+                    <h2>{report.totaleOreInsegnate} ore</h2>
+                  ) : (
+                    <p className="text-muted">Nessuna ora registrata</p>
+                  )}
                 </div>
               </div>
 
